@@ -6,6 +6,8 @@ typedef struct{
   float b[3];
 }FIR_coeff;
 
+extern int IIR_asm(float* a, float* b, int c, FIR_coeff* d);
+
 //If the array index is less than 0, returns 0. Otherwise, return the value of the array at index n.
 float zeroOrArrayPos(int n, float* array ){
 	if(n<0) return 0;
@@ -46,7 +48,9 @@ int main(){
 	
 	float out = IIR_FCtemp(inP, outP, coeff, 5, 2);
 	printf("final result\n\n");
-
+	
+	//call assembly code
+	//IIR_asm(inP,outP, array_length, coeff);
 	for (int i=0; i<5; i++){
 	    printf("%f ", outP[i]);
 	}
