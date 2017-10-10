@@ -1,5 +1,5 @@
 #include <stdio.h>
-//#include "arm_math.h"
+#include "arm_math.h"
 
 typedef struct{
   float a[3];
@@ -21,8 +21,7 @@ float IIR_C(float* InputArray, float* OutputArray,FIR_coeff* coeff, int Length, 
 
 //for testing
 		tempY = (coeff->b)[0]*zeroOrArrayPos(i,InputArray);
-		for (int j=1; j<Order+1;j++)
-			tempY = tempY 
+		for (int j=1; j<Order+1;j++)			tempY = tempY 
 						+(coeff->b)[j]*zeroOrArrayPos(i-j,InputArray)
 							+(coeff->a)[j]*zeroOrArrayPos(i-j,OutputArray);
 		*(OutputArray+i)=tempY; //set the value at index i of OutputArray to the tempY that was just found.
@@ -32,30 +31,46 @@ float IIR_C(float* InputArray, float* OutputArray,FIR_coeff* coeff, int Length, 
 }
 
 int main(){
+	arm_biquad_casd_df1_inst_f32 S;
 	int inputLength=5;
 	int inputOrder=2;
 
 	//initialize input and output
 	float inputExampleC[5] = {1,1,1,1,1};
+	float inputExampleAsm[5] = {1,1,1,1,1};
+	float inputExampleCMSIS[5] = {1,1,1,1,1};
+
 	float outputExampleC[5] = {0,0,0,0,0};
 	float outputExampleAsm[5] = {0,0,0,0,0};
+	float outputExampleCMSIS[5] = {0,0,0,0,0};
 
-	FIR_coeff coeffStruct = {{0, 1,1}, {1, 1,1}};
+  float32_t pState[4]={0};
+	FIR_coeff coeffStruct = {{0, 0.3,-0.2}, {0.2,0.4,0.2}};
+	float coeffForCMSIS[5] = {0.2,0.4,0.2, 0.3,-0.2};
 
 	//call C code
 	float out = IIR_C(&inputExampleC[0], &outputExampleC[0], &coeffStruct, inputLength, inputOrder);
-	printf("C result\n\n:");
+	printf("C result:\n\n");
 	for (int i=0; i<5; i++){
 	   printf("%f ", outputExampleC[i]);
 	}
+	
+	//call CMSIS-DSP code
+	printf("\n\n");
+	arm_biquad_cascade_df1_init_f32(&S,1,coeffForCMSIS,pState);
+  arm_biquad_cascade_df1_f32(&S,	inputExampleCMSIS, outputExampleCMSIS,5);	
+	printf("Library result:\n\n");
+	for (int i=0; i<5; i++){
+	    printf("%f ", outputExampleCMSIS[i]);
+	}	
+	printf("\n\n");
 
-	//call assembly code/
-	IIR_asm(&inputExampleC[0],&outputExampleAsm[0], inputLength, &coeffStruct);
-	printf("\n\nAssembly result:\n\n");
+  //call assembly code/
+	IIR_asm(&inputExampleAsm[0],&outputExampleAsm[0], inputLength, &coeffStruct);
+	printf("Assembly result:\n\n");
 	for (int i=0; i<5; i++){
 	    printf("%f ", outputExampleAsm[i]);
-	}
-	
+	}	
 	return 0;
 	
 }

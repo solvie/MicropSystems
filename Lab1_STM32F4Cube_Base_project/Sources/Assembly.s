@@ -5,7 +5,8 @@ IIR_asm
 		;output array R1
 		;length of array R2
 		;coeff R3
-		MOV R4,R1
+		PUSH {R0-R3}
+		PUSH {R6}
 		ADD R6,R3,#12 ; R6 starting point of coefficient b
 		MOV R7,#0 ; counter i in bytes
 		
@@ -54,5 +55,7 @@ end_inner_loop
 		B loop
 		
 exit
+		POP {R0-R3}
+		POP {R6}
 		BX LR;
 		END
