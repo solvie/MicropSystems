@@ -24,7 +24,7 @@ ARM Macro Assembler    Page 1
    16 00000010 EB00 0807       ADD              R8,R0,R7
    17 00000014 ED98 2A00       VLDR.f32         S4,[R8]     ; load i th element
                                                              of input array
-   18 00000018 EE61 1A82       VMUL.f32         S3,S3,S4    ; temp result,(coef
+   18 00000018 EE61 1A82       VMUL.f32         S3,S3,S4    ; temp result=(coef
                                                             f->b)[0]*InputArray
                                                             [i]
    19 0000001C F04F 0904       MOV              R9,#4
@@ -39,26 +39,26 @@ ARM Macro Assembler    Page 1
    27 0000002E         ;temp R11
    28 0000002E         
    29 0000002E EB06 0B09       ADD              R11,R6,R9
-   30 00000032 EDDB 2A00       VLDR.f32         S5,[R11]    ; load b[j] into S5
+   30 00000032 ED9B 2A00       VLDR.f32         S4,[R11]    ; load b[j] into S4
                                                             
    31 00000036 EB00 0B0A       ADD              R11,R0,R10
-   32 0000003A EDDB 3A00       VLDR.f32         S7,[R11]    ; load InputArray[i
-                                                            -j] into S7
-   33 0000003E EE62 2AA3       VMUL.f32         S5,S5,S7    ; (coeff->b)[j]*Inp
+   32 0000003A EDDB 2A00       VLDR.f32         S5,[R11]    ; load InputArray[i
+                                                            -j] into S5
+   33 0000003E EE22 2A22       VMUL.f32         S4,S4,S5    ; (coeff->b)[j]*Inp
                                                             utArray[i-j]
-   34 00000042 EE71 1AA2       VADD.f32         S3,S3,S5    ; tempResult= tempR
+   34 00000042 EE71 1A82       VADD.f32         S3,S3,S4    ; tempResult= tempR
                                                             esult + (coeff->b)[
                                                             j]*InputArray[i-j]
    35 00000046         
    36 00000046 EB03 0B09       ADD              R11,R3,R9
-   37 0000004A EDDB 2A00       VLDR.f32         S5,[R11]    ; load a[j] into S5
+   37 0000004A ED9B 2A00       VLDR.f32         S4,[R11]    ; load a[j] into S4
                                                             
    38 0000004E EB01 0B0A       ADD              R11,R1,R10
-   39 00000052 EDDB 3A00       VLDR.f32         S7,[R11]    ; load OutputArray[
-                                                            i-j] into S7
-   40 00000056 EE62 2AA3       VMUL.f32         S5,S5,S7    ; (coeff->a)[j]*Out
+   39 00000052 EDDB 2A00       VLDR.f32         S5,[R11]    ; load OutputArray[
+                                                            i-j] into S5
+   40 00000056 EE22 2A22       VMUL.f32         S4,S4,S5    ; (coeff->a)[j]*Out
                                                             PutArray[i-j]
-   41 0000005A EE71 1AA2       VADD.f32         S3,S3,S5    ; tempResult= tempR
+   41 0000005A EE71 1A82       VADD.f32         S3,S3,S4    ; tempResult= tempR
                                                             esult + (coeff->a)[
                                                             j]*OutPut[i-j]
    42 0000005E         

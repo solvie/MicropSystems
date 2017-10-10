@@ -15,7 +15,7 @@ loop
 		;temp R8
 		ADD R8,R0,R7
 		VLDR.f32 S4,[R8] ; load i th element of input array
-		VMUL.f32 S3,S3,S4 ; temp result,(coeff->b)[0]*InputArray[i]
+		VMUL.f32 S3,S3,S4 ; temp result=(coeff->b)[0]*InputArray[i]
 		MOV R9,#4
 		
 inner_loop
@@ -27,18 +27,18 @@ inner_loop
 		;temp R11
 		
 		ADD R11,R6,R9
-		VLDR.f32 S5,[R11] ; load b[j] into S5
+		VLDR.f32 S4,[R11] ; load b[j] into S4
 		ADD R11,R0,R10
-		VLDR.f32 S7,[R11] ; load InputArray[i-j] into S7
-		VMUL.f32 S5,S5,S7 ; (coeff->b)[j]*InputArray[i-j]
-		VADD.f32 S3,S3,S5 ; tempResult= tempResult + (coeff->b)[j]*InputArray[i-j]
+		VLDR.f32 S5,[R11] ; load InputArray[i-j] into S5
+		VMUL.f32 S4,S4,S5 ; (coeff->b)[j]*InputArray[i-j]
+		VADD.f32 S3,S3,S4 ; tempResult= tempResult + (coeff->b)[j]*InputArray[i-j]
 
 		ADD R11,R3,R9
-		VLDR.f32 S5,[R11] ; load a[j] into S5
+		VLDR.f32 S4,[R11] ; load a[j] into S4
 		ADD R11,R1,R10
-		VLDR.f32 S7,[R11] ; load OutputArray[i-j] into S7
-		VMUL.f32 S5,S5,S7 ; (coeff->a)[j]*OutPutArray[i-j]
-		VADD.f32 S3,S3,S5 ; tempResult= tempResult + (coeff->a)[j]*OutPut[i-j]
+		VLDR.f32 S5,[R11] ; load OutputArray[i-j] into S5
+		VMUL.f32 S4,S4,S5 ; (coeff->a)[j]*OutPutArray[i-j]
+		VADD.f32 S3,S3,S4 ; tempResult= tempResult + (coeff->a)[j]*OutPut[i-j]
 		
 		ADD R9,R9,#4
 		B inner_loop
