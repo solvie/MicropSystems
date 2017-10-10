@@ -15,7 +15,7 @@ float zeroOrArrayPos(int n, float* array ){
 }
 
 //Version with all coefficients set as 1
-float IIR_FCtemp(float* InputArray, float* OutputArray,FIR_coeff* coeff, int Length, int Order){
+float IIR_C(float* InputArray, float* OutputArray,FIR_coeff* coeff, int Length, int Order){
 	float tempY;
 	for (int i=0; i<Length;i++){
 
@@ -32,28 +32,30 @@ float IIR_FCtemp(float* InputArray, float* OutputArray,FIR_coeff* coeff, int Len
 }
 
 int main(){
-	printf("hello world\n\n");
-	//initialize input and output
-	float inputExample[5] = {1,1,1,1,1};
-	float outputExample[5] = {0,0,0,0,0};
-	
-	float * inP;
-	float * outP;
+	int inputLength=5;
+	int inputOrder=2;
 
-	inP=&inputExample[0];
-	outP=&outputExample[0];
+	//initialize input and output
+	float inputExampleC[5] = {1,1,1,1,1};
+	float outputExampleC[5] = {0,0,0,0,0};
+	float outputExampleAsm[5] = {0,0,0,0,0};
+
 	FIR_coeff coeffStruct = {{0, 1,1}, {1, 1,1}};
-	
-	FIR_coeff* coeff = &coeffStruct;
-	
-	float out = IIR_FCtemp(inP, outP, coeff, 5, 2);
-	printf("final result\n\n");
-	
-	//call assembly code
-	//IIR_asm(inP,outP, array_length, coeff);
+
+	//call C code
+	float out = IIR_C(&inputExampleC[0], &outputExampleC[0], &coeffStruct, inputLength, inputOrder);
+	printf("C result\n\n:");
 	for (int i=0; i<5; i++){
-	    printf("%f ", outP[i]);
+	   printf("%f ", outputExampleC[i]);
 	}
+
+	//call assembly code/
+	IIR_asm(&inputExampleC[0],&outputExampleAsm[0], inputLength, &coeffStruct);
+	printf("\n\nAssembly result:\n\n");
+	for (int i=0; i<5; i++){
+	    printf("%f ", outputExampleAsm[i]);
+	}
+	
 	return 0;
 	
 }

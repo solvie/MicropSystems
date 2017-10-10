@@ -4,11 +4,147 @@
 ARM Macro Assembler    Page 1 
 
 
-                       
+    1 00000000                 AREA             text,CODE,READONLY
+    2 00000000                 EXPORT           IIR_asm
+    3 00000000         IIR_asm
+    4 00000000         ;input array R0
+    5 00000000         ;output array R1
+    6 00000000         ;length of array R2
+    7 00000000         ;coeff R3
+    8 00000000 460C            MOV              R4,R1
+    9 00000002 F103 060C       ADD              R6,R3,#12   ; R6 starting point
+                                                             of coefficient b
+   10 00000006 F04F 0700       MOV              R7,#0       ; counter i in byte
+                                                            s
+   11 0000000A         
+   12 0000000A         loop
+   13 0000000A 2A00            CMP              R2,#0
+   14 0000000C D034            BEQ              exit
+   15 0000000E EDD6 1A00       VLDR.f32         S3,[R6]     ; (coeff->b)[0]
+   16 00000012         ;temp R8
+   17 00000012 EB00 0807       ADD              R8,R0,R7
+   18 00000016 ED98 2A00       VLDR.f32         S4,[R8]     ; load i th element
+                                                             of input array
+   19 0000001A EE61 1A82       VMUL.f32         S3,S3,S4    ; temp result,(coef
+                                                            f->b)[0]*InputArray
+                                                            [i]
+   20 0000001E F04F 0904       MOV              R9,#4
+   21 00000022         
+   22 00000022         inner_loop
+   23 00000022 F1B9 0F0C       CMP              R9,#12      ; (Order+1)*4 bytes
+                                                            
+   24 00000026 D01E            BEQ              end_inner_loop
+   25 00000028 45B9            CMP              R9,R7
+   26 0000002A DC1C            BGT              end_inner_loop
+   27 0000002C EBA7 0A09       SUB              R10,R7,R9
+   28 00000030         ;temp R11
+   29 00000030 EB06 0B09       ADD              R11,R6,R9
+   30 00000034 EDDB 2A00       VLDR.f32         S5,[R11]    ; load b[j] into S5
+                                                            
+   31 00000038         
+   32 00000038 EB03 0B09       ADD              R11,R3,R9
+   33 0000003C ED9B 3A00       VLDR.f32         S6,[R11]    ; load a[j] into S6
+                                                            
+   34 00000040         
+   35 00000040 EB00 0B0A       ADD              R11,R0,R10
+   36 00000044 EDDB 3A00       VLDR.f32         S7,[R11]    ; load InputArray[i
+                                                            -j] into S7
+   37 00000048         
+   38 00000048 EB01 0B0A       ADD              R11,R1,R10
+   39 0000004C ED9B 4A00       VLDR.f32         S8,[R11]    ; load OutputArray[
+                                                            i-j] into S8
+   40 00000050         
+   41 00000050 EE62 2AA3       VMUL.f32         S5,S5,S7    ; (coeff->b)[j]*Inp
+                                                            utArray[i-j]
+   42 00000054 EE23 3A04       VMUL.f32         S6,S6,S8    ; (coeff->a)[j]*Out
+                                                            PutArray[i-j]
+   43 00000058         
+   44 00000058 EE71 1AA2       VADD.f32         S3,S3,S5    ; tempResult + (coe
+                                                            ff->b)[j]*InputArra
+                                                            y[i-j]
+   45 0000005C EE71 1A83       VADD.f32         S3,S3,S6    ; tempResult + (coe
+
+
+
+ARM Macro Assembler    Page 2 
+
+
+                                                            ff->b)[j]*InputArra
+                                                            y[i-j] + (coeff->a)
+                                                            [j]*OutPut[i-j]
+   46 00000060 F109 0904       ADD              R9,R9,#4
+   47 00000064 E7DD            B                inner_loop
+   48 00000066         
+   49 00000066         end_inner_loop
+   50 00000066 EB01 0C07       ADD              R12,R1,R7
+   51 0000006A EDCC 1A00       VSTR             S3,[R12]
+   52 0000006E F107 0704       ADD              R7,R7,#4
+   53 00000072 F1A2 0201       SUB              R2,R2,#1
+   54 00000076 E7C8            B                loop
+   55 00000078         
+   56 00000078         exit
+   57 00000078 4770            BX               LR          ;
+   58 0000007A                 END
 Command Line: --debug --xref --diag_suppress=9931 --cpu=Cortex-M4.fp --apcs=int
 erwork --depend=.\objects\assembly.d -o.\objects\assembly.o -IP:\uP\Lab1_STM32F
 4Cube_Base_project\RTE -IC:\Keil_v5\ARM\PACK\ARM\CMSIS\5.0.1\CMSIS\Include -IC:
 \Keil_v5\ARM\PACK\Keil\STM32F4xx_DFP\2.11.0\Drivers\CMSIS\Device\ST\STM32F4xx\I
 nclude --predefine="__UVISION_VERSION SETA 515" --predefine="_RTE_ SETA 1" --pr
 edefine="STM32F407xx SETA 1" --list=.\listings\assembly.lst Sources\Assembly.s
-333 symbols in table
+
+
+
+ARM Macro Assembler    Page 1 Alphabetic symbol ordering
+Relocatable symbols
+
+IIR_asm 00000000
+
+Symbol: IIR_asm
+   Definitions
+      At line 3 in file Sources\Assembly.s
+   Uses
+      At line 2 in file Sources\Assembly.s
+Comment: IIR_asm used once
+end_inner_loop 00000066
+
+Symbol: end_inner_loop
+   Definitions
+      At line 49 in file Sources\Assembly.s
+   Uses
+      At line 24 in file Sources\Assembly.s
+      At line 26 in file Sources\Assembly.s
+
+exit 00000078
+
+Symbol: exit
+   Definitions
+      At line 56 in file Sources\Assembly.s
+   Uses
+      At line 14 in file Sources\Assembly.s
+Comment: exit used once
+inner_loop 00000022
+
+Symbol: inner_loop
+   Definitions
+      At line 22 in file Sources\Assembly.s
+   Uses
+      At line 47 in file Sources\Assembly.s
+Comment: inner_loop used once
+loop 0000000A
+
+Symbol: loop
+   Definitions
+      At line 12 in file Sources\Assembly.s
+   Uses
+      At line 54 in file Sources\Assembly.s
+Comment: loop used once
+text 00000000
+
+Symbol: text
+   Definitions
+      At line 1 in file Sources\Assembly.s
+   Uses
+      None
+Comment: text unused
+6 symbols
+340 symbols in table
