@@ -30,6 +30,11 @@ float IIR_C(float* InputArray, float* OutputArray,FIR_coeff* coeff, int Length, 
 	return tempY;
 }
 
+void IIR_CMSIS(arm_biquad_casd_df1_inst_f32 *S, float32_t *pSrc, float32_t *pDst,  float32_t *pCoeffs,float32_t *pState, uint8_t numStages, uint32_t blockSize){
+	arm_biquad_cascade_df1_init_f32(S,numStages,pCoeffs,pState);
+  arm_biquad_cascade_df1_f32(S,	pSrc, pDst, blockSize);	
+}
+
 int main(){
 	arm_biquad_casd_df1_inst_f32 S;
 	int inputLength=5;
@@ -44,12 +49,15 @@ int main(){
 	float outputExampleAsm[5] = {0,0,0,0,0};
 	float outputExampleCMSIS[5] = {0,0,0,0,0};
 
-  float32_t pState[4]={0};
+	uint8_t numstages=1;
+	uint32_t blockSize=5;
+
+  float32_t pState[1*4]={0}; //numstages*4
 	FIR_coeff coeffStruct = {{0, 0.3,-0.2}, {0.2,0.4,0.2}};
 	float coeffForCMSIS[5] = {0.2,0.4,0.2, 0.3,-0.2};
 
 	//call C code
-	float out = IIR_C(&inputExampleC[0], &outputExampleC[0], &coeffStruct, inputLength, inputOrder);
+	IIR_C(&inputExampleC[0], &outputExampleC[0], &coeffStruct, inputLength, inputOrder);
 	printf("C result:\n\n");
 	for (int i=0; i<5; i++){
 	   printf("%f ", outputExampleC[i]);
@@ -57,8 +65,7 @@ int main(){
 	
 	//call CMSIS-DSP code
 	printf("\n\n");
-	arm_biquad_cascade_df1_init_f32(&S,1,coeffForCMSIS,pState);
-  arm_biquad_cascade_df1_f32(&S,	inputExampleCMSIS, outputExampleCMSIS,5);	
+	IIR_CMSIS(&S,inputExampleCMSIS, outputExampleCMSIS,coeffForCMSIS,pState,numstages,blockSize );
 	printf("Library result:\n\n");
 	for (int i=0; i<5; i++){
 	    printf("%f ", outputExampleCMSIS[i]);
