@@ -24,19 +24,18 @@ inner_loop
 		CMP R9,R7
 		BGT end_inner_loop
 		SUB R10,R7,R9
-		;temp R11
 		
-		ADD R11,R6,R9
-		VLDR.f32 S4,[R11] ; load b[j] into S4
-		ADD R11,R0,R10
-		VLDR.f32 S5,[R11] ; load InputArray[i-j] into S5
+		ADD R8,R6,R9
+		VLDR.f32 S4,[R8] ; load b[j] into S4
+		ADD R8,R0,R10
+		VLDR.f32 S5,[R8] ; load InputArray[i-j] into S5
 		VMUL.f32 S4,S4,S5 ; (coeff->b)[j]*InputArray[i-j]
 		VADD.f32 S3,S3,S4 ; tempResult= tempResult + (coeff->b)[j]*InputArray[i-j]
 
-		ADD R11,R3,R9
-		VLDR.f32 S4,[R11] ; load a[j] into S4
-		ADD R11,R1,R10
-		VLDR.f32 S5,[R11] ; load OutputArray[i-j] into S5
+		ADD R8,R3,R9
+		VLDR.f32 S4,[R8] ; load a[j] into S4
+		ADD R8,R1,R10
+		VLDR.f32 S5,[R8] ; load OutputArray[i-j] into S5
 		VMUL.f32 S4,S4,S5 ; (coeff->a)[j]*OutPutArray[i-j]
 		VADD.f32 S3,S3,S4 ; tempResult= tempResult + (coeff->a)[j]*OutPut[i-j]
 		
@@ -44,8 +43,8 @@ inner_loop
 		B inner_loop
 			
 end_inner_loop
-		ADD R12,R1,R7
-		VSTR S3,[R12]
+		ADD R8,R1,R7
+		VSTR S3,[R8]
 		ADD R7,R7,#4
 		SUB R2,R2,#1
 		B loop
