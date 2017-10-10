@@ -5,8 +5,6 @@ IIR_asm
 		;output array R1
 		;length of array R2
 		;coeff R3
-		PUSH {R0-R3}
-		PUSH {R6}
 		ADD R6,R3,#12 ; R6 starting point of coefficient b
 		MOV R7,#0 ; counter i in bytes
 		
@@ -27,23 +25,21 @@ inner_loop
 		BGT end_inner_loop
 		SUB R10,R7,R9
 		;temp R11
+		
 		ADD R11,R6,R9
 		VLDR.f32 S5,[R11] ; load b[j] into S5
-		
-		ADD R11,R3,R9
-		VLDR.f32 S6,[R11] ; load a[j] into S6
-		
 		ADD R11,R0,R10
 		VLDR.f32 S7,[R11] ; load InputArray[i-j] into S7
-		
-		ADD R11,R1,R10
-		VLDR.f32 S8,[R11] ; load OutputArray[i-j] into S8
-		
 		VMUL.f32 S5,S5,S7 ; (coeff->b)[j]*InputArray[i-j]
-		VMUL.f32 S6,S6,S8 ; (coeff->a)[j]*OutPutArray[i-j]
+		VADD.f32 S3,S3,S5 ; tempResult= tempResult + (coeff->b)[j]*InputArray[i-j]
+
+		ADD R11,R3,R9
+		VLDR.f32 S5,[R11] ; load a[j] into S5
+		ADD R11,R1,R10
+		VLDR.f32 S7,[R11] ; load OutputArray[i-j] into S7
+		VMUL.f32 S5,S5,S7 ; (coeff->a)[j]*OutPutArray[i-j]
+		VADD.f32 S3,S3,S5 ; tempResult= tempResult + (coeff->a)[j]*OutPut[i-j]
 		
-		VADD.f32 S3,S3,S5 ; tempResult + (coeff->b)[j]*InputArray[i-j]
-		VADD.f32 S3,S3,S6 ; tempResult + (coeff->b)[j]*InputArray[i-j] + (coeff->a)[j]*OutPut[i-j]
 		ADD R9,R9,#4
 		B inner_loop
 			
@@ -55,7 +51,5 @@ end_inner_loop
 		B loop
 		
 exit
-		POP {R0-R3}
-		POP {R6}
 		BX LR;
 		END

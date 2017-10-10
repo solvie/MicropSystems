@@ -11,83 +11,76 @@ ARM Macro Assembler    Page 1
     5 00000000         ;output array R1
     6 00000000         ;length of array R2
     7 00000000         ;coeff R3
-    8 00000000 B40F            PUSH             {R0-R3}
-    9 00000002 B440            PUSH             {R6}
-   10 00000004 F103 060C       ADD              R6,R3,#12   ; R6 starting point
+    8 00000000 F103 060C       ADD              R6,R3,#12   ; R6 starting point
                                                              of coefficient b
-   11 00000008 F04F 0700       MOV              R7,#0       ; counter i in byte
+    9 00000004 F04F 0700       MOV              R7,#0       ; counter i in byte
                                                             s
-   12 0000000C         
-   13 0000000C         loop
-   14 0000000C 2A00            CMP              R2,#0
-   15 0000000E D034            BEQ              exit
-   16 00000010 EDD6 1A00       VLDR.f32         S3,[R6]     ; (coeff->b)[0]
-   17 00000014         ;temp R8
-   18 00000014 EB00 0807       ADD              R8,R0,R7
-   19 00000018 ED98 2A00       VLDR.f32         S4,[R8]     ; load i th element
+   10 00000008         
+   11 00000008         loop
+   12 00000008 2A00            CMP              R2,#0
+   13 0000000A D034            BEQ              exit
+   14 0000000C EDD6 1A00       VLDR.f32         S3,[R6]     ; (coeff->b)[0]
+   15 00000010         ;temp R8
+   16 00000010 EB00 0807       ADD              R8,R0,R7
+   17 00000014 ED98 2A00       VLDR.f32         S4,[R8]     ; load i th element
                                                              of input array
-   20 0000001C EE61 1A82       VMUL.f32         S3,S3,S4    ; temp result,(coef
+   18 00000018 EE61 1A82       VMUL.f32         S3,S3,S4    ; temp result,(coef
                                                             f->b)[0]*InputArray
                                                             [i]
-   21 00000020 F04F 0904       MOV              R9,#4
-   22 00000024         
-   23 00000024         inner_loop
-   24 00000024 F1B9 0F0C       CMP              R9,#12      ; (Order+1)*4 bytes
+   19 0000001C F04F 0904       MOV              R9,#4
+   20 00000020         
+   21 00000020         inner_loop
+   22 00000020 F1B9 0F0C       CMP              R9,#12      ; (Order+1)*4 bytes
                                                             
-   25 00000028 D01E            BEQ              end_inner_loop
-   26 0000002A 45B9            CMP              R9,R7
-   27 0000002C DC1C            BGT              end_inner_loop
-   28 0000002E EBA7 0A09       SUB              R10,R7,R9
-   29 00000032         ;temp R11
-   30 00000032 EB06 0B09       ADD              R11,R6,R9
-   31 00000036 EDDB 2A00       VLDR.f32         S5,[R11]    ; load b[j] into S5
+   23 00000024 D01E            BEQ              end_inner_loop
+   24 00000026 45B9            CMP              R9,R7
+   25 00000028 DC1C            BGT              end_inner_loop
+   26 0000002A EBA7 0A09       SUB              R10,R7,R9
+   27 0000002E         ;temp R11
+   28 0000002E         
+   29 0000002E EB06 0B09       ADD              R11,R6,R9
+   30 00000032 EDDB 2A00       VLDR.f32         S5,[R11]    ; load b[j] into S5
                                                             
-   32 0000003A         
-   33 0000003A EB03 0B09       ADD              R11,R3,R9
-   34 0000003E ED9B 3A00       VLDR.f32         S6,[R11]    ; load a[j] into S6
-                                                            
-   35 00000042         
-   36 00000042 EB00 0B0A       ADD              R11,R0,R10
-   37 00000046 EDDB 3A00       VLDR.f32         S7,[R11]    ; load InputArray[i
+   31 00000036 EB00 0B0A       ADD              R11,R0,R10
+   32 0000003A EDDB 3A00       VLDR.f32         S7,[R11]    ; load InputArray[i
                                                             -j] into S7
-   38 0000004A         
-   39 0000004A EB01 0B0A       ADD              R11,R1,R10
-   40 0000004E ED9B 4A00       VLDR.f32         S8,[R11]    ; load OutputArray[
-                                                            i-j] into S8
-   41 00000052         
-   42 00000052 EE62 2AA3       VMUL.f32         S5,S5,S7    ; (coeff->b)[j]*Inp
+   33 0000003E EE62 2AA3       VMUL.f32         S5,S5,S7    ; (coeff->b)[j]*Inp
                                                             utArray[i-j]
-   43 00000056 EE23 3A04       VMUL.f32         S6,S6,S8    ; (coeff->a)[j]*Out
+   34 00000042 EE71 1AA2       VADD.f32         S3,S3,S5    ; tempResult= tempR
+                                                            esult + (coeff->b)[
+                                                            j]*InputArray[i-j]
+   35 00000046         
+   36 00000046 EB03 0B09       ADD              R11,R3,R9
+   37 0000004A EDDB 2A00       VLDR.f32         S5,[R11]    ; load a[j] into S5
+                                                            
+   38 0000004E EB01 0B0A       ADD              R11,R1,R10
+   39 00000052 EDDB 3A00       VLDR.f32         S7,[R11]    ; load OutputArray[
+                                                            i-j] into S7
+   40 00000056 EE62 2AA3       VMUL.f32         S5,S5,S7    ; (coeff->a)[j]*Out
                                                             PutArray[i-j]
-   44 0000005A         
-   45 0000005A EE71 1AA2       VADD.f32         S3,S3,S5    ; tempResult + (coe
-                                                            ff->b)[j]*InputArra
-                                                            y[i-j]
+   41 0000005A EE71 1AA2       VADD.f32         S3,S3,S5    ; tempResult= tempR
+                                                            esult + (coeff->a)[
+                                                            j]*OutPut[i-j]
+   42 0000005E         
+   43 0000005E F109 0904       ADD              R9,R9,#4
 
 
 
 ARM Macro Assembler    Page 2 
 
 
-   46 0000005E EE71 1A83       VADD.f32         S3,S3,S6    ; tempResult + (coe
-                                                            ff->b)[j]*InputArra
-                                                            y[i-j] + (coeff->a)
-                                                            [j]*OutPut[i-j]
-   47 00000062 F109 0904       ADD              R9,R9,#4
-   48 00000066 E7DD            B                inner_loop
-   49 00000068         
-   50 00000068         end_inner_loop
-   51 00000068 EB01 0C07       ADD              R12,R1,R7
-   52 0000006C EDCC 1A00       VSTR             S3,[R12]
-   53 00000070 F107 0704       ADD              R7,R7,#4
-   54 00000074 F1A2 0201       SUB              R2,R2,#1
-   55 00000078 E7C8            B                loop
-   56 0000007A         
-   57 0000007A         exit
-   58 0000007A BC0F            POP              {R0-R3}
-   59 0000007C BC40            POP              {R6}
-   60 0000007E 4770            BX               LR          ;
-   61 00000080                 END
+   44 00000062 E7DD            B                inner_loop
+   45 00000064         
+   46 00000064         end_inner_loop
+   47 00000064 EB01 0C07       ADD              R12,R1,R7
+   48 00000068 EDCC 1A00       VSTR             S3,[R12]
+   49 0000006C F107 0704       ADD              R7,R7,#4
+   50 00000070 F1A2 0201       SUB              R2,R2,#1
+   51 00000074 E7C8            B                loop
+   52 00000076         
+   53 00000076         exit
+   54 00000076 4770            BX               LR          ;
+   55 00000078                 END
 Command Line: --debug --xref --diag_suppress=9931 --cpu=Cortex-M4.fp --apcs=int
 erwork --depend=.\objects\assembly.d -o.\objects\assembly.o -IP:\uP\Lab1_STM32F
 4Cube_Base_project\RTE -IC:\Keil_v5\ARM\PACK\ARM\CMSIS\5.0.1\CMSIS\Include -IC:
@@ -108,38 +101,38 @@ Symbol: IIR_asm
    Uses
       At line 2 in file Sources\Assembly.s
 Comment: IIR_asm used once
-end_inner_loop 00000068
+end_inner_loop 00000064
 
 Symbol: end_inner_loop
    Definitions
-      At line 50 in file Sources\Assembly.s
+      At line 46 in file Sources\Assembly.s
    Uses
+      At line 23 in file Sources\Assembly.s
       At line 25 in file Sources\Assembly.s
-      At line 27 in file Sources\Assembly.s
 
-exit 0000007A
+exit 00000076
 
 Symbol: exit
    Definitions
-      At line 57 in file Sources\Assembly.s
+      At line 53 in file Sources\Assembly.s
    Uses
-      At line 15 in file Sources\Assembly.s
+      At line 13 in file Sources\Assembly.s
 Comment: exit used once
-inner_loop 00000024
+inner_loop 00000020
 
 Symbol: inner_loop
    Definitions
-      At line 23 in file Sources\Assembly.s
+      At line 21 in file Sources\Assembly.s
    Uses
-      At line 48 in file Sources\Assembly.s
+      At line 44 in file Sources\Assembly.s
 Comment: inner_loop used once
-loop 0000000C
+loop 00000008
 
 Symbol: loop
    Definitions
-      At line 13 in file Sources\Assembly.s
+      At line 11 in file Sources\Assembly.s
    Uses
-      At line 55 in file Sources\Assembly.s
+      At line 51 in file Sources\Assembly.s
 Comment: loop used once
 text 00000000
 

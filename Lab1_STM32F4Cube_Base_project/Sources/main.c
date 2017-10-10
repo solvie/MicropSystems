@@ -8,22 +8,17 @@ typedef struct{
 
 extern int IIR_asm(float* a, float* b, int c, FIR_coeff* d);
 
-//If the array index is less than 0, returns 0. Otherwise, return the value of the array at index n.
-float zeroOrArrayPos(int n, float* array ){
-	if(n<0) return 0;
-	else return *(array+n);
-}
-
 //Version with all coefficients set as 1
 float IIR_C(float* InputArray, float* OutputArray,FIR_coeff* coeff, int Length, int Order){
 	float tempY;
 	for (int i=0; i<Length;i++){
-
-//for testing
-		tempY = (coeff->b)[0]*zeroOrArrayPos(i,InputArray);
-		for (int j=1; j<Order+1;j++)			tempY = tempY 
-						+(coeff->b)[j]*zeroOrArrayPos(i-j,InputArray)
-							+(coeff->a)[j]*zeroOrArrayPos(i-j,OutputArray);
+		tempY = (coeff->b)[0]*InputArray[i];
+		for (int j=1; j<Order+1;j++){		
+			if(i>=j)
+				tempY = tempY 
+						+(coeff->b)[j]*InputArray[i-j]
+							+(coeff->a)[j]*OutputArray[i-j];
+		}
 		*(OutputArray+i)=tempY; //set the value at index i of OutputArray to the tempY that was just found.
 
 	}
