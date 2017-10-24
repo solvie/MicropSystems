@@ -77,6 +77,7 @@ int main(void)
   HAL_Init();
 
   /* USER CODE BEGIN Init */
+	uint32_t adcVal;
   /* USER CODE END Init */
 
   /* Configure the system clock */
@@ -96,6 +97,7 @@ int main(void)
 	// Step(2): Start the ADC
 	HAL_ADC_Start(&hadc2);
   /* USER CODE END 2 */
+
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
