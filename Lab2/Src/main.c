@@ -37,6 +37,7 @@
   */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include "math.h"
 #include "stm32f4xx_hal.h"
 #include "adc.h"
 #include "tim.h"
@@ -52,13 +53,15 @@
 /* Private variables ---------------------------------------------------------*/
 int displayCounter=0;
 int currentDigit=0;
+int windowSizePassed=0;
+
 int digitArray[4]={0,0,0,0} ;
 
 float total = 0;
 float voltage_reading = 0;
 int window_size = 1000;
 int counter = 0;
-int buffer[1000];
+float buffer[1000];
 float val_a = 0;
 float val_b = 0;
 const float maxAdcBits = 255.0f; 
@@ -75,7 +78,21 @@ void SystemClock_Config(void);
 /* USER CODE END PFP */
 
 /* USER CODE BEGIN 0 */
+void preWindowState(){// ORANGE LED ON, GREEN OFF
+		windowSizePassed=0;
+		HAL_GPIO_WritePin(GPIOD, GPIO_PIN_13, GPIO_PIN_SET);
+		HAL_GPIO_WritePin(GPIOD, GPIO_PIN_12, GPIO_PIN_RESET);
+}
 
+void stableState(){//GREEN LED ON, ORANGE OFF
+		windowSizePassed=1;
+		HAL_GPIO_WritePin(GPIOD, GPIO_PIN_13, GPIO_PIN_RESET);
+		HAL_GPIO_WritePin(GPIOD, GPIO_PIN_12, GPIO_PIN_SET);
+}
+
+void overFlowState(){
+	
+}
 /* USER CODE END 0 */
 
 int main(void)
@@ -109,6 +126,7 @@ int main(void)
 	// Step(2): Start the ADC
 	HAL_ADC_Start(&hadc2);
   /* USER CODE END 2 */
+	preWindowState(); //Starts off at state before window size has been filled up
 	floatTo4DigitArray(0);
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
@@ -129,25 +147,28 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
 void getVoltage(){
 	uint32_t adcVal;
 	adcVal = HAL_ADC_GetValue(&hadc2);
-	float voltage = (double)adcVal * voltsPerBit;
+	float voltage = (float)adcVal * voltsPerBit;
 	float voltage_sqrt = voltage * voltage;
 	if(window_size>0){
 		window_size -= 1;
 		val_a = val_a + voltage_sqrt;
 		buffer[counter] = voltage_sqrt;
 	}else{
+		if (!windowSizePassed)
+			stableState(); 
 		val_b = val_b+buffer[counter];
-		voltage_reading = sqrt(1/sizeof(buffer) * (val_a-val_b));
 		buffer[counter] = voltage_sqrt;
 		val_a = val_a + voltage_sqrt;
+		voltage_reading = sqrt(((float)1/(float)sizeof(buffer)) * (val_a-val_b));
+
 	}
-	
+		if (displayCounter==99){ //update the value less than is actually sampled.
+			floatTo4DigitArray(voltage_reading);
+		}
 	//printf("Window Size: %d \n", window_size);
 	
 	counter= (counter+1)%1000;
-	if (displayCounter==99){ //update the value less than is actually sampled.
-		floatTo4DigitArray(voltage);
-	}
+
 	//printf("%f \n",voltage);
 	//printf("%d \n", adcVal);
 }

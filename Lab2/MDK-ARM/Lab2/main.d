@@ -1,5 +1,6 @@
 lab2\main.o: ../Src/main.c
 lab2\main.o: ../Inc/main.h
+lab2\main.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\math.h
 lab2\main.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal.h
 lab2\main.o: ../Inc/stm32f4xx_hal_conf.h
 lab2\main.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_rcc.h
