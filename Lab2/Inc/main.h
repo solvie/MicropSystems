@@ -138,6 +138,11 @@
 /* USER CODE BEGIN Private defines */
 
 /* USER CODE END Private defines */
+int toggleDigit(void);
+void digitSelect(int );
+void displayInt(int );
+void floatTo4DigitArray(float );  
+void getVoltage(void);
 
 void _Error_Handler(char *, int);
 

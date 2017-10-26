@@ -50,9 +50,20 @@
 
 /* USER CODE BEGIN PV */
 /* Private variables ---------------------------------------------------------*/
+int displayCounter=0;
 int currentDigit=0;
 int digitArray[4]={0,0,0,0} ;
 
+float total = 0;
+float voltage_reading = 0;
+int window_size = 1000;
+int counter = 0;
+int buffer[1000];
+float val_a = 0;
+float val_b = 0;
+const float maxAdcBits = 255.0f; 
+const float maxVolts = 3.0f;  
+const float voltsPerBit = (maxVolts / maxAdcBits);
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -67,22 +78,8 @@ void SystemClock_Config(void);
 
 /* USER CODE END 0 */
 
-//needs to throw exception when 2 digits or more before decimal point
-void floatTo4DigitArray(float fVal)  
-{    fVal += 0.0005; //So that we round up properly
-    digitArray[0] = (int) fVal;
-    fVal = (fVal-digitArray[0]) * 10;
-    digitArray[1] = (int) fVal;
-    fVal = (fVal-digitArray[1]) * 10;
-    digitArray[2] = (int) fVal;
-    fVal = (fVal-digitArray[2]) * 10;
-    digitArray[3] = (int) fVal;
-}
-
-
 int main(void)
 {
-
   /* USER CODE BEGIN 1 */
   /* USER CODE END 1 */
 
@@ -92,7 +89,6 @@ int main(void)
   HAL_Init();
 
   /* USER CODE BEGIN Init */
-	uint32_t adcVal;
   /* USER CODE END Init */
 
   /* Configure the system clock */
@@ -113,20 +109,59 @@ int main(void)
 	// Step(2): Start the ADC
 	HAL_ADC_Start(&hadc2);
   /* USER CODE END 2 */
-	floatTo4DigitArray(1.8888);
+	floatTo4DigitArray(0);
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
 
-
-  /* USER CODE END WHILE */
-  /* USER CODE BEGIN 3 */
-			// Step(1): To get the ADC value
-		//adcVal = HAL_ADC_GetValue(&hadc2);
   }
   /* USER CODE END 3 */
 
+}
+
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
+	   	displayCounter= (displayCounter+1)%100;
+			getVoltage();
+			digitSelect(toggleDigit());
+}
+
+void getVoltage(){
+	uint32_t adcVal;
+	adcVal = HAL_ADC_GetValue(&hadc2);
+	float voltage = (double)adcVal * voltsPerBit;
+	float voltage_sqrt = voltage * voltage;
+	if(window_size>0){
+		window_size -= 1;
+		val_a = val_a + voltage_sqrt;
+		buffer[counter] = voltage_sqrt;
+	}else{
+		val_b = val_b+buffer[counter];
+		voltage_reading = sqrt(1/sizeof(buffer) * (val_a-val_b));
+		buffer[counter] = voltage_sqrt;
+		val_a = val_a + voltage_sqrt;
+	}
+	
+	//printf("Window Size: %d \n", window_size);
+	
+	counter= (counter+1)%1000;
+	if (displayCounter==99){ //update the value less than is actually sampled.
+		floatTo4DigitArray(voltage);
+	}
+	//printf("%f \n",voltage);
+	//printf("%d \n", adcVal);
+}
+
+//needs to throw exception when 2 digits or more before decimal point
+void floatTo4DigitArray(float fVal)  
+{    fVal += 0.0005; //So that we round up properly
+    digitArray[0] = (int) fVal;
+    fVal = (fVal-digitArray[0]) * 10;
+    digitArray[1] = (int) fVal;
+    fVal = (fVal-digitArray[1]) * 10;
+    digitArray[2] = (int) fVal;
+    fVal = (fVal-digitArray[2]) * 10;
+    digitArray[3] = (int) fVal;
 }
 
 /*
@@ -267,10 +302,6 @@ void digitSelect(int currentDigit ){
 
 }
 
-void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
-	digitSelect(toggleDigit());
-	//displayInt(8);
-}
 /** System Clock Configuration
 */
 void SystemClock_Config(void)
