@@ -37,7 +37,8 @@
 
 /* USER CODE BEGIN 0 */
 extern int displayCounter;
-extern int flag, waveFlag;
+extern int flag;
+extern int waveFlag;
 /* USER CODE END 0 */
 
 /* External variables --------------------------------------------------------*/
