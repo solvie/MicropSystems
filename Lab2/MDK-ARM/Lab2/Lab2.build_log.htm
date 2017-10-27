@@ -21,24 +21,24 @@ Target DLL:      STLink\ST-LINKIII-KEIL_SWO.dll V2.0.15.0_KEIL
 Dialog DLL:      TCM.DLL V1.14.5.0
  
 <h2>Project:</h2>
-H:\todelete\ECSE426-Labs\Lab2\MDK-ARM\Lab2.uvprojx
-Project File Date:  10/26/2017
+H:\up\ECSE426-Labs\Lab2\MDK-ARM\Lab2.uvprojx
+Project File Date:  10/27/2017
 
 <h2>Output:</h2>
 *** Using Compiler 'V5.05 update 2 (build 169)', folder: 'C:\Keil_v5\ARM\ARMCC\Bin'
 Build target 'Lab2'
 compiling main.c...
-../Src/main.c(158): warning:  #177-D: variable "counterTemp" was declared but never referenced
+../Src/main.c(83): warning:  #1035-D: single-precision operand implicitly converted to double-precision
+  const float DELTA_THRESHOLD = (MAX_VOLTS*MAX_VOLTS*0.2*0.2); //Delta threshold set to 0.7 of full range.
+../Src/main.c(183): warning:  #177-D: variable "counterTemp" was declared but never referenced
         int counterTemp = 0;
-../Src/main.c(207): warning:  #1035-D: single-precision operand implicitly converted to double-precision
-                                voltage_reading= (val_a-val_b)/1000.0;
-../Src/main.c(244): warning:  #1035-D: single-precision operand implicitly converted to double-precision
+../Src/main.c(284): warning:  #1035-D: single-precision operand implicitly converted to double-precision
   {    fVal += 0.0005; //So that we round up properly
-../Src/main.c(495): warning:  #1-D: last line of file ends without a newline
+../Src/main.c(537): warning:  #1-D: last line of file ends without a newline
   /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
 ../Src/main.c: 4 warnings, 0 errors
 linking...
-Program Size: Code=8504 RO-data=440 RW-data=72 ZI-data=5232  
+Program Size: Code=8404 RO-data=440 RW-data=68 ZI-data=1276  
 "Lab2\Lab2.axf" - 0 Error(s), 4 Warning(s).
 
 <h2>Software Packages used:</h2>
@@ -50,7 +50,7 @@ Package Vendor: ARM
    * Component: CORE Version: 5.0.1
 
 <h2>Collection of Component include folders:</h2>
-  H:\todelete\ECSE426-Labs\Lab2\MDK-ARM\RTE
+  H:\up\ECSE426-Labs\Lab2\MDK-ARM\RTE
   C:\Keil_v5\ARM\PACK\ARM\CMSIS\5.0.1\CMSIS\Include
   C:\Keil_v5\ARM\PACK\Keil\STM32F4xx_DFP\2.11.0\Drivers\CMSIS\Device\ST\STM32F4xx\Include
 

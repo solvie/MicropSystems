@@ -68,16 +68,19 @@ int digitArray[4]={0,0,0,0} ;
 
 float total = 0;
 float voltage_reading = 0;
-float window_size = 1000.0;
+const float WINDOW = 1000.0;
+const int WINDOW_INT=(int)WINDOW;
+int window_counter = WINDOW_INT;
 int counter = 0;
-float buffer[1000];
+float buffer[WINDOW_INT];
 float val_a = 0;
 float val_b = 0;
-const float maxAdcBits = 255.0f; 
-const float maxVolts = 3.0f;  
-const float voltsPerBit = (maxVolts / maxAdcBits);
+const float MAX_ADC_BITS = 255.0f; 
+const float MAX_VOLTS = 3.0f;  
+const float VOLTS_PER_BIT = (MAX_VOLTS / MAX_ADC_BITS);
+const	float MAX_ALLOWABLE = 3.402823466e+38F;
 
-int deltaThreshold = maxAdcBits/2;
+const float DELTA_THRESHOLD = (MAX_VOLTS*MAX_VOLTS*0.2*0.2); //Delta threshold set to 0.7 of full range.
 
 /* USER CODE END PV */
 
@@ -91,27 +94,49 @@ void SystemClock_Config(void);
 
 /* USER CODE BEGIN 0 */
 
-void preWindowState(){// ORANGE LED ON, GREEN OFF
+/**
+* 	Lights up LEDs to indicate that the window size has not fully been collected yet.
+*	  ORANGE LED ON, ALL ELSE OFF
+*/
+void preWindowState(){ 
 		windowSizePassed=0;
-		HAL_GPIO_WritePin(GPIOD, GPIO_PIN_13, GPIO_PIN_SET);
 		HAL_GPIO_WritePin(GPIOD, GPIO_PIN_12, GPIO_PIN_RESET);
+		HAL_GPIO_WritePin(GPIOD, GPIO_PIN_13, GPIO_PIN_SET);
+		HAL_GPIO_WritePin(GPIOD, GPIO_PIN_14, GPIO_PIN_RESET);
+		HAL_GPIO_WritePin(GPIOD, GPIO_PIN_15, GPIO_PIN_RESET);
 }
 
-void stableState(){//GREEN LED ON, ORANGE OFF
+/**
+* 	Lights up LEDs to indicate that data is being collected as expected.
+*	  GREEN LED ON,  ALL ELSE OFF
+*/
+void stableState(){
 		windowSizePassed=1;
-		HAL_GPIO_WritePin(GPIOD, GPIO_PIN_13, GPIO_PIN_RESET);
 		HAL_GPIO_WritePin(GPIOD, GPIO_PIN_12, GPIO_PIN_SET);
+		HAL_GPIO_WritePin(GPIOD, GPIO_PIN_13, GPIO_PIN_RESET);
+		HAL_GPIO_WritePin(GPIOD, GPIO_PIN_14, GPIO_PIN_RESET);
+		HAL_GPIO_WritePin(GPIOD, GPIO_PIN_15, GPIO_PIN_RESET);
 }
 
-void overFlowState(){//GREEN LED OFF, RED ON
-		windowSizePassed=1;
+/**
+* 	Lights up LEDs to indicate that an overflow has been detected.
+*	  RED LED ON,  ALL ELSE OFF
+*/
+void overFlowState(){
+		HAL_GPIO_WritePin(GPIOD, GPIO_PIN_12, GPIO_PIN_RESET);
 		HAL_GPIO_WritePin(GPIOD, GPIO_PIN_13, GPIO_PIN_RESET);
 		HAL_GPIO_WritePin(GPIOD, GPIO_PIN_14, GPIO_PIN_SET);
+		HAL_GPIO_WritePin(GPIOD, GPIO_PIN_15, GPIO_PIN_RESET);
 }
 
-void spikeState(){//GREEN LED OFF, BLUE ON
-		windowSizePassed=1;
+/**
+* 	Lights up LEDs to indicate that a data spike or unexpected value has been detected
+*	  BLUE LED ON,  ALL ELSE OFF
+*/
+void spikeState(){
+		HAL_GPIO_WritePin(GPIOD, GPIO_PIN_12, GPIO_PIN_RESET);
 		HAL_GPIO_WritePin(GPIOD, GPIO_PIN_13, GPIO_PIN_RESET);
+		HAL_GPIO_WritePin(GPIOD, GPIO_PIN_14, GPIO_PIN_RESET);
 		HAL_GPIO_WritePin(GPIOD, GPIO_PIN_15, GPIO_PIN_SET);
 }
 /* USER CODE END 0 */
@@ -158,79 +183,92 @@ int main(void)
 	int counterTemp = 0;
   while (1)
   {
-		if (displayCounter==99){ //update the value less than is actually sampled.
+		//Update the value to be shown in 7-segment display.
+		if (displayCounter==149){ //Waiting for counter to reach 99 ensures display is updated less frequently than interrupt rate from timer (so as changes to be easily visible)
 			floatTo4DigitArray(voltage_reading);
 		}
-		if (flag==1)
-        {
-				digitSelect(toggleDigit());
-				getVoltage();
-       }
-		if (waveFlag==1)
-        {
-				HAL_GPIO_TogglePin(GPIOE, GPIO_PIN_2);
-				waveFlag=0;
-       }
+	  
+		//Calculate RMS, and toggle which digit of 7-segment display to display
+		if (flag==1){
+			digitSelect(toggleDigit());
+			getVoltage();
+    }
+		
+		//Toggle square wave 
+		if (waveFlag==1){
+			HAL_GPIO_TogglePin(GPIOE, GPIO_PIN_2);
+			waveFlag=0;
+    }
   }
   /* USER CODE END 3 */
 }
 
-void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
-	
-}
-//void getVoltage(uint32_t ADCValue){
-	void getVoltage(){
-//float voltage_reading = 0;
-
-			uint32_t adcVal;
-			//adcVal = ADCValue;
-			adcVal = HAL_ADC_GetValue(&hadc2);
-			float voltage = (float)adcVal * voltsPerBit;
-			float voltage_sqrt = voltage * voltage;
-			if(window_size>0){
-				window_size -= 1;
-				val_a = val_a + voltage_sqrt;
-				buffer[counter] = voltage_sqrt;
-			}else{
-				if (!windowSizePassed)
-					stableState(); 
-				if (spiked==1){
-					spikeCounter= (spikeCounter+1)%100;
-					if (spikeCounter == 99){
-						stableState();
-						spiked=0;
-					}
-				}
-				val_b = val_b+buffer[counter];
-				buffer[counter] = voltage_sqrt;
-				val_a = val_a + voltage_sqrt;
-				voltage_reading= (val_a-val_b)/1000.0;
-				voltage_reading = sqrt(voltage_reading);
-				if(fabs(buffer[counter]-buffer[counter-1])>deltaThreshold &&fabs(buffer[counter-1]-buffer[counter-2])>deltaThreshold){
-						//spike detected.
-					spikeState();
-					spiked=1;
+/**
+* Voltmeter functionality; Takes the RMS over the window size worth of samples.
+*/
+void getVoltage(){
+		uint32_t adcVal = HAL_ADC_GetValue(&hadc2);
+		float voltage = (float)adcVal * VOLTS_PER_BIT;
+		float voltage_sqrt = voltage * voltage;
+		if(window_counter>0){
+			window_counter -= 1;
+			val_a = val_a + voltage_sqrt;
+			buffer[counter] = voltage_sqrt;
+		}else{
+			if (!windowSizePassed)
+				stableState(); 
+			if (spiked==1){
+				spikeCounter= (spikeCounter+1)%500;
+				if (spikeCounter == 499){
+					stableState();
+					spiked=0;
 				}
 			}
-			flag=0;
-			checkForOverflow(voltage_reading);
-			counter= (counter+1)%1000;
-
+			val_b = val_b+buffer[counter];
+			buffer[counter] = voltage_sqrt;
+			val_a = val_a + voltage_sqrt;
+			voltage_reading= (val_a-val_b)/WINDOW;
+			voltage_reading = sqrt(voltage_reading);
+			if (checkForSpike( buffer[counter],  buffer[counter-1], buffer[counter-2])){ //if spike is detected, overwrite it
+				//buffer[counter]=buffer[counter-3];
+				//buffer[counter-1]=buffer[counter-3];
+				//buffer[counter-2]=buffer[counter-3];
+			}
+		}
+		flag=0;
+		checkForOverflow(voltage_reading);
+		counter= (counter+1)%WINDOW_INT;
 }
+
+/**
+* Checks for spikes in calculated values - if three successive values have a threshold level of difference (for example, 1,3,1) between them, we call this a spike.
+*/
+int checkForSpike(float a, float b, float c){
+	if(spiked==0&&fabs(a-b)>DELTA_THRESHOLD &&fabs(b-c)>DELTA_THRESHOLD){//spike detected.
+		spikeState();
+		spiked=1;
+		return 1;
+	}
+	return 0;
+}
+
+/**
+* When we get near the overflow value, we reset the accumulators.
+*/
 void checkForOverflow(float voltage_reading){
-	float max_allowable = 3.402823466e+38F;
-	max_allowable = max_allowable/2; //Arbitrarily set overflow value to somewhere near max allowable
-	if (val_a> max_allowable){
+	float max= MAX_ALLOWABLE/2;
+	if (val_a> max){
 		val_b= 0;
 		val_a= 0;
+		window_counter= WINDOW_INT;
 		if (overflowed==0){
 			overFlowState();
 			overflowed=1;
 		}
 	} else {
 		if (overflowed==1){
-			overflowCounter = (overflowCounter+1)%100; 
-			if (overflowCounter==99){
+			overflowCounter = (overflowCounter+1)%200; 
+			if (overflowCounter==199){
 				stableState();
 				overflowed=0;
 			}
@@ -239,7 +277,9 @@ void checkForOverflow(float voltage_reading){
 }
 
 
-//needs to throw exception when 2 digits or more before decimal point
+/**
+* Takes the first  to a 4 digit array
+*/
 void floatTo4DigitArray(float fVal)  
 {    fVal += 0.0005; //So that we round up properly
     digitArray[0] = (int) fVal;
@@ -251,14 +291,15 @@ void floatTo4DigitArray(float fVal)
     digitArray[3] = (int) fVal;
 }
 
-/*
-A - 7
-B - 8
-C - 9
-D - 10 
-E - 11
-F - 12
-G - 13
+/**
+* Sets the segments pins so that the appropriate segments are lit according to number
+* A - 7
+* B - 8
+* C - 9
+* D - 10 
+* E - 11
+* F - 12
+* G - 13
 */
 void displayInt(int toDisplay){
 	if (toDisplay==0){ //G off
@@ -348,45 +389,47 @@ void displayInt(int toDisplay){
 	}
 }
 
+/**
+* Selects which of the four digits to enable
+*/
 int toggleDigit(){
 	currentDigit=(currentDigit+1)%4;
 	return currentDigit;
 }
 
+/**
+* Depending on which bit is selected, enables the digit in 
+*/
 void digitSelect(int currentDigit ){
 		if (currentDigit==0){ 
 			HAL_GPIO_WritePin(GPIOD,GPIO_PIN_0,GPIO_PIN_SET);
 			HAL_GPIO_WritePin(GPIOD,GPIO_PIN_1,GPIO_PIN_RESET);
 			HAL_GPIO_WritePin(GPIOD,GPIO_PIN_2,GPIO_PIN_RESET);
 			HAL_GPIO_WritePin(GPIOD,GPIO_PIN_3,GPIO_PIN_RESET);
-			HAL_GPIO_WritePin(GPIOE,GPIO_PIN_14,GPIO_PIN_SET); //also set the decimal point always
-			displayInt(digitArray[0]);
+			HAL_GPIO_WritePin(GPIOE,GPIO_PIN_14,GPIO_PIN_SET); //also set the decimal point always for first digit
 		}
 		if (currentDigit==1){ 
 			HAL_GPIO_WritePin(GPIOD,GPIO_PIN_0,GPIO_PIN_RESET);
 			HAL_GPIO_WritePin(GPIOD,GPIO_PIN_1,GPIO_PIN_SET);
 			HAL_GPIO_WritePin(GPIOD,GPIO_PIN_2,GPIO_PIN_RESET);
 			HAL_GPIO_WritePin(GPIOD,GPIO_PIN_3,GPIO_PIN_RESET);
-			HAL_GPIO_WritePin(GPIOE,GPIO_PIN_14,GPIO_PIN_RESET); //also set the decimal point always
-			displayInt(digitArray[1]);
+			HAL_GPIO_WritePin(GPIOE,GPIO_PIN_14,GPIO_PIN_RESET);
 
 		}if (currentDigit==2){ 
 			HAL_GPIO_WritePin(GPIOD,GPIO_PIN_0,GPIO_PIN_RESET);
 			HAL_GPIO_WritePin(GPIOD,GPIO_PIN_1,GPIO_PIN_RESET);
 			HAL_GPIO_WritePin(GPIOD,GPIO_PIN_2,GPIO_PIN_SET);
 			HAL_GPIO_WritePin(GPIOD,GPIO_PIN_3,GPIO_PIN_RESET);
-			HAL_GPIO_WritePin(GPIOE,GPIO_PIN_14,GPIO_PIN_RESET); //also set the decimal point always
-			displayInt(digitArray[2]);
+			HAL_GPIO_WritePin(GPIOE,GPIO_PIN_14,GPIO_PIN_RESET);
 
 		}if (currentDigit==3){ 
 			HAL_GPIO_WritePin(GPIOD,GPIO_PIN_0,GPIO_PIN_RESET);
 			HAL_GPIO_WritePin(GPIOD,GPIO_PIN_1,GPIO_PIN_RESET);
 			HAL_GPIO_WritePin(GPIOD,GPIO_PIN_2,GPIO_PIN_RESET);
 			HAL_GPIO_WritePin(GPIOD,GPIO_PIN_3,GPIO_PIN_SET);
-			HAL_GPIO_WritePin(GPIOE,GPIO_PIN_14,GPIO_PIN_RESET); //also set the decimal point always
-			displayInt(digitArray[3]);
+			HAL_GPIO_WritePin(GPIOE,GPIO_PIN_14,GPIO_PIN_RESET);
 		}
-
+		displayInt(digitArray[currentDigit]);
 }
 
 /** System Clock Configuration

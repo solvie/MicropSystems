@@ -144,6 +144,7 @@ void displayInt(int );
 void floatTo4DigitArray(float );  
 void getVoltage(void);
 void checkForOverflow(float );
+int checkForSpike(float , float , float );
 /* USER CODE END Private defines */
 
 void _Error_Handler(char *, int);

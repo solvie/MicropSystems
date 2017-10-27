@@ -82,7 +82,7 @@ void TIM2_IRQHandler(void)
   HAL_TIM_IRQHandler(&htim2);
   /* USER CODE BEGIN TIM2_IRQn 1 */
 	flag=1;
-	displayCounter= (displayCounter+1)%100;
+	displayCounter= (displayCounter+1)%150;
   
   /* USER CODE END TIM2_IRQn 1 */
 }
