@@ -56,6 +56,8 @@ int currentDigit=0;
 int windowSizePassed=0;
 
 int flag;
+int waveFlag;
+
 int digitArray[4]={0,0,0,0} ;
 
 float total = 0;
@@ -131,6 +133,8 @@ int main(void)
 	floatTo4DigitArray(0);
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
+	HAL_GPIO_WritePin(GPIOE, GPIO_PIN_2, GPIO_PIN_RESET);
+
 	int counterTemp = 0;
   while (1)
   {
@@ -139,13 +143,22 @@ int main(void)
 		}
 		if (flag==1)
         {
-				//counterTemp=(counterTemp+1)%10000;
+				digitSelect(toggleDigit());
 				getVoltage();
-					
+       }
+		if (waveFlag==1)
+        {
+				HAL_GPIO_TogglePin(GPIOE, GPIO_PIN_2);
+					printf("TOGGLE" );
 
+				waveFlag=0;
        }
   }
   /* USER CODE END 3 */
+}
+
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
+	
 }
 //void getVoltage(uint32_t ADCValue){
 	void getVoltage(){
@@ -173,13 +186,9 @@ int main(void)
 			flag=0;
 			
 			counter= (counter+1)%1000;
+		//printf("VOLTAGE: %f\n", voltage );
 
-		printf("VOLTAGE: %f\n", voltage_reading );
-}
-
-void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
-	   	displayCounter= (displayCounter+1)%100;
-			digitSelect(toggleDigit());
+		//printf("VOLTAGE: %f\n", voltage_reading );
 }
 
 

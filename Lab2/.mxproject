@@ -1,7 +1,7 @@
 [PreviousGenFiles]
-HeaderPath=H:/uP/Lab2/Inc
+HeaderPath=H:/todelete/ECSE426-Labs/Lab2/Inc
 HeaderFiles=gpio.h;adc.h;tim.h;stm32f4xx_it.h;stm32f4xx_hal_conf.h;main.h;
-SourcePath=H:/uP/Lab2/Src
+SourcePath=H:/todelete/ECSE426-Labs/Lab2/Src
 SourceFiles=gpio.h;adc.h;tim.h;stm32f4xx_it.h;stm32f4xx_hal_conf.h;main.h;gpio.c;adc.c;tim.c;stm32f4xx_it.c;stm32f4xx_hal_msp.c;main.c;
 
 [PreviousLibFiles]

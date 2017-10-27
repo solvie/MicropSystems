@@ -46,6 +46,8 @@
 
 /* Private define ------------------------------------------------------------*/
 
+#define PE2_Pin GPIO_PIN_2
+#define PE2_GPIO_Port GPIOE
 #define CS_I2C_SPI_Pin GPIO_PIN_3
 #define CS_I2C_SPI_GPIO_Port GPIOE
 #define PC14_OSC32_IN_Pin GPIO_PIN_14
@@ -136,13 +138,12 @@
 #define MEMS_INT2_GPIO_Port GPIOE
 
 /* USER CODE BEGIN Private defines */
-
-/* USER CODE END Private defines */
 int toggleDigit(void);
 void digitSelect(int );
 void displayInt(int );
 void floatTo4DigitArray(float );  
 void getVoltage(void);
+/* USER CODE END Private defines */
 
 void _Error_Handler(char *, int);
 
