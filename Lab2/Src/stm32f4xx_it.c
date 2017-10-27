@@ -37,6 +37,10 @@
 
 /* USER CODE BEGIN 0 */
 extern int displayCounter;
+extern int DISPLAY_COUNTER_MAX;
+extern int LED_COUNTER_MAX; 
+
+
 extern int flag;
 extern int waveFlag;
 /* USER CODE END 0 */
@@ -82,7 +86,8 @@ void TIM2_IRQHandler(void)
   HAL_TIM_IRQHandler(&htim2);
   /* USER CODE BEGIN TIM2_IRQn 1 */
 	flag=1;
-	displayCounter= (displayCounter+1)%150;
+
+	displayCounter= (displayCounter+1)%100;
   
   /* USER CODE END TIM2_IRQn 1 */
 }

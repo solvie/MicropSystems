@@ -57,7 +57,6 @@ int windowSizePassed=0;
 int overflowed = 0; 
 int spiked = 0; 
 
-
 int overflowCounter = 0;
 int spikeCounter = 0;
 
@@ -68,7 +67,7 @@ int digitArray[4]={0,0,0,0} ;
 
 float total = 0;
 float voltage_reading = 0;
-const float WINDOW = 1000.0;
+const float WINDOW = 10.0;
 const int WINDOW_INT=(int)WINDOW;
 int window_counter = WINDOW_INT;
 int counter = 0;
@@ -79,6 +78,10 @@ const float MAX_ADC_BITS = 255.0f;
 const float MAX_VOLTS = 3.0f;  
 const float VOLTS_PER_BIT = (MAX_VOLTS / MAX_ADC_BITS);
 const	float MAX_ALLOWABLE = 3.402823466e+38F;
+
+const int DISPLAY_COUNTER_MAX = 100; 
+const int LED_COUNTER_MAX = 300; 
+
 
 const float DELTA_THRESHOLD = (MAX_VOLTS*MAX_VOLTS*0.2*0.2); //Delta threshold set to 0.7 of full range.
 
@@ -184,14 +187,14 @@ int main(void)
   while (1)
   {
 		//Update the value to be shown in 7-segment display.
-		if (displayCounter==149){ //Waiting for counter to reach 99 ensures display is updated less frequently than interrupt rate from timer (so as changes to be easily visible)
+		if (displayCounter==DISPLAY_COUNTER_MAX-1){ //Waiting for counter to reach 99 ensures display is updated less frequently than interrupt rate from timer (so as changes to be easily visible)
 			floatTo4DigitArray(voltage_reading);
 		}
-	  
+
 		//Calculate RMS, and toggle which digit of 7-segment display to display
 		if (flag==1){
-			digitSelect(toggleDigit());
 			getVoltage();
+			digitSelect(toggleDigit());
     }
 		
 		//Toggle square wave 
@@ -218,8 +221,8 @@ void getVoltage(){
 			if (!windowSizePassed)
 				stableState(); 
 			if (spiked==1){
-				spikeCounter= (spikeCounter+1)%500;
-				if (spikeCounter == 499){
+				spikeCounter= (spikeCounter+1)%LED_COUNTER_MAX;
+				if (spikeCounter == LED_COUNTER_MAX-1){
 					stableState();
 					spiked=0;
 				}
@@ -229,11 +232,7 @@ void getVoltage(){
 			val_a = val_a + voltage_sqrt;
 			voltage_reading= (val_a-val_b)/WINDOW;
 			voltage_reading = sqrt(voltage_reading);
-			if (checkForSpike( buffer[counter],  buffer[counter-1], buffer[counter-2])){ //if spike is detected, overwrite it
-				//buffer[counter]=buffer[counter-3];
-				//buffer[counter-1]=buffer[counter-3];
-				//buffer[counter-2]=buffer[counter-3];
-			}
+			checkForSpike( buffer[counter],  buffer[counter-1], buffer[counter-2]); //if spike is detected, overwrite it
 		}
 		flag=0;
 		checkForOverflow(voltage_reading);
@@ -258,17 +257,17 @@ int checkForSpike(float a, float b, float c){
 void checkForOverflow(float voltage_reading){
 	float max= MAX_ALLOWABLE/2;
 	if (val_a> max){
-		val_b= 0;
-		val_a= 0;
-		window_counter= WINDOW_INT;
 		if (overflowed==0){
 			overFlowState();
 			overflowed=1;
+			val_b= 0;
+			val_a= 0;
+			window_counter= WINDOW_INT;
 		}
 	} else {
 		if (overflowed==1){
-			overflowCounter = (overflowCounter+1)%200; 
-			if (overflowCounter==199){
+			overflowCounter = (overflowCounter+1)%LED_COUNTER_MAX; 
+			if (overflowCounter==LED_COUNTER_MAX-1){
 				stableState();
 				overflowed=0;
 			}
