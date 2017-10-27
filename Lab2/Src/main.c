@@ -54,6 +54,7 @@
 int displayCounter=0;
 int currentDigit=0;
 int windowSizePassed=0;
+int overflowed = 0; 
 
 int flag;
 int waveFlag;
@@ -81,6 +82,7 @@ void SystemClock_Config(void);
 /* USER CODE END PFP */
 
 /* USER CODE BEGIN 0 */
+
 void preWindowState(){// ORANGE LED ON, GREEN OFF
 		windowSizePassed=0;
 		HAL_GPIO_WritePin(GPIOD, GPIO_PIN_13, GPIO_PIN_SET);
@@ -93,8 +95,10 @@ void stableState(){//GREEN LED ON, ORANGE OFF
 		HAL_GPIO_WritePin(GPIOD, GPIO_PIN_12, GPIO_PIN_SET);
 }
 
-void overFlowState(){
-	
+void overFlowState(){//GREEN LED OFF, RED ON
+		windowSizePassed=1;
+		HAL_GPIO_WritePin(GPIOD, GPIO_PIN_13, GPIO_PIN_RESET);
+		HAL_GPIO_WritePin(GPIOD, GPIO_PIN_14, GPIO_PIN_SET);
 }
 /* USER CODE END 0 */
 
@@ -151,8 +155,6 @@ int main(void)
 		if (waveFlag==1)
         {
 				HAL_GPIO_TogglePin(GPIOE, GPIO_PIN_2);
-					printf("TOGGLE" );
-
 				waveFlag=0;
        }
   }
@@ -186,11 +188,24 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
 
 			}
 			flag=0;
-			
+			checkForOverflow(voltage_reading);
 			counter= (counter+1)%1000;
-		//printf("VOLTAGE: %f\n", voltage );
 
-		//printf("VOLTAGE: %f\n", voltage_reading );
+}
+void checkForOverflow(float voltage_reading){
+	float max_allowable = 3.402823466e+38F;
+	max_allowable = max_allowable/2; //Arbitrarily set overflow value to somewhere near max allowable
+	if (val_a> max_allowable){
+		val_b= 0;
+		val_a= 0;
+		if (overflowed==0){
+			overFlowState();
+			overflowed=1;
+		}
+	} else {
+		stableState();
+		overflowed=0;
+	}
 }
 
 

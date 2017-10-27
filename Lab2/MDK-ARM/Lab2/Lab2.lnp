@@ -1,4 +1,4 @@
---cpu=Cortex-M4.fp
+--cpu Cortex-M4.fp
 "lab2\adc.o"
 "lab2\main.o"
 "lab2\tim.o"
@@ -25,6 +25,6 @@
 "lab2\startup_stm32f407xx.o"
 "lab2\system_stm32f4xx.o"
 --library_type=microlib --strict --scatter "Lab2\Lab2.sct"
---diag_suppress=L6329 --summary_stderr --info summarysizes --map --load_addr_map_info --xref --callgraph --symbols
+--diag_suppress=L6329 --summary_stderr --info summarysizes --map --xref --callgraph --symbols
 --info sizes --info totals --info unused --info veneers
 --list "Lab2.map" -o Lab2\Lab2.axf
