@@ -27,7 +27,19 @@ Project File Date:  10/26/2017
 <h2>Output:</h2>
 *** Using Compiler 'V5.05 update 2 (build 169)', folder: 'C:\Keil_v5\ARM\ARMCC\Bin'
 Build target 'Lab2'
-"Lab2\Lab2.axf" - 0 Error(s), 0 Warning(s).
+compiling main.c...
+../Src/main.c(158): warning:  #177-D: variable "counterTemp" was declared but never referenced
+        int counterTemp = 0;
+../Src/main.c(207): warning:  #1035-D: single-precision operand implicitly converted to double-precision
+                                voltage_reading= (val_a-val_b)/1000.0;
+../Src/main.c(244): warning:  #1035-D: single-precision operand implicitly converted to double-precision
+  {    fVal += 0.0005; //So that we round up properly
+../Src/main.c(495): warning:  #1-D: last line of file ends without a newline
+  /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
+../Src/main.c: 4 warnings, 0 errors
+linking...
+Program Size: Code=8504 RO-data=440 RW-data=72 ZI-data=5232  
+"Lab2\Lab2.axf" - 0 Error(s), 4 Warning(s).
 
 <h2>Software Packages used:</h2>
 

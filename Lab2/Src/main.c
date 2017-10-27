@@ -55,6 +55,11 @@ int displayCounter=0;
 int currentDigit=0;
 int windowSizePassed=0;
 int overflowed = 0; 
+int spiked = 0; 
+
+
+int overflowCounter = 0;
+int spikeCounter = 0;
 
 int flag;
 int waveFlag;
@@ -71,6 +76,9 @@ float val_b = 0;
 const float maxAdcBits = 255.0f; 
 const float maxVolts = 3.0f;  
 const float voltsPerBit = (maxVolts / maxAdcBits);
+
+int deltaThreshold = maxAdcBits/2;
+
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -99,6 +107,12 @@ void overFlowState(){//GREEN LED OFF, RED ON
 		windowSizePassed=1;
 		HAL_GPIO_WritePin(GPIOD, GPIO_PIN_13, GPIO_PIN_RESET);
 		HAL_GPIO_WritePin(GPIOD, GPIO_PIN_14, GPIO_PIN_SET);
+}
+
+void spikeState(){//GREEN LED OFF, BLUE ON
+		windowSizePassed=1;
+		HAL_GPIO_WritePin(GPIOD, GPIO_PIN_13, GPIO_PIN_RESET);
+		HAL_GPIO_WritePin(GPIOD, GPIO_PIN_15, GPIO_PIN_SET);
 }
 /* USER CODE END 0 */
 
@@ -180,12 +194,23 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
 			}else{
 				if (!windowSizePassed)
 					stableState(); 
+				if (spiked==1){
+					spikeCounter= (spikeCounter+1)%100;
+					if (spikeCounter == 99){
+						stableState();
+						spiked=0;
+					}
+				}
 				val_b = val_b+buffer[counter];
 				buffer[counter] = voltage_sqrt;
 				val_a = val_a + voltage_sqrt;
 				voltage_reading= (val_a-val_b)/1000.0;
 				voltage_reading = sqrt(voltage_reading);
-
+				if(fabs(buffer[counter]-buffer[counter-1])>deltaThreshold &&fabs(buffer[counter-1]-buffer[counter-2])>deltaThreshold){
+						//spike detected.
+					spikeState();
+					spiked=1;
+				}
 			}
 			flag=0;
 			checkForOverflow(voltage_reading);
@@ -203,8 +228,13 @@ void checkForOverflow(float voltage_reading){
 			overflowed=1;
 		}
 	} else {
-		stableState();
-		overflowed=0;
+		if (overflowed==1){
+			overflowCounter = (overflowCounter+1)%100; 
+			if (overflowCounter==99){
+				stableState();
+				overflowed=0;
+			}
+		}
 	}
 }
 
