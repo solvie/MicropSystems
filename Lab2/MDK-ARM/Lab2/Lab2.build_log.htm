@@ -28,12 +28,16 @@ Project File Date:  10/26/2017
 *** Using Compiler 'V5.05 update 2 (build 169)', folder: 'C:\Keil_v5\ARM\ARMCC\Bin'
 Build target 'Lab2'
 compiling main.c...
-../Src/main.c(178): warning:  #1035-D: single-precision operand implicitly converted to double-precision
+../Src/main.c(134): warning:  #177-D: variable "counterTemp" was declared but never referenced
+        int counterTemp = 0;
+../Src/main.c(169): warning:  #1035-D: single-precision operand implicitly converted to double-precision
+                                voltage_reading= (val_a-val_b)/1000.0;
+../Src/main.c(188): warning:  #1035-D: single-precision operand implicitly converted to double-precision
   {    fVal += 0.0005; //So that we round up properly
-../Src/main.c: 1 warning, 0 errors
+../Src/main.c: 3 warnings, 0 errors
 linking...
-Program Size: Code=7804 RO-data=440 RW-data=44 ZI-data=5172  
-"Lab2\Lab2.axf" - 0 Error(s), 1 Warning(s).
+Program Size: Code=10844 RO-data=440 RW-data=52 ZI-data=5172  
+"Lab2\Lab2.axf" - 0 Error(s), 3 Warning(s).
 
 <h2>Software Packages used:</h2>
 

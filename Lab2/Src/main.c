@@ -55,11 +55,12 @@ int displayCounter=0;
 int currentDigit=0;
 int windowSizePassed=0;
 
+int flag;
 int digitArray[4]={0,0,0,0} ;
 
 float total = 0;
 float voltage_reading = 0;
-int window_size = 1000;
+float window_size = 1000.0;
 int counter = 0;
 float buffer[1000];
 float val_a = 0;
@@ -110,7 +111,7 @@ int main(void)
 
   /* Configure the system clock */
   SystemClock_Config();
-
+	//HAL_NVIC_EnableIRQ(ADC_IRQn);
   /* USER CODE BEGIN SysInit */
   /* USER CODE END SysInit */
 
@@ -130,48 +131,57 @@ int main(void)
 	floatTo4DigitArray(0);
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
+	int counterTemp = 0;
   while (1)
   {
+		if (displayCounter==99){ //update the value less than is actually sampled.
+			floatTo4DigitArray(voltage_reading);
+		}
+		if (flag==1)
+        {
+				//counterTemp=(counterTemp+1)%10000;
+				getVoltage();
+					
 
+       }
   }
   /* USER CODE END 3 */
+}
+//void getVoltage(uint32_t ADCValue){
+	void getVoltage(){
+//float voltage_reading = 0;
 
+			uint32_t adcVal;
+			//adcVal = ADCValue;
+			adcVal = HAL_ADC_GetValue(&hadc2);
+			float voltage = (float)adcVal * voltsPerBit;
+			float voltage_sqrt = voltage * voltage;
+			if(window_size>0){
+				window_size -= 1;
+				val_a = val_a + voltage_sqrt;
+				buffer[counter] = voltage_sqrt;
+			}else{
+				if (!windowSizePassed)
+					stableState(); 
+				val_b = val_b+buffer[counter];
+				buffer[counter] = voltage_sqrt;
+				val_a = val_a + voltage_sqrt;
+				voltage_reading= (val_a-val_b)/1000.0;
+				voltage_reading = sqrt(voltage_reading);
+
+			}
+			flag=0;
+			
+			counter= (counter+1)%1000;
+
+		printf("VOLTAGE: %f\n", voltage_reading );
 }
 
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
 	   	displayCounter= (displayCounter+1)%100;
-			getVoltage();
 			digitSelect(toggleDigit());
 }
 
-void getVoltage(){
-	uint32_t adcVal;
-	adcVal = HAL_ADC_GetValue(&hadc2);
-	float voltage = (float)adcVal * voltsPerBit;
-	float voltage_sqrt = voltage * voltage;
-	if(window_size>0){
-		window_size -= 1;
-		val_a = val_a + voltage_sqrt;
-		buffer[counter] = voltage_sqrt;
-	}else{
-		if (!windowSizePassed)
-			stableState(); 
-		val_b = val_b+buffer[counter];
-		buffer[counter] = voltage_sqrt;
-		val_a = val_a + voltage_sqrt;
-		voltage_reading = sqrt(((float)1/(float)sizeof(buffer)) * (val_a-val_b));
-
-	}
-		if (displayCounter==99){ //update the value less than is actually sampled.
-			floatTo4DigitArray(voltage_reading);
-		}
-	//printf("Window Size: %d \n", window_size);
-	
-	counter= (counter+1)%1000;
-
-	//printf("%f \n",voltage);
-	//printf("%d \n", adcVal);
-}
 
 //needs to throw exception when 2 digits or more before decimal point
 void floatTo4DigitArray(float fVal)  
