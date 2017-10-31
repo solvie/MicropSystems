@@ -40,7 +40,7 @@ LIS3DSH_InitTypeDef 		Acc_instance;
 /* Private variables ---------------------------------------------------------*/
 
 
-
+LIS3DSH_DRYInterruptConfigTypeDef configDef;
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 void initializeACC			(void);
@@ -54,7 +54,9 @@ int main(void)
 	uint8_t status;
 	float Buffer[3];
 	float accX, accY, accZ;
-
+	configDef.Dataready_Interrupt = LIS3DSH_DATA_READY_INTERRUPT_ENABLED;
+	configDef.Interrupt_signal = LIS3DSH_ACTIVE_HIGH_INTERRUPT_SIGNAL;
+	configDef.Interrupt_type = LIS3DSH_INTERRUPT_REQUEST_PULSED;
 	initializeACC	();
 
   /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
@@ -66,7 +68,7 @@ int main(void)
   MX_GPIO_Init();
 	
 	MX_NVIC_Init();
-
+	LIS3DSH_DataReadyInterruptConfig(&configDef);
   while (1)
   {
 
