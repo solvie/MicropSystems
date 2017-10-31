@@ -44,6 +44,7 @@ LIS3DSH_InitTypeDef 		Acc_instance;
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 void initializeACC			(void);
+void MX_NVIC_Init(void);
 int SysTickCount;
 
 
@@ -61,9 +62,10 @@ int main(void)
 
   /* Configure the system clock */
   SystemClock_Config();
-
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
+	
+	MX_NVIC_Init();
 
   while (1)
   {
@@ -72,27 +74,13 @@ int main(void)
 		required to read value in interrupt mode automatically, without requestin for a new data every time.
 		In fact, the Accl IC will generate data at a certain rate that you have to configure it.
 	*/
-	// an example of pulse division.
-		if (SysTickCount ==20) 
-		{			
-				LIS3DSH_Read (&status, LIS3DSH_STATUS, 1);
-				//The first four bits denote if we have new data on all XYZ axes, 
-		   	//Z axis only, Y axis only or Z axis only. If any or all changed, proceed
-				if ((status & 0x0F) != 0x00)
-				{
-			
-					LIS3DSH_ReadACC(&Buffer[0]);
-					accX = (float)Buffer[0];
-					accY = (float)Buffer[1];
-					accZ = (float)Buffer[2];
-					printf("X: %3f   Y: %3f   Z: %3f  absX: %d\n", accX, accY, accZ , (int)(Buffer[0]));
-					HAL_GPIO_TogglePin(GPIOD,GPIO_PIN_13);
-				}
-			SysTickCount=0;
-			}
 		
+	// an example of pulse division.
+		//printf("apple\n");
 
-  }
+		
+		}
+  
 
 
 }
@@ -149,12 +137,19 @@ void initializeACC(void){
 	Acc_instance.Self_Test					= LIS3DSH_SELFTEST_NORMAL;
 	Acc_instance.Continous_Update   = LIS3DSH_ContinousUpdate_Enabled;
 	
+	
 	LIS3DSH_Init(&Acc_instance);	
 	
 	/* Enabling interrupt conflicts with push button. Be careful when you plan to 
 	use the interrupt of the accelerometer sensor connceted to PIN A.0
 
 	*/
+}
+
+void MX_NVIC_Init(void){
+  /* Enable and set EXTI Line0 Interrupt */
+  HAL_NVIC_SetPriority(EXTI0_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(EXTI0_IRQn);
 }
 
 #ifdef USE_FULL_ASSERT
@@ -174,6 +169,8 @@ void assert_failed(uint8_t* file, uint32_t line)
   /* USER CODE END 6 */
 
 }
+
+
 
 #endif
 
