@@ -38,13 +38,13 @@
 
 LIS3DSH_InitTypeDef 		Acc_instance;
 /* Private variables ---------------------------------------------------------*/
-
-
 LIS3DSH_DRYInterruptConfigTypeDef configDef;
+SPI_HandleTypeDef SPI_Handle;
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 void initializeACC			(void);
 void MX_NVIC_Init(void);
+void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin);
 int SysTickCount;
 
 
@@ -66,9 +66,10 @@ int main(void)
   SystemClock_Config();
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
-	
+	HAL_SPI_MspInit(&SPI_Handle);
 	MX_NVIC_Init();
 	LIS3DSH_DataReadyInterruptConfig(&configDef);
+	
   while (1)
   {
 
@@ -154,6 +155,11 @@ void MX_NVIC_Init(void){
   HAL_NVIC_EnableIRQ(EXTI0_IRQn);
 }
 
+void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin){
+		if(GPIO_Pin == GPIO_PIN_0){
+			printf("watermelon");
+		}
+	}
 #ifdef USE_FULL_ASSERT
 
 /**
@@ -171,6 +177,7 @@ void assert_failed(uint8_t* file, uint32_t line)
   /* USER CODE END 6 */
 
 }
+
 
 
 
