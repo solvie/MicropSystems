@@ -36,29 +36,20 @@
 #include "lis3dsh.h"
 
 
-LIS3DSH_InitTypeDef 		Acc_instance;
-/* Private variables ---------------------------------------------------------*/
-LIS3DSH_DRYInterruptConfigTypeDef configDef;
-SPI_HandleTypeDef SPI_Handle;
+
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 void initializeACC			(void);
 void MX_NVIC_Init(void);
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin);
 int SysTickCount;
+int acc_flag;
 
 
 
 int main(void)
 {
-	uint8_t status;
-	float Buffer[3];
-	float accX, accY, accZ;
-	configDef.Dataready_Interrupt = LIS3DSH_DATA_READY_INTERRUPT_ENABLED;
-	configDef.Interrupt_signal = LIS3DSH_ACTIVE_HIGH_INTERRUPT_SIGNAL;
-	configDef.Interrupt_type = LIS3DSH_INTERRUPT_REQUEST_PULSED;
-	initializeACC	();
-
+	
   /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
   HAL_Init();
 
@@ -66,20 +57,22 @@ int main(void)
   SystemClock_Config();
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
-	HAL_SPI_MspInit(&SPI_Handle);
+	initializeACC	();
 	MX_NVIC_Init();
-	LIS3DSH_DataReadyInterruptConfig(&configDef);
-	
+	int counter = 0;
   while (1)
   {
-
-	/* this is just an example of reading the Accelerometer data in polling technique. You are
-		required to read value in interrupt mode automatically, without requestin for a new data every time.
-		In fact, the Accl IC will generate data at a certain rate that you have to configure it.
-	*/
-		
-	// an example of pulse division.
-		//printf("apple\n");
+		if(counter > 200){
+			break;
+			printf("------------------------");
+		}
+		if(acc_flag == 1){
+			float acc_value[3]= {99,99,99};
+			Calibrate_ACC_Value(&acc_value);
+			counter += 1;
+			//printf("Calibrated: X: %3f   Y: %3f   Z: %3f \n",acc_value[0], acc_value[1], acc_value[2]);
+			acc_flag = 0;
+		}
 
 		
 		}
@@ -132,17 +125,25 @@ void SystemClock_Config(void)
 
 /* USER CODE END 4 */
 void initializeACC(void){
+	LIS3DSH_InitTypeDef 		Acc_instance;
+	/* Private variables ---------------------------------------------------------*/
+	LIS3DSH_DRYInterruptConfigTypeDef configDef;
+	SPI_HandleTypeDef SPI_Handle;
 	
 	Acc_instance.Axes_Enable				= LIS3DSH_XYZ_ENABLE;
 	Acc_instance.AA_Filter_BW				= LIS3DSH_AA_BW_50;
 	Acc_instance.Full_Scale					= LIS3DSH_FULLSCALE_2;
-	Acc_instance.Power_Mode_Output_DataRate		= LIS3DSH_DATARATE_25;
+	Acc_instance.Power_Mode_Output_DataRate		= LIS3DSH_DATARATE_50;
 	Acc_instance.Self_Test					= LIS3DSH_SELFTEST_NORMAL;
 	Acc_instance.Continous_Update   = LIS3DSH_ContinousUpdate_Enabled;
 	
-	
+	configDef.Dataready_Interrupt = LIS3DSH_DATA_READY_INTERRUPT_ENABLED;
+	configDef.Interrupt_signal = LIS3DSH_ACTIVE_HIGH_INTERRUPT_SIGNAL;
+	configDef.Interrupt_type = LIS3DSH_INTERRUPT_REQUEST_PULSED;
 	LIS3DSH_Init(&Acc_instance);	
 	
+	LIS3DSH_DataReadyInterruptConfig(&configDef);
+	HAL_SPI_MspInit(&SPI_Handle);
 	/* Enabling interrupt conflicts with push button. Be careful when you plan to 
 	use the interrupt of the accelerometer sensor connceted to PIN A.0
 
@@ -151,15 +152,12 @@ void initializeACC(void){
 
 void MX_NVIC_Init(void){
   /* Enable and set EXTI Line0 Interrupt */
+	HAL_NVIC_EnableIRQ(EXTI0_IRQn);
   HAL_NVIC_SetPriority(EXTI0_IRQn, 0, 0);
-  HAL_NVIC_EnableIRQ(EXTI0_IRQn);
+  
 }
 
-void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin){
-		if(GPIO_Pin == GPIO_PIN_0){
-			printf("watermelon");
-		}
-	}
+
 #ifdef USE_FULL_ASSERT
 
 /**

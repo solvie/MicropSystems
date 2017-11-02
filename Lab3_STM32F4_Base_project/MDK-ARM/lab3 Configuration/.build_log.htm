@@ -27,21 +27,15 @@ Project File Date:  11/01/2017
 <h2>Output:</h2>
 *** Using Compiler 'V5.06 update 5 (build 528)', folder: 'D:\Keil_v5\ARM\ARMCC\Bin'
 Build target 'lab3 Configuration'
-compiling main.c...
-../Src/main.c(54): warning:  #177-D: variable "status"  was declared but never referenced
-  	uint8_t status;
-../Src/main.c(55): warning:  #177-D: variable "Buffer"  was declared but never referenced
-  	float Buffer[3];
-../Src/main.c(56): warning:  #177-D: variable "accX"  was declared but never referenced
-  	float accX, accY, accZ;
-../Src/main.c(56): warning:  #177-D: variable "accY"  was declared but never referenced
-  	float accX, accY, accZ;
-../Src/main.c(56): warning:  #177-D: variable "accZ"  was declared but never referenced
-  	float accX, accY, accZ;
-../Src/main.c: 5 warnings, 0 errors
+compiling accelerometer.c...
+accelerometer.c(5): warning:  #1295-D: Deprecated declaration Read_ACC_Value - give arg types
+  void Read_ACC_Value();
+accelerometer.c(49): warning:  #1-D: last line of file ends without a newline
+  }
+accelerometer.c: 2 warnings, 0 errors
 linking...
-Program Size: Code=4832 RO-data=440 RW-data=32 ZI-data=1200  
-"lab3 Configuration/\.axf" - 0 Error(s), 5 Warning(s).
+Program Size: Code=9292 RO-data=452 RW-data=88 ZI-data=1128  
+"lab3 Configuration/\.axf" - 0 Error(s), 2 Warning(s).
 
 <h2>Software Packages used:</h2>
 
