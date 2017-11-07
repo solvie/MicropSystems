@@ -38,7 +38,7 @@
 #include "accelerometer.h"
 #include "tim.h"
 
-
+void user_pwm_setvalue(uint16_t value);
 
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
@@ -53,11 +53,12 @@ static int bufferLen = 3;
 int counter = 0;
 int dataReady = 0;
 //float bufferX[bufferLen], bufferY[bufferLen], bufferZ[bufferLen];
-
+int timer4counter;
+int pwm_value,step;
 
 int main(void)
-`{
-	
+{
+	timer4counter=0;
   /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
   HAL_Init();
 
@@ -67,6 +68,10 @@ int main(void)
   MX_GPIO_Init();
 	initializeACC	();
 	MX_NVIC_Init();
+	MX_TIM4_Init();
+	HAL_TIM_Base_Start(&htim4);
+	HAL_TIM_PWM_Start(&htim4,TIM_CHANNEL_ALL);
+	//HAL_TIM_PWM_Start(&htim4,TIM_CHANNEL_2);//or1
 	//int counter = 0;
   while (1)
   {
@@ -100,13 +105,25 @@ int main(void)
 		if(key_pressed != '\0'){
 			printf("Key Pressed is %c \n", key_pressed);
 		}
-		
+	//	user_pwm_setvalue(20);
 		}
-  
-
 
 }
 
+void user_pwm_setvalue(uint16_t value)
+{
+    TIM_OC_InitTypeDef sConfigOC;
+  
+    sConfigOC.OCMode = TIM_OCMODE_PWM1;
+    sConfigOC.Pulse = value;
+    sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
+    sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
+
+	
+    HAL_TIM_PWM_ConfigChannel(&htim4, &sConfigOC, TIM_CHANNEL_ALL);
+    HAL_TIM_PWM_Start(&htim4, TIM_CHANNEL_ALL);  
+
+}
 /** System Clock Configuration
 	The clock source is configured as external at 168 MHz HCLK
 */
