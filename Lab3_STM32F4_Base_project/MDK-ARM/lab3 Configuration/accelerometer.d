@@ -1,4 +1,5 @@
-lab3 configuration/\accelerometer.o: accelerometer.c
+lab3 configuration/\accelerometer.o: ..\src\accelerometer.c
+lab3 configuration/\accelerometer.o: ../Inc/gpio.h
 lab3 configuration/\accelerometer.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal.h
 lab3 configuration/\accelerometer.o: ../Inc/stm32f4xx_hal_conf.h
 lab3 configuration/\accelerometer.o: ../Inc/mxconstants.h
@@ -29,5 +30,5 @@ lab3 configuration/\accelerometer.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4
 lab3 configuration/\accelerometer.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_spi.h
 lab3 configuration/\accelerometer.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_tim.h
 lab3 configuration/\accelerometer.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_tim_ex.h
-lab3 configuration/\accelerometer.o: ../Inc/gpio.h
 lab3 configuration/\accelerometer.o: ../Inc/lis3dsh.h
+lab3 configuration/\accelerometer.o: ../Inc/accelerometer.h

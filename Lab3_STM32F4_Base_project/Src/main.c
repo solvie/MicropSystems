@@ -34,6 +34,9 @@
 #include "stm32f4xx_hal.h"
 #include "gpio.h"
 #include "lis3dsh.h"
+#include "keypad.h"
+#include "accelerometer.h"
+#include "tim.h"
 
 
 
@@ -44,11 +47,16 @@ void MX_NVIC_Init(void);
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin);
 int SysTickCount;
 int acc_flag;
-
+int reset_flag;
+int sleep_flag;
+static int bufferLen = 3;
+int counter = 0;
+int dataReady = 0;
+//float bufferX[bufferLen], bufferY[bufferLen], bufferZ[bufferLen];
 
 
 int main(void)
-{
+`{
 	
   /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
   HAL_Init();
@@ -59,21 +67,39 @@ int main(void)
   MX_GPIO_Init();
 	initializeACC	();
 	MX_NVIC_Init();
-	int counter = 0;
+	//int counter = 0;
   while (1)
   {
-		if(counter > 200){
-			break;
-			printf("------------------------");
+		//if(counter > 200){
+	//		break;
+	//		printf("------------------------");
+	//	}
+		
+		if(reset_flag == 1){
+			printf("System Reset");
+			reset_flag = 0;
+		}
+		if(sleep_flag == 1){
+			printf("System Sleep");
+			//reset_flag = 0; //remove once operating mode starts 
 		}
 		if(acc_flag == 1){
 			float acc_value[3]= {99,99,99};
-			Calibrate_ACC_Value(&acc_value);
-			counter += 1;
-			//printf("Calibrated: X: %3f   Y: %3f   Z: %3f \n",acc_value[0], acc_value[1], acc_value[2]);
+			Calibrate_ACC_Value(&acc_value[0]);
+			//printf("Temp: X: %3f   Y: %3f   Z: %3f \n",acc_value[0], acc_value[1], acc_value[2]);
+			if(dataReady == 0){
+				
+			}
+
+			//counter += 1;
+//			printf("Calibrated: X: %3f   Y: %3f   Z: %3f \n",acc_value[0], acc_value[1], acc_value[2]);
+		//	bufferX[counter] = 
 			acc_flag = 0;
 		}
-
+		char key_pressed = Read_KP_Value();
+		if(key_pressed != '\0'){
+			printf("Key Pressed is %c \n", key_pressed);
+		}
 		
 		}
   
@@ -157,6 +183,15 @@ void MX_NVIC_Init(void){
   
 }
 
+void _Error_Handler(char * file, int line)
+{
+  /* USER CODE BEGIN Error_Handler_Debug */
+  /* User can add his own implementation to report the HAL error return state */
+  while(1) 
+  {
+  }
+  /* USER CODE END Error_Handler_Debug */ 
+}
 
 #ifdef USE_FULL_ASSERT
 
