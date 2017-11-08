@@ -55,6 +55,7 @@ int dataReady = 0;
 //float bufferX[bufferLen], bufferY[bufferLen], bufferZ[bufferLen];
 int timer4counter;
 int pwm_value,step;
+int testtoggle=0;
 
 int main(void)
 {
@@ -70,7 +71,11 @@ int main(void)
 	MX_NVIC_Init();
 	MX_TIM4_Init();
 	HAL_TIM_Base_Start(&htim4);
-	HAL_TIM_PWM_Start(&htim4,TIM_CHANNEL_ALL);
+	HAL_TIM_PWM_Start(&htim4,TIM_CHANNEL_1);
+	HAL_TIM_PWM_Start(&htim4,TIM_CHANNEL_2);
+	HAL_TIM_PWM_Start(&htim4,TIM_CHANNEL_3);
+	HAL_TIM_PWM_Start(&htim4,TIM_CHANNEL_4);
+
 	//HAL_TIM_PWM_Start(&htim4,TIM_CHANNEL_2);//or1
 	//int counter = 0;
   while (1)
@@ -91,7 +96,7 @@ int main(void)
 		if(acc_flag == 1){
 			float acc_value[3]= {99,99,99};
 			Calibrate_ACC_Value(&acc_value[0]);
-			//printf("Temp: X: %3f   Y: %3f   Z: %3f \n",acc_value[0], acc_value[1], acc_value[2]);
+			printf("Temp: X: %3f   Y: %3f   Z: %3f \n",acc_value[0], acc_value[1], acc_value[2]);
 			if(dataReady == 0){
 				
 			}
@@ -104,24 +109,38 @@ int main(void)
 		char key_pressed = Read_KP_Value();
 		if(key_pressed != '\0'){
 			printf("Key Pressed is %c \n", key_pressed);
+			if (testtoggle==0)
+				user_pwm_setvalue(20);
+			else 
+				user_pwm_setvalue(500);
 		}
-	//	user_pwm_setvalue(20);
 		}
 
 }
 
 void user_pwm_setvalue(uint16_t value)
 {
-    TIM_OC_InitTypeDef sConfigOC;
+    if (testtoggle==0)
+			testtoggle=1;
+		else
+			testtoggle=0;
+	  TIM_OC_InitTypeDef sConfigOC;
   
     sConfigOC.OCMode = TIM_OCMODE_PWM1;
     sConfigOC.Pulse = value;
     sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
     sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
-
 	
-    HAL_TIM_PWM_ConfigChannel(&htim4, &sConfigOC, TIM_CHANNEL_ALL);
-    HAL_TIM_PWM_Start(&htim4, TIM_CHANNEL_ALL);  
+    HAL_TIM_PWM_ConfigChannel(&htim4, &sConfigOC, TIM_CHANNEL_1);
+	  HAL_TIM_PWM_ConfigChannel(&htim4, &sConfigOC, TIM_CHANNEL_2);
+	  HAL_TIM_PWM_ConfigChannel(&htim4, &sConfigOC, TIM_CHANNEL_3);
+    HAL_TIM_PWM_ConfigChannel(&htim4, &sConfigOC, TIM_CHANNEL_4);
+
+    HAL_TIM_PWM_Start(&htim4, TIM_CHANNEL_1);  
+	  HAL_TIM_PWM_Start(&htim4, TIM_CHANNEL_2);  
+    HAL_TIM_PWM_Start(&htim4, TIM_CHANNEL_3);  
+    HAL_TIM_PWM_Start(&htim4, TIM_CHANNEL_4);  
+
 
 }
 /** System Clock Configuration
