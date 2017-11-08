@@ -32,12 +32,18 @@ compiling main.c...
   char Read_KP_Value(void);
 ../Inc/accelerometer.h(1): warning:  #1-D: last line of file ends without a newline
   void Calibrate_ACC_Value(float *value);
-../Src/main.c(52): warning:  #177-D: variable "bufferLen" was declared but never referenced
+../Inc/display.h(3): warning:  #1-D: last line of file ends without a newline
+  void digitSelect(int* digitArray,int currentDigit );
+../Src/main.c(48): warning:  #1295-D: Deprecated declaration toggleDigit - give arg types
+  int toggleDigit();
+../Src/main.c(134): warning:  #111-D: statement is unreachable
+                displayCounter = (displayCounter+1)%100;
+../Src/main.c(59): warning:  #177-D: variable "bufferLen" was declared but never referenced
   static int bufferLen = 3;
-../Src/main.c: 3 warnings, 0 errors
+../Src/main.c: 6 warnings, 0 errors
 linking...
-Program Size: Code=12128 RO-data=500 RW-data=112 ZI-data=1248  
-"lab3 Configuration/\.axf" - 0 Error(s), 3 Warning(s).
+Program Size: Code=14096 RO-data=656 RW-data=120 ZI-data=1304  
+"lab3 Configuration/\.axf" - 0 Error(s), 6 Warning(s).
 
 <h2>Software Packages used:</h2>
 

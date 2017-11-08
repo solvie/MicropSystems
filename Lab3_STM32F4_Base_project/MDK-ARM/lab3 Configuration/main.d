@@ -34,3 +34,5 @@ lab3 configuration/\main.o: ../Inc/lis3dsh.h
 lab3 configuration/\main.o: ../Inc/keypad.h
 lab3 configuration/\main.o: ../Inc/accelerometer.h
 lab3 configuration/\main.o: ../Inc/tim.h
+lab3 configuration/\main.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\math.h
+lab3 configuration/\main.o: ../Inc/display.h

@@ -8,6 +8,7 @@
 "lab3 configuration/\accelerometer.o"
 "lab3 configuration/\keypad.o"
 "lab3 configuration/\tim.o"
+"lab3 configuration/\display.o"
 "lab3 configuration/\system_stm32f4xx.o"
 "lab3 configuration/\startup_stm32f407xx.o"
 "lab3 configuration/\stm32f4xx_hal_tim_ex.o"

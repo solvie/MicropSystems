@@ -37,8 +37,15 @@
 #include "keypad.h"
 #include "accelerometer.h"
 #include "tim.h"
+#include "math.h"
+#include "display.h"
+
+#define PI 3.14159265
 
 void user_pwm_setvalue(uint16_t value);
+void user_pwm_set_led_brightness(uint16_t ld3, uint16_t ld4,uint16_t ld5,uint16_t ld6);
+void adjustBrightnessBasedOnACC(int isPitch, float expectedPitchOrRoll, float* valsFromAcc);
+int toggleDigit();
 
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
@@ -56,9 +63,13 @@ int dataReady = 0;
 int timer4counter;
 int pwm_value,step;
 int testtoggle=0;
+int currentDigit=0;
+int displayCounter=0;
+int digitArray[4]={0,0,0,0} ;
 
 int main(void)
 {
+
 	timer4counter=0;
   /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
   HAL_Init();
@@ -70,7 +81,11 @@ int main(void)
 	initializeACC	();
 	MX_NVIC_Init();
 	MX_TIM4_Init();
+//	MX_TIM2_Init();
+
 	HAL_TIM_Base_Start(&htim4);
+  //HAL_TIM_Base_Start_IT(&htim2);
+	
 	HAL_TIM_PWM_Start(&htim4,TIM_CHANNEL_1);
 	HAL_TIM_PWM_Start(&htim4,TIM_CHANNEL_2);
 	HAL_TIM_PWM_Start(&htim4,TIM_CHANNEL_3);
@@ -84,46 +99,137 @@ int main(void)
 	//		break;
 	//		printf("------------------------");
 	//	}
-		
+		//  counter += 1;
+//			printf("Calibrated: X: %3f   Y: %3f   Z: %3f \n",acc_value[0], acc_value[1], acc_value[2]);
+		//	bufferX[counter] = 
+
+
+	
 		if(reset_flag == 1){
 			printf("System Reset");
 			reset_flag = 0;
 		}
+		
 		if(sleep_flag == 1){
 			printf("System Sleep");
 			//reset_flag = 0; //remove once operating mode starts 
 		}
+		
 		if(acc_flag == 1){
 			float acc_value[3]= {99,99,99};
 			Calibrate_ACC_Value(&acc_value[0]);
-			printf("Temp: X: %3f   Y: %3f   Z: %3f \n",acc_value[0], acc_value[1], acc_value[2]);
-			if(dataReady == 0){
-				
-			}
-
-			//counter += 1;
-//			printf("Calibrated: X: %3f   Y: %3f   Z: %3f \n",acc_value[0], acc_value[1], acc_value[2]);
-		//	bufferX[counter] = 
+			//printf("Temp: X: %3f   Y: %3f   Z: %3f \n",acc_value[0], acc_value[1], acc_value[2]);
+			adjustBrightnessBasedOnACC(1, 0, &acc_value[0]);
 			acc_flag = 0;
+	   	//displayCounter= (displayCounter+1)%100;
+			//digitSelect(&digitArray[0], toggleDigit());
+		
 		}
+		
 		char key_pressed = Read_KP_Value();
 		if(key_pressed != '\0'){
 			printf("Key Pressed is %c \n", key_pressed);
-			if (testtoggle==0)
-				user_pwm_setvalue(20);
-			else 
-				user_pwm_setvalue(500);
 		}
 		}
+		displayCounter = (displayCounter+1)%100;
+}
+
+
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
+	   	displayCounter= (displayCounter+1)%100;
+			digitSelect(&digitArray[0],toggleDigit());
+}
+
+int toggleDigit(){
+	currentDigit=(currentDigit+1)%4;
+	return currentDigit;
+}
+
+float calculatePitchAngleFromAccVals(float ax, float ay, float az){
+	float val = 180.0 / PI;
+	float retval;
+	float denom = ay*ay+az*az;
+	denom = sqrt(denom);
+	retval = ax/denom;
+	retval = atan(retval)*val;
+	return retval;
+}
+
+float calculateRollAngleFromAccVals(float ax, float ay, float az){
+	float val = 180.0 / PI;
+//	printf("allvals:x%f,y%f,z%f", ax, ay, az);
+	float retval;
+	float denom = ax*ax+az*az;
+	denom = sqrt(denom);
+//	printf("denom:%f ", denom);
+	retval = (-ay)/denom;
+	//printf("beforearctan:%f ", retval);
+	retval = atan(retval)*val;
+	//printf("afterarctan:%f\n", retval);
+	return retval;
+}
+
+void adjustBrightnessBasedOnACC(int isPitch, float expectedPitchOrRoll, float* valsFromAcc){
+	uint16_t diffMagnitudeForBrightness;
+	float calculated;
+	float ax = valsFromAcc[0]; //doing absolute values for now.
+	float ay = valsFromAcc[1];
+	float az = valsFromAcc[2];
+	if (isPitch){
+		calculated = calculatePitchAngleFromAccVals(ax, ay, az);
+		// The calculated pitch will be from 0 to 90 (because of abs). 
+		diffMagnitudeForBrightness= (uint16_t) fabs( expectedPitchOrRoll - calculated);
+		if (calculated>0)
+			user_pwm_set_led_brightness(0,0,diffMagnitudeForBrightness * 5.555555,0); //5.5555 = 500/90
+		else
+			user_pwm_set_led_brightness(0,diffMagnitudeForBrightness * 5.5555550,0,0); //5.5555 = 500/90
+	}
+	else {
+		calculated = calculateRollAngleFromAccVals(ax, ay, az);
+		// The calculated roll will be from 0 to 90 (because of abs).
+		diffMagnitudeForBrightness= fabs( expectedPitchOrRoll - calculated);
+		if (calculated>0)
+			user_pwm_set_led_brightness(0,0,0,diffMagnitudeForBrightness * 5.555555); //5.5555 = 500/90
+		else
+			user_pwm_set_led_brightness(diffMagnitudeForBrightness * 5.555555,0,0,0); //5.5555 = 500/90
+	}
+	printf("calculated:%f", calculated);
+	//	printf("\nCalculatedRoll is %f", calculated);
+//	  printf("\ndiffMagnitudeForBrightness is %d", diffMagnitudeForBrightness);
 
 }
 
-void user_pwm_setvalue(uint16_t value)
-{
-    if (testtoggle==0)
-			testtoggle=1;
-		else
-			testtoggle=0;
+/**
+* led brightness can range from 0 to 1000
+* Brightness =1000 is 180 degrees off
+* Brightness = 500 is 90 degrees off
+* Brightness = 0 is 0 degrees off
+* PD12(LD4)- green, PD13(LD3)- orange, PD14(LD5)-red, PD15(LD6)-blue
+* Only LD3,LD6 OR LD4,LD5 will be on at the same time, depending on whether pitch was selected or roll.
+*/
+void user_pwm_set_led_brightness(uint16_t ld3, uint16_t ld4,uint16_t ld5,uint16_t ld6){
+	  TIM_OC_InitTypeDef sConfigOC;
+  
+    sConfigOC.OCMode = TIM_OCMODE_PWM1;
+    sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
+    sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
+	  
+	  sConfigOC.Pulse = ld4;
+    HAL_TIM_PWM_ConfigChannel(&htim4, &sConfigOC, TIM_CHANNEL_1);
+	  sConfigOC.Pulse = ld3;
+	  HAL_TIM_PWM_ConfigChannel(&htim4, &sConfigOC, TIM_CHANNEL_2);
+		sConfigOC.Pulse = ld5;
+	  HAL_TIM_PWM_ConfigChannel(&htim4, &sConfigOC, TIM_CHANNEL_3);
+	  sConfigOC.Pulse = ld6;
+    HAL_TIM_PWM_ConfigChannel(&htim4, &sConfigOC, TIM_CHANNEL_4);
+
+    HAL_TIM_PWM_Start(&htim4, TIM_CHANNEL_1);  
+	  HAL_TIM_PWM_Start(&htim4, TIM_CHANNEL_2);  
+    HAL_TIM_PWM_Start(&htim4, TIM_CHANNEL_3);  
+    HAL_TIM_PWM_Start(&htim4, TIM_CHANNEL_4);  
+}
+
+void user_pwm_setvalue(uint16_t value){
 	  TIM_OC_InitTypeDef sConfigOC;
   
     sConfigOC.OCMode = TIM_OCMODE_PWM1;
@@ -140,9 +246,8 @@ void user_pwm_setvalue(uint16_t value)
 	  HAL_TIM_PWM_Start(&htim4, TIM_CHANNEL_2);  
     HAL_TIM_PWM_Start(&htim4, TIM_CHANNEL_3);  
     HAL_TIM_PWM_Start(&htim4, TIM_CHANNEL_4);  
-
-
 }
+
 /** System Clock Configuration
 	The clock source is configured as external at 168 MHz HCLK
 */
