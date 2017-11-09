@@ -42,7 +42,7 @@
 /* External variables --------------------------------------------------------*/
 extern int SysTickCount;
 extern TIM_HandleTypeDef htim2;
-extern int flag;
+extern int digselect_flag;
 extern int displayCounter;
 extern int DISPLAY_COUNTER_MAX ;
 
@@ -85,8 +85,7 @@ void TIM2_IRQHandler(void)
   /* USER CODE END TIM2_IRQn 0 */
   HAL_TIM_IRQHandler(&htim2);
   /* USER CODE BEGIN TIM2_IRQn 1 */
-	flag=1;
-
+	digselect_flag=1;
 	displayCounter= (displayCounter+1)%DISPLAY_COUNTER_MAX ;
   
   /* USER CODE END TIM2_IRQn 1 */

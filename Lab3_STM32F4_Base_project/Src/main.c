@@ -46,37 +46,54 @@ void user_pwm_setvalue(uint16_t value);
 void user_pwm_set_led_brightness(uint16_t ld3, uint16_t ld4,uint16_t ld5,uint16_t ld6);
 void adjustBrightnessBasedOnACC(int isPitch, float expectedPitchOrRoll, float* valsFromAcc);
 int toggleDigit();
-int flag;
+
+void inputMode(){
+	
+}
 
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 void initializeACC			(void);
 void MX_NVIC_Init(void);
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin);
+int concatenate(int x, int y);
+void toggleflash(int);
+
 int SysTickCount;
 int acc_flag;
 int reset_flag;
 int sleep_flag;
 int wakeup_flag;
+int digselect_flag;
 
-static int bufferLen = 3;
 int counter = 0;
 int dataReady = 0;
-//float bufferX[bufferLen], bufferY[bufferLen], bufferZ[bufferLen];
 int timer4counter;
 int pwm_value,step;
 int testtoggle=0;
 int currentDigit=0;
 int displayCounter=0;
 int digitArray[4]={0,0,0,0} ;
-const int DISPLAY_COUNTER_MAX = 300; 
+const int DISPLAY_COUNTER_MAX = 500; 
 int toDisplay=0;
+
+//	const int reset_threshold = 100000;
+//	const int sleep_threshold = 350000;
 
 //-- fsm
 int enterRollState=1; //
 int enterPitchState=0;
 int operatingMode1State=0; //roll monitoring
 int operatingMode2State=0; //pitch monitoring
+int sleepmode=0;
+int inputExpected = 0;
+
+int rollstatecounter=0;
+int flashflag=0;
+int flashduration=10000;
+
+int entered_char_buffer[4]={-1,-1,-1,0};
+int entered_char_pointer=4; //index of the last element (one further than the last because no input at first)
 
 //--
 char prevkeypressed;
@@ -84,7 +101,6 @@ int pressedCounter=0;
 int loopCounter=0;
 int main(void)
 {
-
 	timer4counter=0;
   /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
   HAL_Init();
@@ -106,68 +122,116 @@ int main(void)
 	HAL_TIM_PWM_Start(&htim4,TIM_CHANNEL_3);
 	HAL_TIM_PWM_Start(&htim4,TIM_CHANNEL_4);
 
+	enterRollState=1; //On startup, we are in enter Roll state
+	user_pwm_set_led_brightness(500,0,0,500);//On startup, we are in enter Roll state
+
 	//HAL_TIM_PWM_Start(&htim4,TIM_CHANNEL_2);//or1
 	//int counter = 0;
   while (1)
   {
+		//in main while loop display counter goes on as long as its not in sleep mode
+		if (!sleepmode){
+		//	if (displayCounter==DISPLAY_COUNTER_MAX-1) //Waiting for counter to reach 99 ensures display is updated less frequently than interrupt rate from timer (so as changes to be easily visible)
+		//			intToArray(&digitArray[0],toDisplay);
+			if(digselect_flag==1)
+					digitSelect(&digitArray[0],toggleDigit());
+			
+			if (enterRollState){
 
-		//Update the value to be shown in 7-segment display.
-		if (displayCounter==DISPLAY_COUNTER_MAX-1){ //Waiting for counter to reach 99 ensures display is updated less frequently than interrupt rate from timer (so as changes to be easily visible)
-			intToArray(&digitArray[0],toDisplay);
+				if (entered_char_pointer==4){//nothing has been entered yet
+						for (int i=0; i<3; i++)
+							digitArray[i] = -1;
+						digitArray[3] = 0; //display zero if nothing has been entered
+				}
+				char key_pressed = Read_KP_Value();
+				if(key_pressed != '\0'&&key_pressed != '*'&&key_pressed != '#'){ //a number was entered
+					printf("Key Pressed is %c \n", key_pressed);
+					int numberEntered =  key_pressed - '0'; //convert the char to an int
+					if (entered_char_pointer>1){ //as long as three digits haven't already been filled, a user can type a new letter
+						for (int i=entered_char_pointer; i<4; i++){
+							digitArray[i-1] =digitArray[i]; //shift what was already there
+						}
+						digitArray[3] = numberEntered; //add the pressed key to the last element.
+						entered_char_pointer--;
+					} //otherwise we ignore, because the full amount we can enter is full.
+				} else if(key_pressed == '#') {
+					// reset entered char pointer and go to the next state.
+					//for now just go directly into roll monitoring. IF VALUE IS GREATER THAN 180, CAP at 180 DIsplay 180 before entering.
+					//convert the array to an integer and set that as the inputex
+					if (entered_char_pointer==4)entered_char_pointer=3;//if nothing was entered just take the 0
+					int concatedint = digitArray[entered_char_pointer];
+					for (int i = entered_char_pointer+1; i<4; i++){
+						concatedint = concatenate(concatedint,digitArray[i] );
+					}
+					printf("Input is %d \n", concatedint);
+					inputExpected = concatedint;
+					enterRollState=0;
+
+				} else if (key_pressed=='*'){
+					printf("Key Pressed is %c \n", key_pressed);
+					//delete the most recent if possible
+						const int lastindex = 3; //last of indices 0,1,2,3
+						if (entered_char_pointer<4){ //as long as three digits haven't already been filled, a user can type a new letter
+							if (entered_char_pointer==3)
+								digitArray[3] = 0;
+							else{ //entered_char_pointer= 2 or 1 
+								int i;
+								for (i=lastindex-1; i>entered_char_pointer-1; i--){
+									digitArray[i+1]=digitArray[i]; //shift what was already there
+								}
+								digitArray[i+1]=-1;//set the previously highest bit to empty
+							}
+							entered_char_pointer++;
+						}
+				}
+			} else{
+			//Update the value to be shown in 7-segment display.
+				if (displayCounter==DISPLAY_COUNTER_MAX-1) //Waiting for counter to reach 99 ensures display is updated less frequently than interrupt rate from timer (so as changes to be easily visible)
+					intToArray(&digitArray[0],toDisplay);
+				
+				if(acc_flag == 1){
+					float acc_value[3]= {99,99,99};
+					Calibrate_ACC_Value(&acc_value[0]);
+					//printf("Temp: X: %3f   Y: %3f   Z: %3f \n",acc_value[0], acc_value[1], acc_value[2]);
+					adjustBrightnessBasedOnACC(0, inputExpected, &acc_value[0]);
+					acc_flag = 0;
+				}
+
+				char key_pressed = Read_KP_Value();
+				if(key_pressed != '\0'){
+					printf("Key Pressed is %c \n", key_pressed);
+					prevkeypressed=key_pressed;
+				}
+			}
 		}
-		if(flag==1){
-			digitSelect(&digitArray[0],toggleDigit());
-		}
+		//
 		
-		if(reset_flag == 1){
-			printf("System Reset");
-			reset_flag = 0;
-		}
-		
-		if(sleep_flag == 1){
-			printf("System Sleep");
-			//LEDS go off, segment display goes off.
-			//reset_flag = 0; //remove once operating mode starts 
-		}
-		
-		if (wakeup_flag==1){
-			printf("System Wakeup"); //this should go into Operating mode (whichever one you left)
-		}
-		
-		if(acc_flag == 1){
-			float acc_value[3]= {99,99,99};
-			Calibrate_ACC_Value(&acc_value[0]);
-			//printf("Temp: X: %3f   Y: %3f   Z: %3f \n",acc_value[0], acc_value[1], acc_value[2]);
-			adjustBrightnessBasedOnACC(0, 90, &acc_value[0]);
-			acc_flag = 0;
-		}
-		const int reset_threshold = 100000;
-		const int sleep_threshold = 350000;
-		char key_pressed = Read_KP_Value();
-		if(key_pressed != '\0'){
-			//if(prevkeypressed==key_pressed){
-				//pressedCounter++;
-				//if (pressedCounter==7 &&loopCounter>100100&& loopCounter<110000){
-			//		printf("Yay! loopCounter is %d", loopCounter);
-			//		pressedCounter=0;
-			//		loopCounter=0;
-			//	} 
-			//	if (pressedCounter==21){// &&loopCounter>100100&& loopCounter<110000){
-			//		printf("Yay! loopCounter is %d", loopCounter);
-			//		pressedCounter=0;
-			//		loopCounter=0;
-			//	} 
-			//}else {
-			//	pressedCounter=0;
-			//	loopCounter=0;
-			//}
-			printf("Key Pressed is %c \n", key_pressed);
-			prevkeypressed=key_pressed;
-		}
 		//loopCounter++;
 		displayCounter = (displayCounter+1)%DISPLAY_COUNTER_MAX;
 	}
 
+}
+void toggleflash(int forroll){
+	if (forroll){
+		if (flashflag)
+			user_pwm_set_led_brightness(0,500,500,0);
+		else
+			user_pwm_set_led_brightness(0,0,0,0);
+  }
+	else {
+		if (flashflag)
+			user_pwm_set_led_brightness(500,0,0,500);
+		else
+			user_pwm_set_led_brightness(0,0,0,0);
+	}
+	flashflag = !flashflag;
+}
+
+int concatenate(int x, int y) {
+    int pow = 10;
+    while(y >= pow)
+        pow *= 10;
+    return x * pow + y;        
 }
 
 int toggleDigit(){
@@ -204,7 +268,7 @@ void adjustBrightnessBasedOnACC(int isPitch, float expectedPitchOrRoll, float* v
 	if (isPitch){
 		calculated = calculatePitchAngleFromAccVals(ax, ay, az);
 		convertedTo180scale= calculated+90;
-		// The calculated pitch will be from 0 to 90 (because of abs). 
+		// The diffMagnitudeForBrightness will be from 0 to 90 (because of abs). 
 		diff = expectedPitchOrRoll- convertedTo180scale;
 		diffMagnitudeForBrightness= (uint16_t) fabs( expectedPitchOrRoll - convertedTo180scale);
 	
@@ -217,18 +281,14 @@ void adjustBrightnessBasedOnACC(int isPitch, float expectedPitchOrRoll, float* v
 		calculated = calculateRollAngleFromAccVals(ax, ay, az);
 		convertedTo180scale= calculated+90;
 		diff = expectedPitchOrRoll- convertedTo180scale;
-		// The calculated roll will be from 0 to 90 (because of abs).
+		// The diffMagnitudeForBrightness will be from 0 to 90 (because of abs).
 		diffMagnitudeForBrightness=  (uint16_t)fabs( expectedPitchOrRoll - convertedTo180scale);
 		if (diff>0)
 			user_pwm_set_led_brightness(0,0,0,diffMagnitudeForBrightness * 5.555555); //5.5555 = 500/90
 		else
 			user_pwm_set_led_brightness(diffMagnitudeForBrightness * 5.555555,0,0,0); //5.5555 = 500/90
 	}
-	//printf("calculated:%f", calculated);
 	toDisplay= (int)convertedTo180scale;
-	//	printf("\nCalculatedRoll is %f", calculated);
-//	  printf("\ndiffMagnitudeForBrightness is %d", diffMagnitudeForBrightness);
-
 }
 
 /**
@@ -253,25 +313,6 @@ void user_pwm_set_led_brightness(uint16_t ld3, uint16_t ld4,uint16_t ld5,uint16_
 		sConfigOC.Pulse = ld5;
 	  HAL_TIM_PWM_ConfigChannel(&htim4, &sConfigOC, TIM_CHANNEL_3);
 	  sConfigOC.Pulse = ld6;
-    HAL_TIM_PWM_ConfigChannel(&htim4, &sConfigOC, TIM_CHANNEL_4);
-
-    HAL_TIM_PWM_Start(&htim4, TIM_CHANNEL_1);  
-	  HAL_TIM_PWM_Start(&htim4, TIM_CHANNEL_2);  
-    HAL_TIM_PWM_Start(&htim4, TIM_CHANNEL_3);  
-    HAL_TIM_PWM_Start(&htim4, TIM_CHANNEL_4);  
-}
-
-void user_pwm_setvalue(uint16_t value){
-	  TIM_OC_InitTypeDef sConfigOC;
-  
-    sConfigOC.OCMode = TIM_OCMODE_PWM1;
-    sConfigOC.Pulse = value;
-    sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
-    sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
-	
-    HAL_TIM_PWM_ConfigChannel(&htim4, &sConfigOC, TIM_CHANNEL_1);
-	  HAL_TIM_PWM_ConfigChannel(&htim4, &sConfigOC, TIM_CHANNEL_2);
-	  HAL_TIM_PWM_ConfigChannel(&htim4, &sConfigOC, TIM_CHANNEL_3);
     HAL_TIM_PWM_ConfigChannel(&htim4, &sConfigOC, TIM_CHANNEL_4);
 
     HAL_TIM_PWM_Start(&htim4, TIM_CHANNEL_1);  

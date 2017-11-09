@@ -94,8 +94,6 @@ char Read_KP_Value(void){
 	
 	static int counter = 0;
 	const int key_pressed_threshold = 10000;
-	const int reset_threshold = 100000;
-	const int sleep_threshold = 350000;
 	static char temp = 0;
 	
 	if(row_index!=-1 && col_index!=-1){
@@ -112,7 +110,6 @@ char Read_KP_Value(void){
 			}else{
 				counter = 0;
 			}
-			
 	}
 		return '\0';
 	}else{
