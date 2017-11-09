@@ -57,6 +57,8 @@ int SysTickCount;
 int acc_flag;
 int reset_flag;
 int sleep_flag;
+int wakeup_flag;
+
 static int bufferLen = 3;
 int counter = 0;
 int dataReady = 0;
@@ -109,7 +111,7 @@ int main(void)
 			//Update the value to be shown in 7-segment display.
 		if (displayCounter==DISPLAY_COUNTER_MAX-1){ //Waiting for counter to reach 99 ensures display is updated less frequently than interrupt rate from timer (so as changes to be easily visible)
 		//	floatTo4DigitArray(&digitArray[0],toDisplay);
-			intToArray(&digitArray[0],180);
+			intToArray(&digitArray[0],765);
 		}
 		if(flag==1){
 			digitSelect(&digitArray[0],toggleDigit());
@@ -138,7 +140,7 @@ int main(void)
 		char key_pressed = Read_KP_Value();
 		if(key_pressed != '\0'){
 			printf("Key Pressed is %c \n", key_pressed);
-		}
+			}
 		}
 		displayCounter = (displayCounter+1)%100;
 }
@@ -197,7 +199,7 @@ void adjustBrightnessBasedOnACC(int isPitch, float expectedPitchOrRoll, float* v
 		else
 			user_pwm_set_led_brightness(diffMagnitudeForBrightness * 5.555555,0,0,0); //5.5555 = 500/90
 	}
-	printf("calculated:%f", calculated);
+	//printf("calculated:%f", calculated);
 	toDisplay= fabs(calculated);
 	//	printf("\nCalculatedRoll is %f", calculated);
 //	  printf("\ndiffMagnitudeForBrightness is %d", diffMagnitudeForBrightness);

@@ -19,15 +19,18 @@ void floatTo4DigitArray(int* digitArray, float fVal)
 * input number must be 1~ 3 digits long. 
 */
 void intToArray(int * array, int number){
+		const int NUM_LED_DIGITS = 4;
     int length = log10(number) + 1;
+		printf("length is :%d", length);
     int i;
-    for ( i = 0; i < length; ++i, number /= 10 ){
-				if (length+i-4<0)
-					 array[i] = -1; //-1 indicates off
-        else {
-					array[i] = number % 10;
-					}
-				}
+		for (i =0; i<NUM_LED_DIGITS-length; i++)
+			array[i] = -1;
+	
+    for ( i = 0; i < length; ++i, number/=10){
+				array[NUM_LED_DIGITS-1-i] = number % 10;
+				printf("\n number is :%d",  number);
+				printf("\n number mod 10 is :%d",  number % 10);
+		}
 }
 
 
