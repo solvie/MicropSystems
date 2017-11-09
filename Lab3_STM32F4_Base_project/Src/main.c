@@ -191,11 +191,51 @@ int main(void)
 					printf("Key Pressed is %c \n", key_pressed);
 					prevkeypressed=key_pressed;
 					operatingModeRollMonitoring=0;
+				}else if(key_pressed == '*'){
+					if(prevkeypressed==key_pressed){
+						pressedCounter++;
+						if (pressedCounter==20){ //experimentally found to take about 3 seconds
+							printf("Yay! loopCounter is %d", loopCounter);
+							if (loopCounter <200200){ //experimentally found to be 200040
+								//enter sleep mode
+								sleepmode=1;
+								for (int i=0; i<4; i++)digitArray[i] = -1;
+								user_pwm_set_led_brightness(10,10,10,10);//Dim the LEDS
+							}
+							pressedCounter=0;
+							loopCounter=0;
+						} 
+					}else{
+						pressedCounter=0;
+						loopCounter=0;
+					}
+					prevkeypressed=key_pressed;
 				}
 			} 
+		} else{ //Is in sleep mode
+			if (displayCounter==DISPLAY_COUNTER_MAX-1) //Waiting for counter to reach 99 ensures display is updated less frequently than interrupt rate from timer (so as changes to be easily visible)
+					intToArray(&digitArray[0],toDisplay);
+			char key_pressed = Read_KP_Value();
+			if(key_pressed == '#'){
+					if(prevkeypressed==key_pressed){
+						pressedCounter++;
+						if (pressedCounter==20){ //experimentally found to take about 3 seconds
+							printf("Yay! loopCounter is %d", loopCounter);
+							if (loopCounter <200200){ //experimentally found to be 200040
+								sleepmode=0;
+							}
+							pressedCounter=0;
+							loopCounter=0;
+						} 
+					}else{
+						pressedCounter=0;
+						loopCounter=0;
+					}
+					prevkeypressed=key_pressed;
+				}
 		}
 		
-		//loopCounter++;
+		loopCounter++;
 		displayCounter = (displayCounter+1)%DISPLAY_COUNTER_MAX;
 	}
 }
