@@ -36,14 +36,16 @@ compiling main.c...
   void digitSelect(int* digitArray,int currentDigit );
 ../Src/main.c(48): warning:  #1295-D: Deprecated declaration toggleDigit - give arg types
   int toggleDigit();
-../Src/main.c(145): warning:  #111-D: statement is unreachable
-                displayCounter = (displayCounter+1)%100;
+../Src/main.c(144): warning:  #177-D: variable "reset_threshold" was declared but never referenced
+                const int reset_threshold = 100000;
+../Src/main.c(145): warning:  #177-D: variable "sleep_threshold" was declared but never referenced
+                const int sleep_threshold = 350000;
 ../Src/main.c(62): warning:  #177-D: variable "bufferLen" was declared but never referenced
   static int bufferLen = 3;
-../Src/main.c: 6 warnings, 0 errors
+../Src/main.c: 7 warnings, 0 errors
 linking...
-Program Size: Code=15768 RO-data=720 RW-data=132 ZI-data=1324  
-"lab3 Configuration/\.axf" - 0 Error(s), 6 Warning(s).
+Program Size: Code=15300 RO-data=724 RW-data=136 ZI-data=1320  
+"lab3 Configuration/\.axf" - 0 Error(s), 7 Warning(s).
 
 <h2>Software Packages used:</h2>
 

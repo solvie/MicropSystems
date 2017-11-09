@@ -69,8 +69,19 @@ int testtoggle=0;
 int currentDigit=0;
 int displayCounter=0;
 int digitArray[4]={0,0,0,0} ;
-const int DISPLAY_COUNTER_MAX = 100; 
+const int DISPLAY_COUNTER_MAX = 300; 
 int toDisplay=0;
+
+//-- fsm
+int enterRollState=1; //
+int enterPitchState=0;
+int operatingMode1State=0; //roll monitoring
+int operatingMode2State=0; //pitch monitoring
+
+//--
+char prevkeypressed;
+int pressedCounter=0;
+int loopCounter=0;
 int main(void)
 {
 
@@ -99,17 +110,9 @@ int main(void)
 	//int counter = 0;
   while (1)
   {
-		//if(counter > 200){
-	//		break;
-	//		printf("------------------------");
-	//	}
-		//  counter += 1;
-   //			printf("Calibrated: X: %3f   Y: %3f   Z: %3f \n",acc_value[0], acc_value[1], acc_value[2]);
-		//	bufferX[counter] = 
 
-			//Update the value to be shown in 7-segment display.
+		//Update the value to be shown in 7-segment display.
 		if (displayCounter==DISPLAY_COUNTER_MAX-1){ //Waiting for counter to reach 99 ensures display is updated less frequently than interrupt rate from timer (so as changes to be easily visible)
-		//	floatTo4DigitArray(&digitArray[0],toDisplay);
 			intToArray(&digitArray[0],toDisplay);
 		}
 		if(flag==1){
@@ -123,27 +126,49 @@ int main(void)
 		
 		if(sleep_flag == 1){
 			printf("System Sleep");
+			//LEDS go off, segment display goes off.
 			//reset_flag = 0; //remove once operating mode starts 
+		}
+		
+		if (wakeup_flag==1){
+			printf("System Wakeup"); //this should go into Operating mode (whichever one you left)
 		}
 		
 		if(acc_flag == 1){
 			float acc_value[3]= {99,99,99};
 			Calibrate_ACC_Value(&acc_value[0]);
 			//printf("Temp: X: %3f   Y: %3f   Z: %3f \n",acc_value[0], acc_value[1], acc_value[2]);
-			adjustBrightnessBasedOnACC(1, 0, &acc_value[0]);
+			adjustBrightnessBasedOnACC(0, 90, &acc_value[0]);
 			acc_flag = 0;
-	   	//displayCounter= (displayCounter+1)%100;
-			//digitSelect(&digitArray[0], toggleDigit());
 		}
-		
+		const int reset_threshold = 100000;
+		const int sleep_threshold = 350000;
 		char key_pressed = Read_KP_Value();
 		if(key_pressed != '\0'){
+			//if(prevkeypressed==key_pressed){
+				//pressedCounter++;
+				//if (pressedCounter==7 &&loopCounter>100100&& loopCounter<110000){
+			//		printf("Yay! loopCounter is %d", loopCounter);
+			//		pressedCounter=0;
+			//		loopCounter=0;
+			//	} 
+			//	if (pressedCounter==21){// &&loopCounter>100100&& loopCounter<110000){
+			//		printf("Yay! loopCounter is %d", loopCounter);
+			//		pressedCounter=0;
+			//		loopCounter=0;
+			//	} 
+			//}else {
+			//	pressedCounter=0;
+			//	loopCounter=0;
+			//}
 			printf("Key Pressed is %c \n", key_pressed);
-			}
+			prevkeypressed=key_pressed;
 		}
-		displayCounter = (displayCounter+1)%100;
-}
+		//loopCounter++;
+		displayCounter = (displayCounter+1)%DISPLAY_COUNTER_MAX;
+	}
 
+}
 
 int toggleDigit(){
 	currentDigit=(currentDigit+1)%4;
@@ -162,44 +187,45 @@ float calculatePitchAngleFromAccVals(float ax, float ay, float az){
 
 float calculateRollAngleFromAccVals(float ax, float ay, float az){
 	float val = 180.0 / PI;
-//	printf("allvals:x%f,y%f,z%f", ax, ay, az);
 	float retval;
 	float denom = ax*ax+az*az;
 	denom = sqrt(denom);
-//	printf("denom:%f ", denom);
 	retval = (-ay)/denom;
-	//printf("beforearctan:%f ", retval);
 	retval = atan(retval)*val;
-	//printf("afterarctan:%f\n", retval);
 	return retval;
 }
 
 void adjustBrightnessBasedOnACC(int isPitch, float expectedPitchOrRoll, float* valsFromAcc){
 	uint16_t diffMagnitudeForBrightness;
-	float calculated;
+	float calculated, convertedTo180scale, diff;
 	float ax = valsFromAcc[0]; //doing absolute values for now.
 	float ay = valsFromAcc[1];
 	float az = valsFromAcc[2];
 	if (isPitch){
 		calculated = calculatePitchAngleFromAccVals(ax, ay, az);
+		convertedTo180scale= calculated+90;
 		// The calculated pitch will be from 0 to 90 (because of abs). 
-		diffMagnitudeForBrightness= (uint16_t) fabs( expectedPitchOrRoll - calculated);
-		if (calculated>0)
+		diff = expectedPitchOrRoll- convertedTo180scale;
+		diffMagnitudeForBrightness= (uint16_t) fabs( expectedPitchOrRoll - convertedTo180scale);
+	
+		if (diff>0)
 			user_pwm_set_led_brightness(0,0,diffMagnitudeForBrightness * 5.555555,0); //5.5555 = 500/90
 		else
 			user_pwm_set_led_brightness(0,diffMagnitudeForBrightness * 5.5555550,0,0); //5.5555 = 500/90
 	}
 	else {
 		calculated = calculateRollAngleFromAccVals(ax, ay, az);
+		convertedTo180scale= calculated+90;
+		diff = expectedPitchOrRoll- convertedTo180scale;
 		// The calculated roll will be from 0 to 90 (because of abs).
-		diffMagnitudeForBrightness= fabs( expectedPitchOrRoll - calculated);
-		if (calculated>0)
+		diffMagnitudeForBrightness=  (uint16_t)fabs( expectedPitchOrRoll - convertedTo180scale);
+		if (diff>0)
 			user_pwm_set_led_brightness(0,0,0,diffMagnitudeForBrightness * 5.555555); //5.5555 = 500/90
 		else
 			user_pwm_set_led_brightness(diffMagnitudeForBrightness * 5.555555,0,0,0); //5.5555 = 500/90
 	}
 	//printf("calculated:%f", calculated);
-	toDisplay= (int) fabs(calculated);
+	toDisplay= (int)convertedTo180scale;
 	//	printf("\nCalculatedRoll is %f", calculated);
 //	  printf("\ndiffMagnitudeForBrightness is %d", diffMagnitudeForBrightness);
 

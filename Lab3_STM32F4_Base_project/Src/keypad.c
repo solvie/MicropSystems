@@ -1,16 +1,13 @@
 #include "gpio.h"
 #include "keypad.h"
 /*
-
 connection: 
 PB12,PB13,PB14,PB15,PD8,PD9,PD10,PD11
-
 Row:
 	RB0 -> PD8
 	RB1 -> PD9
 	RB2 -> PD10
 	RB3 -> PD11
-
 Col:
 	RB4 -> PB12
 	RB5 -> PB13
@@ -20,7 +17,6 @@ Col:
 
 extern int reset_flag;
 extern int sleep_flag;
-extern int wakeup_flag;
 const float KEYPAD_MAP [4][3] = {
 	{'1','2','3'},
 	{'4','5','6'},
@@ -49,7 +45,7 @@ void Row_Out_Col_In(void){
 void Row_In_Col_Out(void){
 	GPIO_InitTypeDef GPIO_InitStruct;
 	//row -> Input
-	//__GPIOD_CLK_ENABLE();
+	__GPIOD_CLK_ENABLE();
 	GPIO_InitStruct.Pin = GPIO_PIN_8|GPIO_PIN_9|GPIO_PIN_10|GPIO_PIN_11;
   	GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
   	GPIO_InitStruct.Pull = GPIO_PULLUP;
@@ -57,7 +53,7 @@ void Row_In_Col_Out(void){
 
 
 	//col -> Output
- 	//__GPIOB_CLK_ENABLE();
+ 	__GPIOB_CLK_ENABLE();
   	GPIO_InitStruct.Pin = GPIO_PIN_12|GPIO_PIN_13|GPIO_PIN_14|GPIO_PIN_15;
 	GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
 	GPIO_InitStruct.Pull = GPIO_PULLDOWN;
@@ -99,7 +95,6 @@ char Read_KP_Value(void){
 	static int counter = 0;
 	const int key_pressed_threshold = 10000;
 	const int reset_threshold = 100000;
-	const int wakeup_threshold = 350000;
 	const int sleep_threshold = 350000;
 	static char temp = 0;
 	
@@ -108,51 +103,16 @@ char Read_KP_Value(void){
 			temp = KEYPAD_MAP[row_index][col_index];
 			counter += 1;
 		}else{
+			if(counter > key_pressed_threshold){
+				counter = 0;
+				return KEYPAD_MAP[row_index][col_index];
+			}
+			if(temp == KEYPAD_MAP[row_index][col_index]){
+				counter ++;
+			}else{
+				counter = 0;
+			}
 			
-			if(temp == '*'){
-				if(temp == KEYPAD_MAP[row_index][col_index]){
-					counter ++;
-					if(counter > sleep_threshold){
-						sleep_flag = 1;
-						counter = 0;
-					}
-				}else{
-					if(counter > reset_threshold){
-						reset_flag = 1;
-					}else if(counter > key_pressed_threshold && counter < reset_threshold){
-						counter = 0;
-						return '*';
-					}
-					counter = 0;
-				}
-			
-			}
-			if(temp == '#'){
-				if(temp == KEYPAD_MAP[row_index][col_index]){
-					counter ++;
-					if(counter > wakeup_threshold){
-						wakeup_flag = 1;
-						counter = 0;
-					}
-				}else{
-					if(counter > key_pressed_threshold){
-						counter = 0;
-						return '*';
-					}
-					counter = 0;
-				}				
-			}
-			else{
-				if(counter > key_pressed_threshold){
-					counter = 0;
-					return KEYPAD_MAP[row_index][col_index];
-				}
-				if(temp == KEYPAD_MAP[row_index][col_index]){
-					counter ++;
-				}else{
-					counter = 0;
-				}
-			}
 	}
 		return '\0';
 	}else{

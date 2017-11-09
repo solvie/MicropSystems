@@ -21,7 +21,6 @@ void floatTo4DigitArray(int* digitArray, float fVal)
 void intToArray(int * array, int number){
 		const int NUM_LED_DIGITS = 4;
     int length = log10(number) + 1;
-		printf("length is :%d", length);
     int i;
 		for (i =0; i<NUM_LED_DIGITS-length; i++)
 			array[i] = -1;
