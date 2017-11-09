@@ -70,7 +70,7 @@ int currentDigit=0;
 int displayCounter=0;
 int digitArray[4]={0,0,0,0} ;
 const int DISPLAY_COUNTER_MAX = 100; 
-float toDisplay=0.000;
+int toDisplay=0;
 int main(void)
 {
 
@@ -104,14 +104,13 @@ int main(void)
 	//		printf("------------------------");
 	//	}
 		//  counter += 1;
-//			printf("Calibrated: X: %3f   Y: %3f   Z: %3f \n",acc_value[0], acc_value[1], acc_value[2]);
+   //			printf("Calibrated: X: %3f   Y: %3f   Z: %3f \n",acc_value[0], acc_value[1], acc_value[2]);
 		//	bufferX[counter] = 
-
 
 			//Update the value to be shown in 7-segment display.
 		if (displayCounter==DISPLAY_COUNTER_MAX-1){ //Waiting for counter to reach 99 ensures display is updated less frequently than interrupt rate from timer (so as changes to be easily visible)
 		//	floatTo4DigitArray(&digitArray[0],toDisplay);
-			intToArray(&digitArray[0],765);
+			intToArray(&digitArray[0],toDisplay);
 		}
 		if(flag==1){
 			digitSelect(&digitArray[0],toggleDigit());
@@ -200,7 +199,7 @@ void adjustBrightnessBasedOnACC(int isPitch, float expectedPitchOrRoll, float* v
 			user_pwm_set_led_brightness(diffMagnitudeForBrightness * 5.555555,0,0,0); //5.5555 = 500/90
 	}
 	//printf("calculated:%f", calculated);
-	toDisplay= fabs(calculated);
+	toDisplay= (int) fabs(calculated);
 	//	printf("\nCalculatedRoll is %f", calculated);
 //	  printf("\ndiffMagnitudeForBrightness is %d", diffMagnitudeForBrightness);
 

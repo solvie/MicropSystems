@@ -30,7 +30,7 @@ Section Cross References
     main.o(i.adjustBrightnessBasedOnACC) refers to dmul.o(.text) for __aeabi_dmul
     main.o(i.adjustBrightnessBasedOnACC) refers to main.o(i.user_pwm_set_led_brightness) for user_pwm_set_led_brightness
     main.o(i.adjustBrightnessBasedOnACC) refers to main.o(i.calculateRollAngleFromAccVals) for calculateRollAngleFromAccVals
-    main.o(i.adjustBrightnessBasedOnACC) refers to d2f.o(.text) for __aeabi_d2f
+    main.o(i.adjustBrightnessBasedOnACC) refers to dfixi.o(.text) for __aeabi_d2iz
     main.o(i.adjustBrightnessBasedOnACC) refers to main.o(.data) for .data
     main.o(i.calculatePitchAngleFromAccVals) refers to f2d.o(.text) for __aeabi_f2d
     main.o(i.calculatePitchAngleFromAccVals) refers to sqrt.o(i.__hardfp_sqrt) for __hardfp_sqrt
@@ -2075,7 +2075,7 @@ Image component sizes
        472         30          0          0          0       1211   gpio.o
        676         72         48          8          0       4243   keypad.o
       1152        140          0          4         88       7512   lis3dsh.o
-      1186        130         16         40         16      15812   main.o
+      1186        130         16         40         16      15804   main.o
         36          8        392          0       1024        928   startup_stm32f407xx.o
        114         16          0          4          0       3594   stm32f4xx_hal.o
        242         16          0          0          0      31441   stm32f4xx_hal_cortex.o
@@ -2090,7 +2090,7 @@ Image component sizes
        536         62          0          0        180       3155   tim.o
 
     ----------------------------------------------------------------------
-     10868        758        504        124       1324     487235   Object Totals
+     10868        758        504        124       1324     487227   Object Totals
          0          0         32          0          0          0   (incl. Generated)
         22          8          0          0          4          0   (incl. Padding)
 
@@ -2161,8 +2161,8 @@ Image component sizes
 
       Code (inc. data)   RO Data    RW Data    ZI Data      Debug   
 
-     15768       1080        720        132       1324     480663   Grand Totals
-     15768       1080        720        132       1324     480663   ELF Image Totals
+     15768       1080        720        132       1324     480655   Grand Totals
+     15768       1080        720        132       1324     480655   ELF Image Totals
      15768       1080        720        132          0          0   ROM Totals
 
 ==============================================================================

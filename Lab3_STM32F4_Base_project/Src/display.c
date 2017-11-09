@@ -25,14 +25,9 @@ void intToArray(int * array, int number){
     int i;
 		for (i =0; i<NUM_LED_DIGITS-length; i++)
 			array[i] = -1;
-	
-    for ( i = 0; i < length; ++i, number/=10){
-				array[NUM_LED_DIGITS-1-i] = number % 10;
-				printf("\n number is :%d",  number);
-				printf("\n number mod 10 is :%d",  number % 10);
-		}
+    for ( i = 0; i < length; ++i, number/=10)
+			array[NUM_LED_DIGITS-1-i] = number % 10;
 }
-
 
 /*
 A - 7
