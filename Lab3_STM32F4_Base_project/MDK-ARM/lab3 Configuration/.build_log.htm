@@ -27,23 +27,18 @@ Project File Date:  11/07/2017
 <h2>Output:</h2>
 *** Using Compiler 'V5.05 update 2 (build 169)', folder: 'C:\Keil_v5\ARM\ARMCC\Bin'
 Build target 'lab3 Configuration'
-compiling main.c...
-../Inc/keypad.h(5): warning:  #1-D: last line of file ends without a newline
-  char Read_KP_Value(void);
-../Inc/accelerometer.h(1): warning:  #1-D: last line of file ends without a newline
-  void Calibrate_ACC_Value(float *value);
-../Inc/display.h(3): warning:  #1-D: last line of file ends without a newline
+compiling display.c...
+../Inc/display.h(4): warning:  #1-D: last line of file ends without a newline
   void digitSelect(int* digitArray,int currentDigit );
-../Src/main.c(48): warning:  #1295-D: Deprecated declaration toggleDigit - give arg types
-  int toggleDigit();
-../Src/main.c(134): warning:  #111-D: statement is unreachable
-                displayCounter = (displayCounter+1)%100;
-../Src/main.c(59): warning:  #177-D: variable "bufferLen" was declared but never referenced
-  static int bufferLen = 3;
-../Src/main.c: 6 warnings, 0 errors
+..\Src\display.c(8): warning:  #1035-D: single-precision operand implicitly converted to double-precision
+  {    fVal += 0.0005; //So that we round up properly
+..\Src\display.c(190): warning:  #1-D: last line of file ends without a newline
+  }
+..\Src\display.c: 3 warnings, 0 errors
+compiling stm32f4xx_hal_gpio.c...
 linking...
-Program Size: Code=14096 RO-data=656 RW-data=120 ZI-data=1304  
-"lab3 Configuration/\.axf" - 0 Error(s), 6 Warning(s).
+Program Size: Code=17584 RO-data=720 RW-data=128 ZI-data=1320  
+"lab3 Configuration/\.axf" - 0 Error(s), 3 Warning(s).
 
 <h2>Software Packages used:</h2>
 

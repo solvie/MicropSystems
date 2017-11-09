@@ -31,3 +31,4 @@ lab3 configuration/\display.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal
 lab3 configuration/\display.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_tim.h
 lab3 configuration/\display.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_tim_ex.h
 lab3 configuration/\display.o: ../Inc/display.h
+lab3 configuration/\display.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\math.h

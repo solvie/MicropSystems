@@ -46,6 +46,7 @@ void user_pwm_setvalue(uint16_t value);
 void user_pwm_set_led_brightness(uint16_t ld3, uint16_t ld4,uint16_t ld5,uint16_t ld6);
 void adjustBrightnessBasedOnACC(int isPitch, float expectedPitchOrRoll, float* valsFromAcc);
 int toggleDigit();
+int flag;
 
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
@@ -66,7 +67,8 @@ int testtoggle=0;
 int currentDigit=0;
 int displayCounter=0;
 int digitArray[4]={0,0,0,0} ;
-
+const int DISPLAY_COUNTER_MAX = 100; 
+float toDisplay=0.000;
 int main(void)
 {
 
@@ -81,10 +83,10 @@ int main(void)
 	initializeACC	();
 	MX_NVIC_Init();
 	MX_TIM4_Init();
-//	MX_TIM2_Init();
-
+	MX_TIM2_Init();
+	
+  HAL_TIM_Base_Start_IT(&htim2);
 	HAL_TIM_Base_Start(&htim4);
-  //HAL_TIM_Base_Start_IT(&htim2);
 	
 	HAL_TIM_PWM_Start(&htim4,TIM_CHANNEL_1);
 	HAL_TIM_PWM_Start(&htim4,TIM_CHANNEL_2);
@@ -104,7 +106,15 @@ int main(void)
 		//	bufferX[counter] = 
 
 
-	
+			//Update the value to be shown in 7-segment display.
+		if (displayCounter==DISPLAY_COUNTER_MAX-1){ //Waiting for counter to reach 99 ensures display is updated less frequently than interrupt rate from timer (so as changes to be easily visible)
+		//	floatTo4DigitArray(&digitArray[0],toDisplay);
+			intToArray(&digitArray[0],180);
+		}
+		if(flag==1){
+			digitSelect(&digitArray[0],toggleDigit());
+		}
+		
 		if(reset_flag == 1){
 			printf("System Reset");
 			reset_flag = 0;
@@ -123,7 +133,6 @@ int main(void)
 			acc_flag = 0;
 	   	//displayCounter= (displayCounter+1)%100;
 			//digitSelect(&digitArray[0], toggleDigit());
-		
 		}
 		
 		char key_pressed = Read_KP_Value();
@@ -134,11 +143,6 @@ int main(void)
 		displayCounter = (displayCounter+1)%100;
 }
 
-
-void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
-	   	displayCounter= (displayCounter+1)%100;
-			digitSelect(&digitArray[0],toggleDigit());
-}
 
 int toggleDigit(){
 	currentDigit=(currentDigit+1)%4;
@@ -194,6 +198,7 @@ void adjustBrightnessBasedOnACC(int isPitch, float expectedPitchOrRoll, float* v
 			user_pwm_set_led_brightness(diffMagnitudeForBrightness * 5.555555,0,0,0); //5.5555 = 500/90
 	}
 	printf("calculated:%f", calculated);
+	toDisplay= fabs(calculated);
 	//	printf("\nCalculatedRoll is %f", calculated);
 //	  printf("\ndiffMagnitudeForBrightness is %d", diffMagnitudeForBrightness);
 
