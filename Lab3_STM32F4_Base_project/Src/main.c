@@ -46,10 +46,10 @@ void user_pwm_setvalue(uint16_t value);
 void user_pwm_set_led_brightness(uint16_t ld3, uint16_t ld4,uint16_t ld5,uint16_t ld6);
 void adjustBrightnessBasedOnACC(int isPitch, float expectedPitchOrRoll, float* valsFromAcc);
 int toggleDigit();
-
-void inputMode(){
-	
-}
+void enterNumberIntoBuffer(int numberEntered);
+void deleteLastInBuffer();
+void initializeDisplayToZero();
+int concatenateArray();
 
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
@@ -81,12 +81,12 @@ int toDisplay=0;
 //	const int sleep_threshold = 350000;
 
 //-- fsm
-int enterRollState=1; //
-int enterPitchState=0;
-int operatingMode1State=0; //roll monitoring
-int operatingMode2State=0; //pitch monitoring
+int userInputState; //if not in userInputState, is in operatingMode
+int enterRollState; // if not in enterRollState, is in enterPitchState
+int operatingModeRollMonitoring; // if not operatingModeRollMonitoring, is operatingModePitchMonitoring
 int sleepmode=0;
-int inputExpected = 0;
+int inputRollExpected = 0;
+int inputPitchExpected = 0;
 
 int rollstatecounter=0;
 int flashflag=0;
@@ -121,8 +121,10 @@ int main(void)
 	HAL_TIM_PWM_Start(&htim4,TIM_CHANNEL_2);
 	HAL_TIM_PWM_Start(&htim4,TIM_CHANNEL_3);
 	HAL_TIM_PWM_Start(&htim4,TIM_CHANNEL_4);
-
+	
+  userInputState=1;
 	enterRollState=1; //On startup, we are in enter Roll state
+	operatingModeRollMonitoring=1; //the first operating mode we enter will be roll monitoring
 	user_pwm_set_led_brightness(500,0,0,500);//On startup, we are in enter Roll state
 
 	//HAL_TIM_PWM_Start(&htim4,TIM_CHANNEL_2);//or1
@@ -136,55 +138,35 @@ int main(void)
 			if(digselect_flag==1)
 					digitSelect(&digitArray[0],toggleDigit());
 			
-			if (enterRollState){
-
+			if (userInputState){
 				if (entered_char_pointer==4){//nothing has been entered yet
-						for (int i=0; i<3; i++)
-							digitArray[i] = -1;
-						digitArray[3] = 0; //display zero if nothing has been entered
+						initializeDisplayToZero();//display zero if nothing has been entered
 				}
 				char key_pressed = Read_KP_Value();
 				if(key_pressed != '\0'&&key_pressed != '*'&&key_pressed != '#'){ //a number was entered
 					printf("Key Pressed is %c \n", key_pressed);
-					int numberEntered =  key_pressed - '0'; //convert the char to an int
-					if (entered_char_pointer>1){ //as long as three digits haven't already been filled, a user can type a new letter
-						for (int i=entered_char_pointer; i<4; i++){
-							digitArray[i-1] =digitArray[i]; //shift what was already there
-						}
-						digitArray[3] = numberEntered; //add the pressed key to the last element.
-						entered_char_pointer--;
-					} //otherwise we ignore, because the full amount we can enter is full.
+					enterNumberIntoBuffer(key_pressed - '0');
 				} else if(key_pressed == '#') {
-					// reset entered char pointer and go to the next state.
-					//for now just go directly into roll monitoring. IF VALUE IS GREATER THAN 180, CAP at 180 DIsplay 180 before entering.
-					//convert the array to an integer and set that as the inputex
-					if (entered_char_pointer==4)entered_char_pointer=3;//if nothing was entered just take the 0
-					int concatedint = digitArray[entered_char_pointer];
-					for (int i = entered_char_pointer+1; i<4; i++){
-						concatedint = concatenate(concatedint,digitArray[i] );
-					}
+					//for now just go directly into roll monitoring. later IF VALUE IS GREATER THAN 180, CAP at 180 DIsplay 180 before entering.
+					int concatedint = concatenateArray();// concatenate array contents into one integer/.
 					printf("Input is %d \n", concatedint);
-					inputExpected = concatedint;
-					enterRollState=0;
-
+					if (enterRollState){ //go to enterPitchState
+						inputRollExpected = concatedint;
+						//enterPitchState
+						enterRollState=0;
+						entered_char_pointer=4;
+						initializeDisplayToZero();
+						user_pwm_set_led_brightness(0,500,500,0);//On startup, we enter Pitch state
+					}	else{ //otherwise is enterPitchState, go to roll monitoring
+						inputPitchExpected = concatedint;
+						userInputState=0;
+						enterRollState=1;
+					}
 				} else if (key_pressed=='*'){
 					printf("Key Pressed is %c \n", key_pressed);
-					//delete the most recent if possible
-						const int lastindex = 3; //last of indices 0,1,2,3
-						if (entered_char_pointer<4){ //as long as three digits haven't already been filled, a user can type a new letter
-							if (entered_char_pointer==3)
-								digitArray[3] = 0;
-							else{ //entered_char_pointer= 2 or 1 
-								int i;
-								for (i=lastindex-1; i>entered_char_pointer-1; i--){
-									digitArray[i+1]=digitArray[i]; //shift what was already there
-								}
-								digitArray[i+1]=-1;//set the previously highest bit to empty
-							}
-							entered_char_pointer++;
-						}
+					deleteLastInBuffer();
 				}
-			} else{
+			}else{ // if not userInputState, is in operatingMode
 			//Update the value to be shown in 7-segment display.
 				if (displayCounter==DISPLAY_COUNTER_MAX-1) //Waiting for counter to reach 99 ensures display is updated less frequently than interrupt rate from timer (so as changes to be easily visible)
 					intToArray(&digitArray[0],toDisplay);
@@ -193,38 +175,69 @@ int main(void)
 					float acc_value[3]= {99,99,99};
 					Calibrate_ACC_Value(&acc_value[0]);
 					//printf("Temp: X: %3f   Y: %3f   Z: %3f \n",acc_value[0], acc_value[1], acc_value[2]);
-					adjustBrightnessBasedOnACC(0, inputExpected, &acc_value[0]);
+					if (operatingModeRollMonitoring){
+						adjustBrightnessBasedOnACC(0, inputRollExpected, &acc_value[0]);
+					} else{//if not in operatingModeRollMonitoring is operatingModePitchMonitoring
+						adjustBrightnessBasedOnACC(1, inputPitchExpected, &acc_value[0]);
+					}
 					acc_flag = 0;
 				}
-
 				char key_pressed = Read_KP_Value();
-				if(key_pressed != '\0'){
+				if(key_pressed == '1'){ //go to roll
 					printf("Key Pressed is %c \n", key_pressed);
 					prevkeypressed=key_pressed;
+					operatingModeRollMonitoring=1;
+				} else if(key_pressed == '2'){ //go to pitch
+					printf("Key Pressed is %c \n", key_pressed);
+					prevkeypressed=key_pressed;
+					operatingModeRollMonitoring=0;
 				}
-			}
+			} 
 		}
-		//
 		
 		//loopCounter++;
 		displayCounter = (displayCounter+1)%DISPLAY_COUNTER_MAX;
 	}
-
 }
-void toggleflash(int forroll){
-	if (forroll){
-		if (flashflag)
-			user_pwm_set_led_brightness(0,500,500,0);
-		else
-			user_pwm_set_led_brightness(0,0,0,0);
-  }
-	else {
-		if (flashflag)
-			user_pwm_set_led_brightness(500,0,0,500);
-		else
-			user_pwm_set_led_brightness(0,0,0,0);
+void initializeDisplayToZero(){
+		for (int i=0; i<3; i++)
+			digitArray[i] = -1;
+		digitArray[3] = 0; //display zero if nothing has been entered
+}
+
+void enterNumberIntoBuffer(int numberEntered){
+	if (entered_char_pointer>1){ //as long as three digits haven't already been filled, a user can type a new letter
+		for (int i=entered_char_pointer; i<4; i++){
+			digitArray[i-1] =digitArray[i]; //shift what was already there
+		}
+		digitArray[3] = numberEntered; //add the pressed key to the last element.
+		entered_char_pointer--;
 	}
-	flashflag = !flashflag;
+}
+
+void deleteLastInBuffer(){
+		const int lastindex = 3; //last of indices 0,1,2,3
+		if (entered_char_pointer<4){ //as long as three digits haven't already been filled, a user can type a new letter
+			if (entered_char_pointer==3)
+				digitArray[3] = 0;
+			else{ //entered_char_pointer= 2 or 1 
+				int i;
+				for (i=lastindex-1; i>entered_char_pointer-1; i--){
+					digitArray[i+1]=digitArray[i]; //shift what was already there
+				}
+				digitArray[i+1]=-1;//set the previously highest bit to empty
+			}
+			entered_char_pointer++;
+		}
+}
+
+int concatenateArray(){
+		if (entered_char_pointer==4) entered_char_pointer=3;//if nothing was entered just take the 0
+		int concatedint = digitArray[entered_char_pointer];
+		for (int i = entered_char_pointer+1; i<4; i++){
+			concatedint = concatenate(concatedint,digitArray[i] );
+		}
+		return concatedint;
 }
 
 int concatenate(int x, int y) {
