@@ -1,7 +1,7 @@
 #include "gpio.h"
 #include "keypad.h"
-/*
 
+/*
 connection: 
 PB12,PB13,PB14,PB15,PD8,PD9,PD10,PD11
 
@@ -27,6 +27,12 @@ const float KEYPAD_MAP [4][3] = {
 	{'7','8','9'},
 	{'*','0','#'}
 };
+
+/**
+* Helper for Read_KP_Value.
+* Set rows as output and columns as input; if no button is pressed, column line inputs
+* will all be read as 1 due to pullup resistors; if button is pressed, that column will go 0.
+*/
 void Row_Out_Col_In(void){
 	GPIO_InitTypeDef GPIO_InitStruct;
 	//row -> Output
@@ -37,7 +43,6 @@ void Row_Out_Col_In(void){
 	GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
 	HAL_GPIO_Init(GPIOD, &GPIO_InitStruct);
 
-
 	//col -> Input
  	__GPIOB_CLK_ENABLE();
   	GPIO_InitStruct.Pin = GPIO_PIN_12|GPIO_PIN_13|GPIO_PIN_14|GPIO_PIN_15;
@@ -46,6 +51,11 @@ void Row_Out_Col_In(void){
   	HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 }
 
+/**
+* Helper for Read_KP_Value.
+* Set rows as input and columns as output; if no button is pressed, row line inputs
+* will all be read as 1 due to pullup resistors; if button is pressed, that row will be set 0.
+*/
 void Row_In_Col_Out(void){
 	GPIO_InitTypeDef GPIO_InitStruct;
 	//row -> Input
@@ -54,7 +64,6 @@ void Row_In_Col_Out(void){
   	GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
   	GPIO_InitStruct.Pull = GPIO_PULLUP;
 	HAL_GPIO_Init(GPIOD, &GPIO_InitStruct);
-
 
 	//col -> Output
  	__GPIOB_CLK_ENABLE();
@@ -65,6 +74,10 @@ void Row_In_Col_Out(void){
   	HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 }
 
+/**
+* Helper for Read_KP_Value.
+* Retrieves the index of the column where the key was pressed by finding which pin was reset.
+*/
 int Get_Col_Pin_In_Reset_Mode(void){
 	if(HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_12) == GPIO_PIN_RESET){
 		return 0;
@@ -77,6 +90,10 @@ int Get_Col_Pin_In_Reset_Mode(void){
 	}
 }
 
+/**
+* Helper for Read_KP_Value.
+* Retrieves the index of the row where the key was pressed by finding which pin was reset.
+*/
 int Get_Row_Pin_In_Reset_Mode(void){
 	if(HAL_GPIO_ReadPin(GPIOD, GPIO_PIN_8) == GPIO_PIN_RESET){
 		return 0;
@@ -90,12 +107,16 @@ int Get_Row_Pin_In_Reset_Mode(void){
 		return -1;
 	}
 }
+
+/**
+* Reads and returns the value pressed on the keypad, as well as setting flags to 
+* announce detection of long presses on the * and # keys.
+*/
 char Read_KP_Value(void){
 	Row_Out_Col_In();
 	int col_index = Get_Col_Pin_In_Reset_Mode();
 	Row_In_Col_Out();
 	int row_index = Get_Row_Pin_In_Reset_Mode();
-	
 	static int counter = 0;
 	const int key_pressed_threshold = 10000;
 	const int reset_threshold = 30000;
@@ -107,7 +128,7 @@ char Read_KP_Value(void){
 			temp = KEYPAD_MAP[row_index][col_index];
 			counter += 1;
 		}else{
-			
+	
 			if(temp == '*'){
 				if(temp == KEYPAD_MAP[row_index][col_index]){
 					counter ++;
