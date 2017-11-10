@@ -157,7 +157,7 @@ char Read_KP_Value(void){
 		} 
 		
 		if(temp == '#'){
-			if(counter > key_pressed_threshold && counter < reset_threshold){
+			if(counter > key_pressed_threshold){
 			counter = 0;
 			return '#';
 			}

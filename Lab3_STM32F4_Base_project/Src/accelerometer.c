@@ -24,7 +24,11 @@ float z_buffer[BUFFER_SIZE];
 float x_filtered[BUFFER_SIZE];
 float y_filtered[BUFFER_SIZE];
 float z_filtered[BUFFER_SIZE];
-FIR_coeff coeffStruct = {{1.0000,0.0678,0.2369}, {0.3169,0.6338,0.3169}};
+
+FIR_coeff coeffStruct_x = {{1.0000,-0.2430,0.2951}, {0.2427,0.4853,0.2427}};
+FIR_coeff coeffStruct_y = {{1.0000,-0.2386,0.2938}, {0.2437,0.4873,0.2437}};
+FIR_coeff coeffStruct_z = {{1.0000,-0.1961,0.2826}, {0.2535,0.5070,0.2535}};
+
 float Cal_M[4][3] = {
 	{0.0010,-0.0000,-0.0000},
 	{-0.0000,0.0010,-0.0000},
@@ -46,9 +50,16 @@ float zeroOrArrayPos(int n, float* array ){
 	else return *(array+n);
 }
 
-float Apply_IIR_Filter(float* InputArray, float* OutputArray){
+float Apply_IIR_Filter(float* InputArray, float* OutputArray, char axis){
+	FIR_coeff* coeff;
+	if(axis == 'z'){
+		coeff = &coeffStruct_z;
+	}else if(axis == 'y'){
+		coeff = &coeffStruct_y;
+	}else{
+		coeff = &coeffStruct_x;
+	}
 	
-	FIR_coeff* coeff = &coeffStruct;
 	int Length = BUFFER_SIZE;
 	int Order = 2;
 	float tempY;
@@ -98,9 +109,9 @@ void ACC_Read_Value(void){
 }
 
 void Read_ACC(float *value){
-		Apply_IIR_Filter(&x_buffer[0], &x_filtered[0]);
-		Apply_IIR_Filter(&y_buffer[0], &y_filtered[0]);
-		Apply_IIR_Filter(&z_buffer[0], &z_filtered[0]);
+		Apply_IIR_Filter(&x_buffer[0], &x_filtered[0], 'x');
+		Apply_IIR_Filter(&y_buffer[0], &y_filtered[0], 'y');
+		Apply_IIR_Filter(&z_buffer[0], &z_filtered[0], 'z');
 		value[0] = x_filtered[BUFFER_SIZE-1];
 		value[1] = y_filtered[BUFFER_SIZE-1];
 		value[2] = z_filtered[BUFFER_SIZE-1];

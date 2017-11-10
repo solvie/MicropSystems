@@ -3,7 +3,7 @@
 <title>Static Call Graph - [lab3 Configuration/\.axf]</title></head>
 <body><HR>
 <H1>Static Call Graph for image lab3 Configuration/\.axf</H1><HR>
-<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 5060528: Last Updated: Thu Nov 09 19:16:38 2017
+<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 5060528: Last Updated: Thu Nov 09 21:21:19 2017
 <BR><P>
 <H3>Maximum Stack Usage =        256 bytes + Unknown(Cycles, Untraceable Function Pointers)</H3><H3>
 Call chain for Maximum Stack Depth:</H3>
@@ -595,7 +595,7 @@ Global Symbols
 <BR>[Called By]<UL><LI><a href="#[5b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;main
 </UL>
 
-<P><STRONG><a name="[71]"></a>Apply_IIR_Filter</STRONG> (Thumb, 108 bytes, Stack size 32 bytes, accelerometer.o(i.Apply_IIR_Filter))
+<P><STRONG><a name="[71]"></a>Apply_IIR_Filter</STRONG> (Thumb, 124 bytes, Stack size 32 bytes, accelerometer.o(i.Apply_IIR_Filter))
 <BR><BR>[Stack]<UL><LI>Max Depth = 32<LI>Call Chain = Apply_IIR_Filter
 </UL>
 <BR>[Calls]<UL><LI><a href="#[72]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;zeroOrArrayPos
@@ -875,7 +875,7 @@ Global Symbols
 <BR>[Called By]<UL><LI><a href="#[5b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;main
 </UL>
 
-<P><STRONG><a name="[99]"></a>Read_ACC</STRONG> (Thumb, 72 bytes, Stack size 8 bytes, accelerometer.o(i.Read_ACC))
+<P><STRONG><a name="[99]"></a>Read_ACC</STRONG> (Thumb, 78 bytes, Stack size 8 bytes, accelerometer.o(i.Read_ACC))
 <BR><BR>[Stack]<UL><LI>Max Depth = 40<LI>Call Chain = Read_ACC &rArr; Apply_IIR_Filter
 </UL>
 <BR>[Calls]<UL><LI><a href="#[71]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Apply_IIR_Filter
@@ -892,7 +892,7 @@ Global Symbols
 <BR>[Called By]<UL><LI><a href="#[77]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_GPIO_EXTI_Callback
 </UL>
 
-<P><STRONG><a name="[9a]"></a>Read_KP_Value</STRONG> (Thumb, 388 bytes, Stack size 24 bytes, keypad.o(i.Read_KP_Value))
+<P><STRONG><a name="[9a]"></a>Read_KP_Value</STRONG> (Thumb, 410 bytes, Stack size 24 bytes, keypad.o(i.Read_KP_Value))
 <BR><BR>[Stack]<UL><LI>Max Depth = 104<LI>Call Chain = Read_KP_Value &rArr; Row_Out_Col_In &rArr; HAL_GPIO_Init
 </UL>
 <BR>[Calls]<UL><LI><a href="#[9b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Row_Out_Col_In

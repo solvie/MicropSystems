@@ -57,7 +57,7 @@ int operation_flag;
 
 
 int main(void)
-{
+ {
 	
   /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
   HAL_Init();
@@ -87,7 +87,7 @@ int main(void)
 		}
 		
 		if(operation_flag==1){
-			printf("Operation Sleep");
+			printf("Operation");
 			operation_flag=0;
 		}
 		
