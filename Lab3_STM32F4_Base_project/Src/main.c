@@ -134,11 +134,8 @@ int main(void)
   {
 		//in main while loop display counter goes on as long as its not in sleep mode
 		if (!sleepmode){
-		//	if (displayCounter==DISPLAY_COUNTER_MAX-1) //Waiting for counter to reach 99 ensures display is updated less frequently than interrupt rate from timer (so as changes to be easily visible)
-		//			intToArray(&digitArray[0],toDisplay);
 			if(digselect_flag==1)
 					digitSelect(&digitArray[0],toggleDigit());
-			
 			if (userInputState){
 				if (entered_char_pointer==4){//nothing has been entered yet
 						initializeDisplayToZero();//display zero if nothing has been entered
@@ -148,46 +145,42 @@ int main(void)
 					printf("Key Pressed is %c \n", key_pressed);
 					enterNumberIntoBuffer(key_pressed - '0');
 				} else if(key_pressed == '#') {
-					//for now just go directly into roll monitoring. later IF VALUE IS GREATER THAN 180, CAP at 180 DIsplay 180 before entering.
 					int concatedint = concatenateArray();// concatenate array contents into one integer/.
 					printf("Input is %d \n", concatedint);
 					if (enterRollState){ 
 						inputRollExpected = concatedint;
-						//enterPitchState
-						if(!reinit){//go to enterPitchState
+						if(!reinit){//If not reinitializing, go to enterPitchState
 							enterRollState=0;
 							entered_char_pointer=4;
 							initializeDisplayToZero();
-							user_pwm_set_led_brightness(0,500,500,0);//On startup, we enter Pitch state
-						} else{ //if reiniting, go to operating mode
-							reinit=0;
+							user_pwm_set_led_brightness(0,500,500,0);
+						} else{ //if reinitializing, go directly back to roll monitoring operating mode
+							reinit=0; 
 							userInputState=0; //operating mode
-						  enterRollState=1;
+							operatingModeRollMonitoring=1;
+						  //enterRollState=1;
 						}
-					}	else{ //otherwise is enterPitchState, go to roll monitoring
+					}	else{ //Is enterPitchState
 						inputPitchExpected = concatedint;
-						if(!reinit){
-						userInputState=0;
-						enterRollState=1;
-						} else{
+						if(!reinit){//If not reinitializing, roll monitoring operating mode
+							userInputState=0;
+							operatingModeRollMonitoring=1;
+						} else{//if reinitializing, go directly back to pitch monitoring operating mode
 							reinit=0;
 							userInputState=0;
-							enterRollState=0;
+							operatingModeRollMonitoring=0;
 						}
 					}
 				} else if (key_pressed=='*'){
 					printf("Key Pressed is %c \n", key_pressed);
 					deleteLastInBuffer();
 				}
-			}else{ // if not userInputState, is in operatingMode
+			}else{ // Is in operatingMode
 			//Update the value to be shown in 7-segment display.
-				if (displayCounter==DISPLAY_COUNTER_MAX-1) //Waiting for counter to reach 99 ensures display is updated less frequently than interrupt rate from timer (so as changes to be easily visible)
-					intToArray(&digitArray[0],toDisplay);
-				
+
 				if(acc_flag == 1){
 					float acc_value[3]= {99,99,99};
 					Calibrate_ACC_Value(&acc_value[0]);
-					//printf("Temp: X: %3f   Y: %3f   Z: %3f \n",acc_value[0], acc_value[1], acc_value[2]);
 					if (operatingModeRollMonitoring){
 						adjustBrightnessBasedOnACC(0, inputRollExpected, &acc_value[0]);
 					} else{//if not in operatingModeRollMonitoring is operatingModePitchMonitoring
@@ -198,19 +191,16 @@ int main(void)
 				char key_pressed = Read_KP_Value();
 				if(key_pressed == '1'){ //go to roll
 					printf("Key Pressed is %c \n", key_pressed);
-					prevkeypressed=key_pressed;
 					operatingModeRollMonitoring=1;
 				} else if(key_pressed == '2'){ //go to pitch
 					printf("Key Pressed is %c \n", key_pressed);
-					prevkeypressed=key_pressed;
 					operatingModeRollMonitoring=0;
-				} if (sleep_flag){
-						//enter sleep mode
+				} if (sleep_flag){//enter sleep mode
 						sleep_flag=0;
 						sleepmode=1;
 						for (int i=0; i<4; i++)digitArray[i] = -1;
 						user_pwm_set_led_brightness(10,10,10,10);//Dim the LEDS
-				} else if (reset_flag){
+				} else if (reset_flag){ //go to input mode for the relevant roll state
 						reset_flag=0;
 						userInputState=1;
 						reinit = 1;
@@ -226,6 +216,9 @@ int main(void)
 								user_pwm_set_led_brightness(0,500,500,0);
 							}
 				}
+				if (displayCounter==DISPLAY_COUNTER_MAX-1) //Waiting for counter to reach 99 ensures display is updated less frequently than interrupt rate from timer (so as changes to be easily visible)
+					intToArray(&digitArray[0],toDisplay);
+				
 			} 
 		} else{ //Is in sleep mode
 			char key_pressed = Read_KP_Value();
