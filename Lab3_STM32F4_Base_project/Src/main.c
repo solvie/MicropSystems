@@ -63,7 +63,7 @@ int SysTickCount;
 int acc_flag;
 int reset_flag;
 int sleep_flag;
-int wakeup_flag;
+int operation_flag;
 int digselect_flag;
 
 int counter = 0;
@@ -87,6 +87,7 @@ int operatingModeRollMonitoring; // if not operatingModeRollMonitoring, is opera
 int sleepmode=0;
 int inputRollExpected = 0;
 int inputPitchExpected = 0;
+int reinit=0;
 
 int rollstatecounter=0;
 int flashflag=0;
@@ -150,17 +151,29 @@ int main(void)
 					//for now just go directly into roll monitoring. later IF VALUE IS GREATER THAN 180, CAP at 180 DIsplay 180 before entering.
 					int concatedint = concatenateArray();// concatenate array contents into one integer/.
 					printf("Input is %d \n", concatedint);
-					if (enterRollState){ //go to enterPitchState
+					if (enterRollState){ 
 						inputRollExpected = concatedint;
 						//enterPitchState
-						enterRollState=0;
-						entered_char_pointer=4;
-						initializeDisplayToZero();
-						user_pwm_set_led_brightness(0,500,500,0);//On startup, we enter Pitch state
+						if(!reinit){//go to enterPitchState
+							enterRollState=0;
+							entered_char_pointer=4;
+							initializeDisplayToZero();
+							user_pwm_set_led_brightness(0,500,500,0);//On startup, we enter Pitch state
+						} else{ //if reiniting, go to operating mode
+							reinit=0;
+							userInputState=0; //operating mode
+						  enterRollState=1;
+						}
 					}	else{ //otherwise is enterPitchState, go to roll monitoring
 						inputPitchExpected = concatedint;
+						if(!reinit){
 						userInputState=0;
 						enterRollState=1;
+						} else{
+							reinit=0;
+							userInputState=0;
+							enterRollState=0;
+						}
 					}
 				} else if (key_pressed=='*'){
 					printf("Key Pressed is %c \n", key_pressed);
@@ -191,54 +204,56 @@ int main(void)
 					printf("Key Pressed is %c \n", key_pressed);
 					prevkeypressed=key_pressed;
 					operatingModeRollMonitoring=0;
-				}else if(key_pressed == '*'){
-					if(prevkeypressed==key_pressed){
-						pressedCounter++;
-						if (pressedCounter==20){ //experimentally found to take about 3 seconds
-							printf("Yay! loopCounter is %d", loopCounter);
-							if (loopCounter <200200){ //experimentally found to be 200040
-								//enter sleep mode
-								sleepmode=1;
-								for (int i=0; i<4; i++)digitArray[i] = -1;
-								user_pwm_set_led_brightness(10,10,10,10);//Dim the LEDS
+				} if (sleep_flag){
+						//enter sleep mode
+						sleep_flag=0;
+						sleepmode=1;
+						for (int i=0; i<4; i++)digitArray[i] = -1;
+						user_pwm_set_led_brightness(10,10,10,10);//Dim the LEDS
+				} else if (reset_flag){
+						reset_flag=0;
+						userInputState=1;
+						reinit = 1;
+						if (operatingModeRollMonitoring){
+								enterRollState=1;
+								entered_char_pointer=4;
+								initializeDisplayToZero();
+								user_pwm_set_led_brightness(500,0,0,500);
+							} else{
+								enterRollState=0;
+								entered_char_pointer=4;
+								initializeDisplayToZero();
+								user_pwm_set_led_brightness(0,500,500,0);
 							}
-							pressedCounter=0;
-							loopCounter=0;
-						} 
-					}else{
-						pressedCounter=0;
-						loopCounter=0;
-					}
-					prevkeypressed=key_pressed;
 				}
 			} 
 		} else{ //Is in sleep mode
+			char key_pressed = Read_KP_Value();
 			if (displayCounter==DISPLAY_COUNTER_MAX-1) //Waiting for counter to reach 99 ensures display is updated less frequently than interrupt rate from timer (so as changes to be easily visible)
 					intToArray(&digitArray[0],toDisplay);
-			char key_pressed = Read_KP_Value();
-			if(key_pressed == '#'){
-					if(prevkeypressed==key_pressed){
-						pressedCounter++;
-						if (pressedCounter==20){ //experimentally found to take about 3 seconds
-							printf("Yay! loopCounter is %d", loopCounter);
-							if (loopCounter <200200){ //experimentally found to be 200040
-								sleepmode=0;
-							}
-							pressedCounter=0;
-							loopCounter=0;
-						} 
-					}else{
-						pressedCounter=0;
-						loopCounter=0;
-					}
-					prevkeypressed=key_pressed;
+			if(operation_flag){
+					sleepmode=0;
+					userInputState=0;
+					operation_flag=0;
 				}
 		}
 		
-		loopCounter++;
+		//loopCounter++;
 		displayCounter = (displayCounter+1)%DISPLAY_COUNTER_MAX;
 	}
 }
+
+void enterOperationMode(){
+	sleepmode=0;
+	userInputState=0;
+}
+
+void enterSleepMode(){
+	sleepmode=0;
+	userInputState=0;
+}
+
+//void enter
 void initializeDisplayToZero(){
 		for (int i=0; i<3; i++)
 			digitArray[i] = -1;

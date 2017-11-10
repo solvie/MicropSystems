@@ -1,13 +1,16 @@
 #include "gpio.h"
 #include "keypad.h"
 /*
+
 connection: 
 PB12,PB13,PB14,PB15,PD8,PD9,PD10,PD11
+
 Row:
 	RB0 -> PD8
 	RB1 -> PD9
 	RB2 -> PD10
 	RB3 -> PD11
+
 Col:
 	RB4 -> PB12
 	RB5 -> PB13
@@ -17,6 +20,7 @@ Col:
 
 extern int reset_flag;
 extern int sleep_flag;
+extern int operation_flag;
 const float KEYPAD_MAP [4][3] = {
 	{'1','2','3'},
 	{'4','5','6'},
@@ -94,6 +98,8 @@ char Read_KP_Value(void){
 	
 	static int counter = 0;
 	const int key_pressed_threshold = 10000;
+	const int reset_threshold = 30000;
+	const int sleep_threshold = 100000;
 	static char temp = 0;
 	
 	if(row_index!=-1 && col_index!=-1){
@@ -101,18 +107,65 @@ char Read_KP_Value(void){
 			temp = KEYPAD_MAP[row_index][col_index];
 			counter += 1;
 		}else{
-			if(counter > key_pressed_threshold){
-				counter = 0;
-				return KEYPAD_MAP[row_index][col_index];
+			
+			if(temp == '*'){
+				if(temp == KEYPAD_MAP[row_index][col_index]){
+					counter ++;
+					if(counter > sleep_threshold){
+						sleep_flag = 1;
+						temp = 0;
+						counter = 0;
+						return '\0';
+					}
+				}
+
+			}else if(temp=='#'){
+				if(temp == KEYPAD_MAP[row_index][col_index]){
+					counter ++;
+					if(counter > sleep_threshold){
+						operation_flag = 1;
+						temp = 0;
+						counter = 0;
+						return '\0';
+					}
+				}
 			}
-			if(temp == KEYPAD_MAP[row_index][col_index]){
-				counter ++;
-			}else{
-				counter = 0;
+			
+			else{
+				if(counter > key_pressed_threshold){
+					counter = 0;
+					return KEYPAD_MAP[row_index][col_index];
+				}
+				if(temp == KEYPAD_MAP[row_index][col_index]){
+					counter ++;
+				}else{
+					counter = 0;
+				}
 			}
 	}
 		return '\0';
 	}else{
+		if(temp == '*'){
+				if(counter > reset_threshold){
+						reset_flag = 1;
+						counter = 0;
+						return '\0';
+					}else if(counter > key_pressed_threshold && counter < reset_threshold){
+						counter = 0;
+						return '*';
+					}
+					
+		} 
+		
+		if(temp == '#'){
+				if(counter > key_pressed_threshold){
+						counter = 0;
+						return '#';
+					}
+					
+		} 
+		temp = 0;
+		counter = 0;
 		return '\0';
 	}
 	
