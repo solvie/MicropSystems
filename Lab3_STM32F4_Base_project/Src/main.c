@@ -98,8 +98,8 @@ int main(void)
 			if(read_flag == 1){
 					float acc_value[3]= {99,99,99};
 					Read_ACC(&acc_value[0]);
-					//printf("%3f,%3f,%3f \n",acc_value[0], acc_value[1], acc_value[2]);
-					//read_flag = 0;
+					printf("%3f,%3f,%3f \n",acc_value[0], acc_value[1], acc_value[2]);
+					read_flag = 0;
 			}
 			//counter += 1;
 //			printf("Calibrated: X: %3f   Y: %3f   Z: %3f \n",acc_value[0], acc_value[1], acc_value[2]);

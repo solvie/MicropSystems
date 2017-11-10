@@ -155,6 +155,13 @@ char Read_KP_Value(void){
 						return '*';
 					}
 		} 
+		
+		if(temp == '#'){
+			if(counter > key_pressed_threshold && counter < reset_threshold){
+			counter = 0;
+			return '#';
+			}
+		}
 		temp = 0;
 		counter = 0;
 		return '\0';

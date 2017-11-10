@@ -24,7 +24,7 @@ float z_buffer[BUFFER_SIZE];
 float x_filtered[BUFFER_SIZE];
 float y_filtered[BUFFER_SIZE];
 float z_filtered[BUFFER_SIZE];
-FIR_coeff coeffStruct = {{1.0000,-0.3299,0.2597}, {0.2246,0.4491,0.2246}};
+FIR_coeff coeffStruct = {{1.0000,0.0678,0.2369}, {0.3169,0.6338,0.3169}};
 float Cal_M[4][3] = {
 	{0.0010,-0.0000,-0.0000},
 	{-0.0000,0.0010,-0.0000},
