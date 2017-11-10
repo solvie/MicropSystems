@@ -55,6 +55,8 @@ void deleteLastInBuffer();
 void initializeDisplayToZero();
 int concatenateArray();
 
+int SysTickCount;
+
 int acc_flag;
 int read_flag;
 int reset_flag;
@@ -108,7 +110,7 @@ int main(void)
   while (1){
 		//in main while loop display counter goes on as long as its not in sleep mode
 		if (!sleepmode){
-			HAL_TIM_Base_Stop_IT(&htim2);//DOUBLE CHECK!!
+			HAL_TIM_Base_Start_IT(&htim2);//DOUBLE CHECK!!
 			if(digselect_flag==1)
 				digitSelect(&digitArray[0],toggleDigit());
 			if (userInputState){
@@ -176,8 +178,10 @@ int main(void)
 				} if (sleep_flag){//enter sleep mode
 					sleep_flag=0;
 					sleepmode=1;
+					resetAll(); 
+					HAL_TIM_Base_Stop_IT(&htim2);
 					for (int i=0; i<4; i++)digitArray[i] = -1;
-					user_pwm_set_led_brightness(10,10,10,10);//Dim the LEDS
+					user_pwm_set_led_brightness(0,0,0,0);//Dim the LEDS
 				} else if (reset_flag){ //go to input mode for the relevant roll state
 					reset_flag=0;
 					userInputState=1;
@@ -198,8 +202,8 @@ int main(void)
 					intToArray(&digitArray[0],toDisplay);
 			} 
 		} else{ //Is in sleep mode
-			resetAll(); 
-		  	HAL_TIM_Base_Stop_IT(&htim2);
+			//resetAll(); 
+		  //HAL_TIM_Base_Stop_IT(&htim2);
 			char key_pressed = Read_KP_Value();
 			if(operation_flag){
 				sleepmode=0;

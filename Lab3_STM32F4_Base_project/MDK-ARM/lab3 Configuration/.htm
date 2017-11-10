@@ -3,7 +3,7 @@
 <title>Static Call Graph - [lab3 Configuration/\.axf]</title></head>
 <body><HR>
 <H1>Static Call Graph for image lab3 Configuration/\.axf</H1><HR>
-<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 5050169: Last Updated: Thu Nov 09 21:44:45 2017
+<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 5050169: Last Updated: Fri Nov 10 11:40:37 2017
 <BR><P>
 <H3>Maximum Stack Usage =        280 bytes + Unknown(Cycles, Untraceable Function Pointers)</H3><H3>
 Call chain for Maximum Stack Depth:</H3>
@@ -646,7 +646,7 @@ Global Symbols
 
 <P><STRONG><a name="[f4]"></a>__scatterload_rt2</STRONG> (Thumb, 0 bytes, Stack size 0 bytes, init.o(.text), UNUSED)
 
-<P><STRONG><a name="[e6]"></a>ACC_Read_Value</STRONG> (Thumb, 178 bytes, Stack size 12 bytes, accelerometer.o(i.ACC_Read_Value))
+<P><STRONG><a name="[e4]"></a>ACC_Read_Value</STRONG> (Thumb, 178 bytes, Stack size 12 bytes, accelerometer.o(i.ACC_Read_Value))
 <BR><BR>[Stack]<UL><LI>Max Depth = 12<LI>Call Chain = ACC_Read_Value
 </UL>
 <BR>[Called By]<UL><LI><a href="#[5c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;main
@@ -718,7 +718,7 @@ Global Symbols
 <BR><BR>[Called By]<UL><LI><a href="#[db]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;displayInt
 <LI><a href="#[ac]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;LIS3DSH_Write
 <LI><a href="#[ab]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;LIS3DSH_Read
-<LI><a href="#[e0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;resetAll
+<LI><a href="#[e5]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;resetAll
 <LI><a href="#[da]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;digitSelect
 <LI><a href="#[8a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_SPI_MspInit
 </UL>
@@ -907,7 +907,7 @@ Global Symbols
 <BR><BR>[Called By]<UL><LI><a href="#[5c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;main
 </UL>
 
-<P><STRONG><a name="[e1]"></a>HAL_TIM_Base_Stop_IT</STRONG> (Thumb, 42 bytes, Stack size 0 bytes, stm32f4xx_hal_tim.o(i.HAL_TIM_Base_Stop_IT))
+<P><STRONG><a name="[e6]"></a>HAL_TIM_Base_Stop_IT</STRONG> (Thumb, 42 bytes, Stack size 0 bytes, stm32f4xx_hal_tim.o(i.HAL_TIM_Base_Stop_IT))
 <BR><BR>[Called By]<UL><LI><a href="#[5c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;main
 </UL>
 
@@ -1403,7 +1403,7 @@ Global Symbols
 <BR>[Called By]<UL><LI><a href="#[5c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;main
 </UL>
 
-<P><STRONG><a name="[e5]"></a>deleteLastInBuffer</STRONG> (Thumb, 64 bytes, Stack size 8 bytes, main.o(i.deleteLastInBuffer))
+<P><STRONG><a name="[e3]"></a>deleteLastInBuffer</STRONG> (Thumb, 64 bytes, Stack size 8 bytes, main.o(i.deleteLastInBuffer))
 <BR><BR>[Stack]<UL><LI>Max Depth = 8<LI>Call Chain = deleteLastInBuffer
 </UL>
 <BR>[Called By]<UL><LI><a href="#[5c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;main
@@ -1426,7 +1426,7 @@ Global Symbols
 <BR>[Called By]<UL><LI><a href="#[da]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;digitSelect
 </UL>
 
-<P><STRONG><a name="[e4]"></a>enterNumberIntoBuffer</STRONG> (Thumb, 46 bytes, Stack size 8 bytes, main.o(i.enterNumberIntoBuffer))
+<P><STRONG><a name="[e2]"></a>enterNumberIntoBuffer</STRONG> (Thumb, 46 bytes, Stack size 8 bytes, main.o(i.enterNumberIntoBuffer))
 <BR><BR>[Stack]<UL><LI>Max Depth = 8<LI>Call Chain = enterNumberIntoBuffer
 </UL>
 <BR>[Called By]<UL><LI><a href="#[5c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;main
@@ -1451,7 +1451,7 @@ Global Symbols
 <BR>[Called By]<UL><LI><a href="#[5c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;main
 </UL>
 
-<P><STRONG><a name="[e3]"></a>initializeDisplayToZero</STRONG> (Thumb, 22 bytes, Stack size 0 bytes, main.o(i.initializeDisplayToZero))
+<P><STRONG><a name="[e1]"></a>initializeDisplayToZero</STRONG> (Thumb, 22 bytes, Stack size 0 bytes, main.o(i.initializeDisplayToZero))
 <BR><BR>[Called By]<UL><LI><a href="#[5c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;main
 </UL>
 
@@ -1474,10 +1474,10 @@ Global Symbols
 <BR>[Called By]<UL><LI><a href="#[ce]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__hardfp_log10
 </UL>
 
-<P><STRONG><a name="[5c]"></a>main</STRONG> (Thumb, 570 bytes, Stack size 16 bytes, main.o(i.main))
+<P><STRONG><a name="[5c]"></a>main</STRONG> (Thumb, 568 bytes, Stack size 16 bytes, main.o(i.main))
 <BR><BR>[Stack]<UL><LI>Max Depth = 280<LI>Call Chain = main &rArr; intToArray &rArr; __hardfp_log10 &rArr; log &rArr; __hardfp_log &rArr; __kernel_poly &rArr; __aeabi_dmul &rArr; _double_epilogue &rArr; _double_round
 </UL>
-<BR>[Calls]<UL><LI><a href="#[e0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;resetAll
+<BR>[Calls]<UL><LI><a href="#[e5]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;resetAll
 <LI><a href="#[dd]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;intToArray
 <LI><a href="#[da]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;digitSelect
 <LI><a href="#[bb]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Read_KP_Value
@@ -1486,17 +1486,17 @@ Global Symbols
 <LI><a href="#[b6]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;MX_TIM2_Init
 <LI><a href="#[b4]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;MX_GPIO_Init
 <LI><a href="#[a8]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_TIM_PWM_Start
-<LI><a href="#[e1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_TIM_Base_Stop_IT
+<LI><a href="#[e6]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_TIM_Base_Stop_IT
 <LI><a href="#[de]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_TIM_Base_Start_IT
 <LI><a href="#[df]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_TIM_Base_Start
 <LI><a href="#[7c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_Init
-<LI><a href="#[e6]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;ACC_Read_Value
+<LI><a href="#[e4]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;ACC_Read_Value
 <LI><a href="#[d6]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;user_pwm_set_led_brightness
-<LI><a href="#[e2]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;toggleDigit
-<LI><a href="#[e3]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;initializeDisplayToZero
+<LI><a href="#[e0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;toggleDigit
+<LI><a href="#[e1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;initializeDisplayToZero
 <LI><a href="#[dc]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;initializeACC
-<LI><a href="#[e4]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;enterNumberIntoBuffer
-<LI><a href="#[e5]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;deleteLastInBuffer
+<LI><a href="#[e2]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;enterNumberIntoBuffer
+<LI><a href="#[e3]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;deleteLastInBuffer
 <LI><a href="#[d8]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;concatenateArray
 <LI><a href="#[d2]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;adjustBrightnessBasedOnACC
 <LI><a href="#[bf]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SystemClock_Config
@@ -1505,7 +1505,7 @@ Global Symbols
 </UL>
 <BR>[Address Reference Count : 1]<UL><LI> entry9a.o(.ARM.Collect$$$$0000000B)
 </UL>
-<P><STRONG><a name="[e0]"></a>resetAll</STRONG> (Thumb, 122 bytes, Stack size 8 bytes, display.o(i.resetAll))
+<P><STRONG><a name="[e5]"></a>resetAll</STRONG> (Thumb, 122 bytes, Stack size 8 bytes, display.o(i.resetAll))
 <BR><BR>[Stack]<UL><LI>Max Depth = 8<LI>Call Chain = resetAll
 </UL>
 <BR>[Calls]<UL><LI><a href="#[8c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_GPIO_WritePin
@@ -1513,7 +1513,7 @@ Global Symbols
 <BR>[Called By]<UL><LI><a href="#[5c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;main
 </UL>
 
-<P><STRONG><a name="[e2]"></a>toggleDigit</STRONG> (Thumb, 22 bytes, Stack size 0 bytes, main.o(i.toggleDigit))
+<P><STRONG><a name="[e0]"></a>toggleDigit</STRONG> (Thumb, 22 bytes, Stack size 0 bytes, main.o(i.toggleDigit))
 <BR><BR>[Called By]<UL><LI><a href="#[5c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;main
 </UL>
 
