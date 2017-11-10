@@ -74,7 +74,7 @@ int testtoggle=0;
 int currentDigit=0;
 int displayCounter=0;
 int digitArray[4]={0,0,0,0} ;
-const int DISPLAY_COUNTER_MAX = 500; 
+const int DISPLAY_COUNTER_MAX = 10000; 
 int toDisplay=0;
 
 //	const int reset_threshold = 100000;
@@ -134,6 +134,7 @@ int main(void)
   {
 		//in main while loop display counter goes on as long as its not in sleep mode
 		if (!sleepmode){
+			HAL_TIM_Base_Stop_IT(&htim2);
 			if(digselect_flag==1)
 					digitSelect(&digitArray[0],toggleDigit());
 			if (userInputState){
@@ -221,9 +222,12 @@ int main(void)
 				
 			} 
 		} else{ //Is in sleep mode
+			resetAll();
+		  HAL_TIM_Base_Stop_IT(&htim2);
+			//for (int i=0; i<4; i++)digitArray[i] = -1;
 			char key_pressed = Read_KP_Value();
-			if (displayCounter==DISPLAY_COUNTER_MAX-1) //Waiting for counter to reach 99 ensures display is updated less frequently than interrupt rate from timer (so as changes to be easily visible)
-					intToArray(&digitArray[0],toDisplay);
+			//if (displayCounter==DISPLAY_COUNTER_MAX-1) //Waiting for counter to reach 99 ensures display is updated less frequently than interrupt rate from timer (so as changes to be easily visible)
+			//		intToArray(&digitArray[0],toDisplay);
 			if(operation_flag){
 					sleepmode=0;
 					userInputState=0;
@@ -328,7 +332,7 @@ void adjustBrightnessBasedOnACC(int isPitch, float expectedPitchOrRoll, float* v
 	float az = valsFromAcc[2];
 	if (isPitch){
 		calculated = calculatePitchAngleFromAccVals(ax, ay, az);
-		convertedTo180scale= calculated+90;
+		convertedTo180scale= calculated+90.5;//adding .5 to cast to int properly
 		// The diffMagnitudeForBrightness will be from 0 to 90 (because of abs). 
 		diff = expectedPitchOrRoll- convertedTo180scale;
 		diffMagnitudeForBrightness= (uint16_t) fabs( expectedPitchOrRoll - convertedTo180scale);
@@ -340,7 +344,7 @@ void adjustBrightnessBasedOnACC(int isPitch, float expectedPitchOrRoll, float* v
 	}
 	else {
 		calculated = calculateRollAngleFromAccVals(ax, ay, az);
-		convertedTo180scale= calculated+90;
+		convertedTo180scale= calculated+90.5;//adding .5 to cast to int properly
 		diff = expectedPitchOrRoll- convertedTo180scale;
 		// The diffMagnitudeForBrightness will be from 0 to 90 (because of abs).
 		diffMagnitudeForBrightness=  (uint16_t)fabs( expectedPitchOrRoll - convertedTo180scale);
