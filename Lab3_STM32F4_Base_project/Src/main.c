@@ -87,7 +87,7 @@ int main(void)
 	SystemClock_Config();
 	/* Initialize all configured peripherals */
 	MX_GPIO_Init();
-	initializeACC	();
+	initializeACC();
 	MX_NVIC_Init();
 	MX_TIM4_Init();
 	MX_TIM2_Init();
@@ -108,7 +108,7 @@ int main(void)
   while (1){
 		//in main while loop display counter goes on as long as its not in sleep mode
 		if (!sleepmode){
-			HAL_TIM_Base_Stop_IT(&htim2);
+			HAL_TIM_Base_Stop_IT(&htim2);//DOUBLE CHECK!!
 			if(digselect_flag==1)
 				digitSelect(&digitArray[0],toggleDigit());
 			if (userInputState){
