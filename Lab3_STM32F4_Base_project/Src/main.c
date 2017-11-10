@@ -42,7 +42,11 @@
 
 #define PI 3.14159265
 
-void user_pwm_setvalue(uint16_t value);
+/* Private function prototypes -----------------------------------------------*/
+void SystemClock_Config(void);
+void initializeACC(void);
+void MX_NVIC_Init(void);
+int concatenate(int x, int y);
 void user_pwm_set_led_brightness(uint16_t ld3, uint16_t ld4,uint16_t ld5,uint16_t ld6);
 void adjustBrightnessBasedOnACC(int isPitch, float expectedPitchOrRoll, float* valsFromAcc);
 int toggleDigit();
@@ -51,15 +55,6 @@ void deleteLastInBuffer();
 void initializeDisplayToZero();
 int concatenateArray();
 
-/* Private function prototypes -----------------------------------------------*/
-void SystemClock_Config(void);
-void initializeACC			(void);
-void MX_NVIC_Init(void);
-void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin);
-int concatenate(int x, int y);
-void toggleflash(int);
-
-int SysTickCount;
 int acc_flag;
 int read_flag;
 int reset_flag;
@@ -67,21 +62,14 @@ int sleep_flag;
 int operation_flag;
 int digselect_flag;
 
-int counter = 0;
-int dataReady = 0;
-int timer4counter;
-int pwm_value,step;
-int testtoggle=0;
 int currentDigit=0;
 int displayCounter=0;
 int digitArray[4]={0,0,0,0} ;
+int entered_char_pointer=4; //index of the last element (one further than the last because no input at first)
+
 const int DISPLAY_COUNTER_MAX = 10000; 
 int toDisplay=0;
 
-//	const int reset_threshold = 100000;
-//	const int sleep_threshold = 350000;
-
-//-- fsm
 int userInputState; //if not in userInputState, is in operatingMode
 int enterRollState; // if not in enterRollState, is in enterPitchState
 int operatingModeRollMonitoring; // if not operatingModeRollMonitoring, is operatingModePitchMonitoring
@@ -90,33 +78,21 @@ int inputRollExpected = 0;
 int inputPitchExpected = 0;
 int reinit=0;
 
-int rollstatecounter=0;
-int flashflag=0;
-int flashduration=10000;
-
-int entered_char_buffer[4]={-1,-1,-1,0};
-int entered_char_pointer=4; //index of the last element (one further than the last because no input at first)
-
-//--
-char prevkeypressed;
-int pressedCounter=0;
-int loopCounter=0;
 int main(void)
 {
-	timer4counter=0;
-  /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
-  HAL_Init();
+	/* Reset of all peripherals, Initializes the Flash interface and the Systick. */
+	HAL_Init();
 
-  /* Configure the system clock */
-  SystemClock_Config();
-  /* Initialize all configured peripherals */
-  MX_GPIO_Init();
+	/* Configure the system clock */
+	SystemClock_Config();
+	/* Initialize all configured peripherals */
+	MX_GPIO_Init();
 	initializeACC	();
 	MX_NVIC_Init();
 	MX_TIM4_Init();
 	MX_TIM2_Init();
 	
-  HAL_TIM_Base_Start_IT(&htim2);
+	HAL_TIM_Base_Start_IT(&htim2);
 	HAL_TIM_Base_Start(&htim4);
 	
 	HAL_TIM_PWM_Start(&htim4,TIM_CHANNEL_1);
@@ -124,23 +100,20 @@ int main(void)
 	HAL_TIM_PWM_Start(&htim4,TIM_CHANNEL_3);
 	HAL_TIM_PWM_Start(&htim4,TIM_CHANNEL_4);
 	
-  userInputState=1;
+	userInputState=1;
 	enterRollState=1; //On startup, we are in enter Roll state
 	operatingModeRollMonitoring=1; //the first operating mode we enter will be roll monitoring
 	user_pwm_set_led_brightness(500,0,0,500);//On startup, we are in enter Roll state
 
-	//HAL_TIM_PWM_Start(&htim4,TIM_CHANNEL_2);//or1
-	//int counter = 0;
-  while (1)
-  {
+  while (1){
 		//in main while loop display counter goes on as long as its not in sleep mode
 		if (!sleepmode){
 			HAL_TIM_Base_Stop_IT(&htim2);
 			if(digselect_flag==1)
-					digitSelect(&digitArray[0],toggleDigit());
+				digitSelect(&digitArray[0],toggleDigit());
 			if (userInputState){
 				if (entered_char_pointer==4){//nothing has been entered yet
-						initializeDisplayToZero();//display zero if nothing has been entered
+					initializeDisplayToZero();//display zero if nothing has been entered
 				}
 				char key_pressed = Read_KP_Value();
 				if(key_pressed != '\0'&&key_pressed != '*'&&key_pressed != '#'){ //a number was entered
@@ -179,22 +152,19 @@ int main(void)
 				}
 			}else{ // Is in operatingMode
 			//Update the value to be shown in 7-segment display.
-
 				if(acc_flag == 1){
-								//printf("Temp: X: %3f   Y: %3f   Z: %3f \n",acc_value[0], acc_value[1], acc_value[2]);
-						ACC_Read_Value();
-						if(read_flag == 1){
-								float acc_value[3]= {99,99,99};
-								Read_ACC(&acc_value[0]);
-								if (operatingModeRollMonitoring){
-									adjustBrightnessBasedOnACC(0, inputRollExpected, &acc_value[0]);
-								} else{//if not in operatingModeRollMonitoring is operatingModePitchMonitoring
-									adjustBrightnessBasedOnACC(1, inputPitchExpected, &acc_value[0]);
-								}
-								//printf("%3f,%3f,%3f \n",acc_value[0], acc_value[1], acc_value[2]);
-								read_flag = 0;
+					ACC_Read_Value();
+					if(read_flag == 1){
+						float acc_value[3]= {99,99,99};
+						Read_ACC(&acc_value[0]);
+						if (operatingModeRollMonitoring){
+							adjustBrightnessBasedOnACC(0, inputRollExpected, &acc_value[0]);
+						} else{//if not in operatingModeRollMonitoring is operatingModePitchMonitoring
+							adjustBrightnessBasedOnACC(1, inputPitchExpected, &acc_value[0]);
 						}
-						acc_flag = 0;
+						read_flag = 0;
+					}
+					acc_flag = 0;
 				}
 				char key_pressed = Read_KP_Value();
 				if(key_pressed == '1'){ //go to roll
@@ -204,66 +174,54 @@ int main(void)
 					printf("Key Pressed is %c \n", key_pressed);
 					operatingModeRollMonitoring=0;
 				} if (sleep_flag){//enter sleep mode
-						sleep_flag=0;
-						sleepmode=1;
-						for (int i=0; i<4; i++)digitArray[i] = -1;
-						user_pwm_set_led_brightness(10,10,10,10);//Dim the LEDS
+					sleep_flag=0;
+					sleepmode=1;
+					for (int i=0; i<4; i++)digitArray[i] = -1;
+					user_pwm_set_led_brightness(10,10,10,10);//Dim the LEDS
 				} else if (reset_flag){ //go to input mode for the relevant roll state
-						reset_flag=0;
-						userInputState=1;
-						reinit = 1;
-						if (operatingModeRollMonitoring){
-								enterRollState=1;
-								entered_char_pointer=4;
-								initializeDisplayToZero();
-								user_pwm_set_led_brightness(500,0,0,500);
-							} else{
-								enterRollState=0;
-								entered_char_pointer=4;
-								initializeDisplayToZero();
-								user_pwm_set_led_brightness(0,500,500,0);
-							}
+					reset_flag=0;
+					userInputState=1;
+					reinit = 1;
+					if (operatingModeRollMonitoring){
+						enterRollState=1;
+						entered_char_pointer=4;
+						initializeDisplayToZero();
+						user_pwm_set_led_brightness(500,0,0,500);
+					} else{
+						enterRollState=0;
+						entered_char_pointer=4;
+						initializeDisplayToZero();
+						user_pwm_set_led_brightness(0,500,500,0);
+					}
 				}
 				if (displayCounter==DISPLAY_COUNTER_MAX-1) //Waiting for counter to reach 99 ensures display is updated less frequently than interrupt rate from timer (so as changes to be easily visible)
 					intToArray(&digitArray[0],toDisplay);
-				
 			} 
 		} else{ //Is in sleep mode
-			resetAll();
-		  HAL_TIM_Base_Stop_IT(&htim2);
-			//for (int i=0; i<4; i++)digitArray[i] = -1;
+			resetAll(); 
+		  	HAL_TIM_Base_Stop_IT(&htim2);
 			char key_pressed = Read_KP_Value();
-			//if (displayCounter==DISPLAY_COUNTER_MAX-1) //Waiting for counter to reach 99 ensures display is updated less frequently than interrupt rate from timer (so as changes to be easily visible)
-			//		intToArray(&digitArray[0],toDisplay);
 			if(operation_flag){
-					sleepmode=0;
-					userInputState=0;
-					operation_flag=0;
-				}
+				sleepmode=0;
+				userInputState=0;
+				operation_flag=0;
+			}
 		}
-		
-		//loopCounter++;
 		displayCounter = (displayCounter+1)%DISPLAY_COUNTER_MAX;
 	}
 }
 
-void enterOperationMode(){
-	sleepmode=0;
-	userInputState=0;
-}
-
-void enterSleepMode(){
-	sleepmode=0;
-	userInputState=0;
-}
-
-//void enter
+/**
+* Initializes the digitArray for user input mode; the last digit of the array should be 0, all the rest off.
+*/
 void initializeDisplayToZero(){
-		for (int i=0; i<3; i++)
-			digitArray[i] = -1;
-		digitArray[3] = 0; //display zero if nothing has been entered
+	for (int i=0; i<3; i++) digitArray[i] = -1;
+	digitArray[3] = 0; //display zero if nothing has been entered
 }
 
+/**
+* Appends the @param numberEntered, the user input digit, into the digitArray.
+*/
 void enterNumberIntoBuffer(int numberEntered){
 	if (entered_char_pointer>1){ //as long as three digits haven't already been filled, a user can type a new letter
 		for (int i=entered_char_pointer; i<4; i++){
@@ -274,6 +232,9 @@ void enterNumberIntoBuffer(int numberEntered){
 	}
 }
 
+/**
+* Removes the last entered number from the digitArray.
+*/
 void deleteLastInBuffer(){
 		const int lastindex = 3; //last of indices 0,1,2,3
 		if (entered_char_pointer<4){ //as long as three digits haven't already been filled, a user can type a new letter
@@ -290,27 +251,37 @@ void deleteLastInBuffer(){
 		}
 }
 
+/**
+* Concatentates the contents of digitArray into one integer, and returns that integer
+*/
 int concatenateArray(){
-		if (entered_char_pointer==4) entered_char_pointer=3;//if nothing was entered just take the 0
-		int concatedint = digitArray[entered_char_pointer];
-		for (int i = entered_char_pointer+1; i<4; i++){
-			concatedint = concatenate(concatedint,digitArray[i] );
-		}
-		return concatedint;
+	if (entered_char_pointer==4) entered_char_pointer=3;//If a user input nothing, set the pointer to the least significant digit, aka the last array index, where the zero is.
+	int concatedint = digitArray[entered_char_pointer];
+	for (int i = entered_char_pointer+1; i<4; i++) concatedint = concatenate(concatedint,digitArray[i] );
+	return concatedint;
 }
 
+/**
+* Helper method for concatenateArray which concatenates two integers together, and returns the result
+*/
 int concatenate(int x, int y) {
     int pow = 10;
-    while(y >= pow)
-        pow *= 10;
+    while(y >= pow) pow *= 10;
     return x * pow + y;        
 }
 
+/**
+* Helper method for the display, toggles between which of the LEDs to select.
+*/
 int toggleDigit(){
 	currentDigit=(currentDigit+1)%4;
 	return currentDigit;
 }
 
+/**
+* Helper method for adjustBrightnessBasedOnACC that calculates the pitch angle from the input accelerometer x,y,z values.
+* Returns a value in degrees (as opposed to rads)
+*/
 float calculatePitchAngleFromAccVals(float ax, float ay, float az){
 	float val = 180.0 / PI;
 	float retval;
@@ -321,6 +292,10 @@ float calculatePitchAngleFromAccVals(float ax, float ay, float az){
 	return retval;
 }
 
+/**
+* Helper method for adjustBrightnessBasedOnACC that calculates the roll angle from the input accelerometer x,y,z values.
+* Returns a value in degrees (as opposed to rads)
+*/
 float calculateRollAngleFromAccVals(float ax, float ay, float az){
 	float val = 180.0 / PI;
 	float retval;
@@ -331,6 +306,14 @@ float calculateRollAngleFromAccVals(float ax, float ay, float az){
 	return retval;
 }
 
+/**
+* Sets the relevant LEDs for either pitch or roll to a brightness determined by how far off the user input value is
+* from the accelerometer-calculated value.
+* 
+* @param isPitch - if this is high, we are adjusting brightness for the pitch related LEDs. If low, for roll related LEDs.
+* @param expectedPitchOrRoll - this is the user input value of the pitch or roll.
+* @param valsFromAcc - refers to the array that holds the x,y,z values provided by the accelerometer
+*/
 void adjustBrightnessBasedOnACC(int isPitch, float expectedPitchOrRoll, float* valsFromAcc){
 	uint16_t diffMagnitudeForBrightness;
 	float calculated, convertedTo180scale, diff;
@@ -347,7 +330,7 @@ void adjustBrightnessBasedOnACC(int isPitch, float expectedPitchOrRoll, float* v
 		if (diff>0)
 			user_pwm_set_led_brightness(0,0,diffMagnitudeForBrightness * 5.555555,0); //5.5555 = 500/90
 		else
-			user_pwm_set_led_brightness(0,diffMagnitudeForBrightness * 5.5555550,0,0); //5.5555 = 500/90
+			user_pwm_set_led_brightness(0,diffMagnitudeForBrightness * 5.555555,0,0); //5.5555 = 500/90
 	}
 	else {
 		calculated = calculateRollAngleFromAccVals(ax, ay, az);
@@ -364,31 +347,32 @@ void adjustBrightnessBasedOnACC(int isPitch, float expectedPitchOrRoll, float* v
 }
 
 /**
-* led brightness can range from 0 to 1000
-* Brightness =1000 is 180 degrees off
-* Brightness = 500 is 90 degrees off
-* Brightness = 0 is 0 degrees off
+* Adjusts the brightness of the LED according to the values of each parameter ld3, ld4, ld5, and ld6.
+* brightness can range from 0 to 1000
+* Pulse =1000 gives max brightness (period has been set to 1000 for the timer)
+* Pulse = 500 is half
+* Pulse = 0 is off
 * PD12(LD4)- green, PD13(LD3)- orange, PD14(LD5)-red, PD15(LD6)-blue
-* Only LD3,LD6 OR LD4,LD5 will be on at the same time, depending on whether pitch was selected or roll.
+* 
 */
 void user_pwm_set_led_brightness(uint16_t ld3, uint16_t ld4,uint16_t ld5,uint16_t ld6){
-	  TIM_OC_InitTypeDef sConfigOC;
+	TIM_OC_InitTypeDef sConfigOC;
   
     sConfigOC.OCMode = TIM_OCMODE_PWM1;
     sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
     sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
 	  
-	  sConfigOC.Pulse = ld4;
+	sConfigOC.Pulse = ld4;
     HAL_TIM_PWM_ConfigChannel(&htim4, &sConfigOC, TIM_CHANNEL_1);
-	  sConfigOC.Pulse = ld3;
-	  HAL_TIM_PWM_ConfigChannel(&htim4, &sConfigOC, TIM_CHANNEL_2);
-		sConfigOC.Pulse = ld5;
-	  HAL_TIM_PWM_ConfigChannel(&htim4, &sConfigOC, TIM_CHANNEL_3);
-	  sConfigOC.Pulse = ld6;
+	sConfigOC.Pulse = ld3;
+	HAL_TIM_PWM_ConfigChannel(&htim4, &sConfigOC, TIM_CHANNEL_2);
+	sConfigOC.Pulse = ld5;
+	HAL_TIM_PWM_ConfigChannel(&htim4, &sConfigOC, TIM_CHANNEL_3);
+	sConfigOC.Pulse = ld6;
     HAL_TIM_PWM_ConfigChannel(&htim4, &sConfigOC, TIM_CHANNEL_4);
 
     HAL_TIM_PWM_Start(&htim4, TIM_CHANNEL_1);  
-	  HAL_TIM_PWM_Start(&htim4, TIM_CHANNEL_2);  
+	HAL_TIM_PWM_Start(&htim4, TIM_CHANNEL_2);  
     HAL_TIM_PWM_Start(&htim4, TIM_CHANNEL_3);  
     HAL_TIM_PWM_Start(&htim4, TIM_CHANNEL_4);  
 }
@@ -396,46 +380,43 @@ void user_pwm_set_led_brightness(uint16_t ld3, uint16_t ld4,uint16_t ld5,uint16_
 /** System Clock Configuration
 	The clock source is configured as external at 168 MHz HCLK
 */
-
 void SystemClock_Config(void)
 {
 
-  RCC_OscInitTypeDef RCC_OscInitStruct;
-  RCC_ClkInitTypeDef RCC_ClkInitStruct;
-	
-  __PWR_CLK_ENABLE();
+	RCC_OscInitTypeDef RCC_OscInitStruct;
+	RCC_ClkInitTypeDef RCC_ClkInitStruct;
 
-  __HAL_PWR_VOLTAGESCALING_CONFIG(PWR_REGULATOR_VOLTAGE_SCALE1);
+	__PWR_CLK_ENABLE();
 
-  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE;
-  RCC_OscInitStruct.HSEState = RCC_HSE_ON;
-  RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
-  RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
-  RCC_OscInitStruct.PLL.PLLM = 8;
-  RCC_OscInitStruct.PLL.PLLN = 336;
-  RCC_OscInitStruct.PLL.PLLP = RCC_PLLP_DIV2;
-  RCC_OscInitStruct.PLL.PLLQ = 7;
-  HAL_RCC_OscConfig(&RCC_OscInitStruct);
+	__HAL_PWR_VOLTAGESCALING_CONFIG(PWR_REGULATOR_VOLTAGE_SCALE1);
 
-  RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_SYSCLK|RCC_CLOCKTYPE_PCLK1
-                              |RCC_CLOCKTYPE_PCLK2;
-  RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
-  RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
-  RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV4;
-  RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV2;
-  HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_5);
+	RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE;
+	RCC_OscInitStruct.HSEState = RCC_HSE_ON;
+	RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
+	RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
+	RCC_OscInitStruct.PLL.PLLM = 8;
+	RCC_OscInitStruct.PLL.PLLN = 336;
+	RCC_OscInitStruct.PLL.PLLP = RCC_PLLP_DIV2;
+	RCC_OscInitStruct.PLL.PLLQ = 7;
+	HAL_RCC_OscConfig(&RCC_OscInitStruct);
 
-  HAL_SYSTICK_Config(HAL_RCC_GetHCLKFreq()/1000);
+	RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_SYSCLK|RCC_CLOCKTYPE_PCLK1
+	                          |RCC_CLOCKTYPE_PCLK2;
+	RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
+	RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
+	RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV4;
+	RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV2;
+	HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_5);
 
-  HAL_SYSTICK_CLKSourceConfig(SYSTICK_CLKSOURCE_HCLK);
+	HAL_SYSTICK_Config(HAL_RCC_GetHCLKFreq()/1000);
 
-  /* SysTick_IRQn interrupt configuration */
-  HAL_NVIC_SetPriority(SysTick_IRQn, 0, 0);
+	HAL_SYSTICK_CLKSourceConfig(SYSTICK_CLKSOURCE_HCLK);
+
+	/* SysTick_IRQn interrupt configuration */
+	HAL_NVIC_SetPriority(SysTick_IRQn, 0, 0);
 }
 
-/* USER CODE BEGIN 4 */
 
-/* USER CODE END 4 */
 void initializeACC(void){
 	LIS3DSH_InitTypeDef 		Acc_instance;
 	/* Private variables ---------------------------------------------------------*/
@@ -465,7 +446,7 @@ void initializeACC(void){
 void MX_NVIC_Init(void){
   /* Enable and set EXTI Line0 Interrupt */
 	HAL_NVIC_EnableIRQ(EXTI0_IRQn);
-  HAL_NVIC_SetPriority(EXTI0_IRQn, 0, 0);
+	HAL_NVIC_SetPriority(EXTI0_IRQn, 0, 0);
   
 }
 
