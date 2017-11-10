@@ -7,13 +7,28 @@ uint8_t status;
 float Buffer[3];
 float accX, accY, accZ;
 extern int acc_flag;
+extern int read_flag;
 typedef struct{
   float a[3];
   float b[3];
 }FIR_coeff;
 
+int data_ready = 0;
+const int BUFFER_SIZE = 4;
+int buffer_counter = 0;
+int filtered_counter = 0;
+float x_buffer[BUFFER_SIZE];
+float y_buffer[BUFFER_SIZE];
+float z_buffer[BUFFER_SIZE];
 
-FIR_coeff coeffStruct = {{0, 0.3,-0.2}, {0.2,0.4,0.2}};
+float x_filtered[BUFFER_SIZE];
+float y_filtered[BUFFER_SIZE];
+float z_filtered[BUFFER_SIZE];
+
+FIR_coeff coeffStruct_x = {{1.0000,-0.2430,0.2951}, {0.2427,0.4853,0.2427}};
+FIR_coeff coeffStruct_y = {{1.0000,-0.2386,0.2938}, {0.2437,0.4873,0.2437}};
+FIR_coeff coeffStruct_z = {{1.0000,-0.1961,0.2826}, {0.2535,0.5070,0.2535}};
+
 float Cal_M[4][3] = {
 	{0.0010,-0.0000,-0.0000},
 	{-0.0000,0.0010,-0.0000},
@@ -30,16 +45,31 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin){
 		}
 	}
 
-float IIR_C(float* InputArray, float* OutputArray,FIR_coeff* coeff, int Length, int Order){
+float zeroOrArrayPos(int n, float* array ){
+	if(n<0) return 0;
+	else return *(array+n);
+}
+
+float Apply_IIR_Filter(float* InputArray, float* OutputArray, char axis){
+	FIR_coeff* coeff;
+	if(axis == 'z'){
+		coeff = &coeffStruct_z;
+	}else if(axis == 'y'){
+		coeff = &coeffStruct_y;
+	}else{
+		coeff = &coeffStruct_x;
+	}
+	
+	int Length = BUFFER_SIZE;
+	int Order = 2;
 	float tempY;
 	for (int i=0; i<Length;i++){
-		tempY = (coeff->b)[0]*InputArray[i];
-		for (int j=1; j<Order+1;j++){		
-			if(i>=j)
-				tempY = tempY 
-						+(coeff->b)[j]*InputArray[i-j]
-							+(coeff->a)[j]*OutputArray[i-j];
-		}
+//for testing
+		tempY = (coeff->b)[0]*zeroOrArrayPos(i,InputArray);
+		for (int j=1; j<Order+1;j++)
+			tempY = tempY 
+						+(coeff->b)[j]*zeroOrArrayPos(i-j,InputArray)
+							+(coeff->a)[j]*zeroOrArrayPos(i-j,OutputArray);
 		*(OutputArray+i)=tempY; //set the value at index i of OutputArray to the tempY that was just found.
 
 	}
@@ -61,13 +91,30 @@ void Read_ACC_Value(){
 	}
 }
 
-void Calibrate_ACC_Value(float *value){
+void ACC_Read_Value(void){
 		float new_value[3];
 		new_value[0] = accX * Cal_M[0][0] + accY * Cal_M[1][0] + accZ * Cal_M[2][0] + Cal_M[3][0];
 		new_value[1] = accX * Cal_M[0][1] + accY * Cal_M[1][1] + accZ * Cal_M[2][1] + Cal_M[3][1];
 		new_value[2] = accX * Cal_M[0][2] + accY * Cal_M[1][2] + accZ * Cal_M[2][2] + Cal_M[3][2];	
-		//printf("Temp: X: %3f   Y: %3f   Z: %3f \n",new_value[0], new_value[1], new_value[2]);
-		value[0] = new_value[0];
-		value[1] = new_value[1];
-		value[2] = new_value[2];
+	
+		x_buffer[buffer_counter] = new_value[0];
+		y_buffer[buffer_counter] = new_value[1];
+		z_buffer[buffer_counter] = new_value[2];
+		//printf("%3f,%3f,%3f \n",new_value[0], new_value[1], new_value[2]);
+		buffer_counter += 1;
+		if(buffer_counter == BUFFER_SIZE){
+			read_flag = 1;
+				
+		}
+}
+
+void Read_ACC(float *value){
+		Apply_IIR_Filter(&x_buffer[0], &x_filtered[0], 'x');
+		Apply_IIR_Filter(&y_buffer[0], &y_filtered[0], 'y');
+		Apply_IIR_Filter(&z_buffer[0], &z_filtered[0], 'z');
+		value[0] = x_filtered[BUFFER_SIZE-1];
+		value[1] = y_filtered[BUFFER_SIZE-1];
+		value[2] = z_filtered[BUFFER_SIZE-1];
+		buffer_counter = 0;
+	
 }

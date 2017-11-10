@@ -61,6 +61,7 @@ void toggleflash(int);
 
 int SysTickCount;
 int acc_flag;
+int read_flag;
 int reset_flag;
 int sleep_flag;
 int operation_flag;
@@ -180,14 +181,20 @@ int main(void)
 			//Update the value to be shown in 7-segment display.
 
 				if(acc_flag == 1){
-					float acc_value[3]= {99,99,99};
-					Calibrate_ACC_Value(&acc_value[0]);
-					if (operatingModeRollMonitoring){
-						adjustBrightnessBasedOnACC(0, inputRollExpected, &acc_value[0]);
-					} else{//if not in operatingModeRollMonitoring is operatingModePitchMonitoring
-						adjustBrightnessBasedOnACC(1, inputPitchExpected, &acc_value[0]);
-					}
-					acc_flag = 0;
+								//printf("Temp: X: %3f   Y: %3f   Z: %3f \n",acc_value[0], acc_value[1], acc_value[2]);
+						ACC_Read_Value();
+						if(read_flag == 1){
+								float acc_value[3]= {99,99,99};
+								Read_ACC(&acc_value[0]);
+								if (operatingModeRollMonitoring){
+									adjustBrightnessBasedOnACC(0, inputRollExpected, &acc_value[0]);
+								} else{//if not in operatingModeRollMonitoring is operatingModePitchMonitoring
+									adjustBrightnessBasedOnACC(1, inputPitchExpected, &acc_value[0]);
+								}
+								//printf("%3f,%3f,%3f \n",acc_value[0], acc_value[1], acc_value[2]);
+								read_flag = 0;
+						}
+						acc_flag = 0;
 				}
 				char key_pressed = Read_KP_Value();
 				if(key_pressed == '1'){ //go to roll
