@@ -20,6 +20,7 @@ Col:
 
 extern int reset_flag;
 extern int sleep_flag;
+extern int operation_flag;
 const float KEYPAD_MAP [4][3] = {
 	{'1','2','3'},
 	{'4','5','6'},
@@ -97,8 +98,8 @@ char Read_KP_Value(void){
 	
 	static int counter = 0;
 	const int key_pressed_threshold = 10000;
-	const int reset_threshold = 100000;
-	const int sleep_threshold = 350000;
+	const int reset_threshold = 30000;
+	const int sleep_threshold = 100000;
 	static char temp = 0;
 	
 	if(row_index!=-1 && col_index!=-1){
@@ -112,19 +113,25 @@ char Read_KP_Value(void){
 					counter ++;
 					if(counter > sleep_threshold){
 						sleep_flag = 1;
+						temp = 0;
 						counter = 0;
+						return '\0';
 					}
-				}else{
-					if(counter > reset_threshold){
-						reset_flag = 1;
-					}else if(counter > key_pressed_threshold && counter < reset_threshold){
-						counter = 0;
-						return '*';
-					}
-					counter = 0;
 				}
+
+			}else if(temp=='#'){
+				if(temp == KEYPAD_MAP[row_index][col_index]){
+					counter ++;
+					if(counter > sleep_threshold){
+						operation_flag = 1;
+						temp = 0;
+						counter = 0;
+						return '\0';
+					}
+				}
+			}
 			
-			}else{
+			else{
 				if(counter > key_pressed_threshold){
 					counter = 0;
 					return KEYPAD_MAP[row_index][col_index];
@@ -138,6 +145,18 @@ char Read_KP_Value(void){
 	}
 		return '\0';
 	}else{
+		if(temp == '*'){
+				if(counter > reset_threshold){
+						reset_flag = 1;
+						counter = 0;
+						return '\0';
+					}else if(counter > key_pressed_threshold && counter < reset_threshold){
+						counter = 0;
+						return '*';
+					}
+		} 
+		temp = 0;
+		counter = 0;
 		return '\0';
 	}
 	

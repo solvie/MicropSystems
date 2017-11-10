@@ -49,14 +49,15 @@ int SysTickCount;
 int acc_flag;
 int reset_flag;
 int sleep_flag;
-static int bufferLen = 3;
 int counter = 0;
-int dataReady = 0;
+int read_flag;
+int acc_flag;
+int operation_flag;
 //float bufferX[bufferLen], bufferY[bufferLen], bufferZ[bufferLen];
 
 
 int main(void)
-`{
+{
 	
   /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
   HAL_Init();
@@ -81,16 +82,25 @@ int main(void)
 		}
 		if(sleep_flag == 1){
 			printf("System Sleep");
+			sleep_flag = 0;
 			//reset_flag = 0; //remove once operating mode starts 
 		}
+		
+		if(operation_flag==1){
+			printf("Operation Sleep");
+			operation_flag=0;
+		}
+		
 		if(acc_flag == 1){
-			float acc_value[3]= {99,99,99};
-			Calibrate_ACC_Value(&acc_value[0]);
-			//printf("Temp: X: %3f   Y: %3f   Z: %3f \n",acc_value[0], acc_value[1], acc_value[2]);
-			if(dataReady == 0){
-				
-			}
 
+			//printf("Temp: X: %3f   Y: %3f   Z: %3f \n",acc_value[0], acc_value[1], acc_value[2]);
+			ACC_Read_Value();
+			if(read_flag == 1){
+					float acc_value[3]= {99,99,99};
+					Read_ACC(&acc_value[0]);
+					//printf("%3f,%3f,%3f \n",acc_value[0], acc_value[1], acc_value[2]);
+					//read_flag = 0;
+			}
 			//counter += 1;
 //			printf("Calibrated: X: %3f   Y: %3f   Z: %3f \n",acc_value[0], acc_value[1], acc_value[2]);
 		//	bufferX[counter] = 
@@ -159,7 +169,7 @@ void initializeACC(void){
 	Acc_instance.Axes_Enable				= LIS3DSH_XYZ_ENABLE;
 	Acc_instance.AA_Filter_BW				= LIS3DSH_AA_BW_50;
 	Acc_instance.Full_Scale					= LIS3DSH_FULLSCALE_2;
-	Acc_instance.Power_Mode_Output_DataRate		= LIS3DSH_DATARATE_50;
+	Acc_instance.Power_Mode_Output_DataRate		= LIS3DSH_DATARATE_100;
 	Acc_instance.Self_Test					= LIS3DSH_SELFTEST_NORMAL;
 	Acc_instance.Continous_Update   = LIS3DSH_ContinousUpdate_Enabled;
 	
