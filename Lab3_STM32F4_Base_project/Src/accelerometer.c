@@ -38,7 +38,8 @@ float Cal_M[4][3] = {
 };
 
 /**
-* Interrupt handler for the accelerometer interrupt received at PE0
+* Interrupt handler for the accelerometer interrupt received at PE0.
+* @param GPIO_Pin where the interrupt is read
 */
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin){
 	if(GPIO_Pin == GPIO_PIN_0){
@@ -48,7 +49,7 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin){
 }
 
 /**
-* Helper for Apply_IIR_Filter that returns the input array @param array's value at index n 
+* Helper for Apply_IIR_Filter that returns the input array @param array's value at index @param n 
 * if n is not negative, and 0 otherwise. 
 */
 float zeroOrArrayPos(int n, float* array ){
