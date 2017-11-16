@@ -23,7 +23,7 @@ int inputRollExpected = 0;
 int inputPitchExpected = 0;
 int reinit=0;
 int toDisplay=0;
-int digitArray[4];
+//int digitArray[4];
 int userInputState;
 int enterRollState; 
 int operatingModeRollMonitoring; //the first operating mode we enter will be roll monitoring
@@ -274,6 +274,9 @@ void Display_Thread(void const *argument){
 	userInputState=1;
 	enterRollState=1; 
 	operatingModeRollMonitoring=1;
+	user_pwm_set_led_brightness(500,0,0,500);//On startup, we are in enter Roll state
+	int digitArray[4];
+	
 	while(1){
 		
 		osSignalWait(SIGNAL_READY, osWaitForever);
@@ -283,23 +286,24 @@ void Display_Thread(void const *argument){
 			printf("Key is %c \n", key_pressed);
 		}
 		if (!sleepmode){
-			HAL_TIM_Base_Start_IT(&htim2);//DOUBLE CHECK!!
+			HAL_TIM_Base_Start_IT(&htim2);
 			if (userInputState){
+				digitSelect(&digitArray[0],toggleDigit());
 				if (entered_char_pointer==4){//nothing has been entered yet
-					initializeDisplayToZero();//display zero if nothing has been entered
+					initializeDisplayToZero(digitArray);//display zero if nothing has been entered
 				}
 				if(key_pressed != '\0'&&key_pressed != '*'&&key_pressed != '#'){ //a number was entered
 					printf("Key Pressed is %c \n", key_pressed);
-					enterNumberIntoBuffer(key_pressed - '0');
+					enterNumberIntoBuffer(digitArray, key_pressed - '0');
 				} else if(key_pressed == '#') {
-					int concatedint = concatenateArray();// concatenate array contents into one integer/.
+					int concatedint = concatenateArray(digitArray);// concatenate array contents into one integer/.
 					printf("Input is %d \n", concatedint);
 					if (enterRollState){ 
 						inputRollExpected = concatedint;
 						if(!reinit){//If not reinitializing, go to enterPitchState
 							enterRollState=0;
 							entered_char_pointer=4;
-							initializeDisplayToZero();
+							initializeDisplayToZero(digitArray);
 							user_pwm_set_led_brightness(0,500,500,0);
 						} else{ //if reinitializing, go directly back to roll monitoring operating mode
 							reinit=0; 
@@ -320,20 +324,17 @@ void Display_Thread(void const *argument){
 					}
 				} else if (key_pressed=='*'){
 					printf("Key Pressed is %c \n", key_pressed);
-					deleteLastInBuffer();
+					deleteLastInBuffer(digitArray);
 				}
 			}else{ // Is in operatingMode
 			//Update the value to be shown in 7-segment display.
 				get_acc_value_display(&acc_value[0]);
 				if (operatingModeRollMonitoring){
-					printf("okkkk");
-					//adjustBrightnessBasedOnACC(0, inputRollExpected, &acc_value[0]);
+					adjustBrightnessBasedOnACC(0, inputRollExpected, &acc_value[0]);
 				} else{//if not in operatingModeRollMonitoring is operatingModePitchMonitoring
-					//adjustBrightnessBasedOnACC(1, inputPitchExpected, &acc_value[0]);
-					printf("NONON");
+					adjustBrightnessBasedOnACC(1, inputPitchExpected, &acc_value[0]);
 				}
 
-			
 				if(key_pressed == '1'){ //go to roll
 					printf("Key Pressed is %c \n", key_pressed);
 					operatingModeRollMonitoring=1;
@@ -346,7 +347,7 @@ void Display_Thread(void const *argument){
 					resetAll(); 
 					HAL_TIM_Base_Stop_IT(&htim2);
 					for (int i=0; i<4; i++)digitArray[i] = -1;
-					//user_pwm_set_led_brightness(0,0,0,0);//Dim the LEDS
+					user_pwm_set_led_brightness(0,0,0,0);//Dim the LEDS
 				} else if (reset_flag){ //go to input mode for the relevant roll state
 					reset_flag=0;
 					userInputState=1;
@@ -354,13 +355,13 @@ void Display_Thread(void const *argument){
 					if (operatingModeRollMonitoring){
 						enterRollState=1;
 						entered_char_pointer=4;
-						initializeDisplayToZero();
-						//user_pwm_set_led_brightness(500,0,0,500);
+						initializeDisplayToZero(digitArray);
+						user_pwm_set_led_brightness(500,0,0,500);
 					} else{
 						enterRollState=0;
 						entered_char_pointer=4;
-						initializeDisplayToZero();
-						//user_pwm_set_led_brightness(0,500,500,0);
+						initializeDisplayToZero(digitArray);
+						user_pwm_set_led_brightness(0,500,500,0);
 					}
 				}
 				if (displayCounter==DISPLAY_COUNTER_MAX-1){ //Waiting for counter to reach 99 ensures display is updated less frequently than interrupt rate from timer (so as changes to be easily visible)
@@ -379,13 +380,13 @@ void Display_Thread(void const *argument){
 		displayCounter = (displayCounter+1)%DISPLAY_COUNTER_MAX;
 }
 }
-void initializeDisplayToZero(){
+void initializeDisplayToZero(int * digitArray){
 	int i;
 	for (i=0; i<3; i++) digitArray[i] = -1;
 	digitArray[3] = 0; //display zero if nothing has been entered
 }
 
-int concatenateArray(){
+int concatenateArray(int * digitArray){
 	if (entered_char_pointer==4) entered_char_pointer=3;//If a user input nothing, set the pointer to the least significant digit, aka the last array index, where the zero is.
 	int concatedint = digitArray[entered_char_pointer];
 	for (int i = entered_char_pointer+1; i<4; i++) concatedint = concatenate(concatedint,digitArray[i] );
@@ -398,7 +399,7 @@ int concatenate(int x, int y) {
     return x * pow + y;        
 }
 
-void enterNumberIntoBuffer(int numberEntered){
+void enterNumberIntoBuffer(int * digitArray, int numberEntered){
 	if (entered_char_pointer>1){ //as long as three digits haven't already been filled, a user can type a new letter
 		for (int i=entered_char_pointer; i<4; i++){
 			digitArray[i-1] =digitArray[i]; //shift what was already there
@@ -408,7 +409,7 @@ void enterNumberIntoBuffer(int numberEntered){
 	}
 }
 
-void deleteLastInBuffer(){
+void deleteLastInBuffer(int * digitArray){
 		const int lastindex = 3; //last of indices 0,1,2,3
 		if (entered_char_pointer<4){ //as long as three digits haven't already been filled, a user can type a new letter
 			if (entered_char_pointer==3)
