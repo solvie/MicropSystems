@@ -119,6 +119,7 @@ void Read_KP_Value(void const *argument){
 	int col_index;
 	int row_index;
 	int data_ok;
+	int isSemReady;
 	static int counter = 0;
 	const int key_pressed_threshold = 10000;
 	const int reset_threshold = 30000;
@@ -126,7 +127,10 @@ void Read_KP_Value(void const *argument){
 	static char temp = 0;
 
 	while(1){
-		osSemaphoreWait(read_kp_flag_sem, osWaitForever);
+		//isSemReady = osSemaphoreWait(read_kp_flag_sem, 0);
+		//if(isSemReady == 0){
+		//	osThreadYield();
+		//}
 		data_ok = 0;
 		counter = 0;
 		temp = 0;
@@ -193,9 +197,7 @@ void Read_KP_Value(void const *argument){
 								data_ok = 1;
 						}
 							
-				} 
-				
-				if(temp == '#'){
+				}else if(temp == '#'){
 					if(counter > key_pressed_threshold){
 							counter = 0;
 							temp = 0;
@@ -203,14 +205,21 @@ void Read_KP_Value(void const *argument){
 							data_ok = 1;
 					}
 							
-				} 
-				temp = 0;
-				counter = 0;
-				key_pressed = '\0';
-				data_ok = 1;
+				}else{
+					temp = 0;
+					counter = 0;
+					key_pressed = '\0';
+					data_ok = 1;
+				}
+
 				}
 			}
-		osSemaphoreRelease(read_kp_flag_sem);
+		//osSemaphoreRelease(read_kp_flag_sem);
+		if(key_pressed != '\0'){
+			printf("Key is %c \n", key_pressed);
+		}
+		
+		osDelay(10);  
 	}
 }
 

@@ -104,20 +104,17 @@ void Read_Raw_ACC(void const *argument){
 	//The first four bits denote if we have new data on all XYZ axes, 
 	//Z axis only, Y axis only or Z axis only. If any or all changed, proceed
 	while(1){
-		osSignalWait(SIGNAL_READY, osWaitForever);
-		LIS3DSH_Read (&status, LIS3DSH_STATUS, 1);
-		//printf("This is ACC \n");
-		if ((status & 0x0F) != 0x00)
-		{
-			LIS3DSH_ReadACC(&Buffer[0]);
-			accX = (float)Buffer[0];
-			accY = (float)Buffer[1];
-			accZ = (float)Buffer[2];
-		}
-		
-		osSignalSet(Read_Raw_ACC_Id, SIGNAL_WAIT);
+			osSignalWait(SIGNAL_READY, osWaitForever);
+			LIS3DSH_Read (&status, LIS3DSH_STATUS, 1);
+			if ((status & 0x0F) != 0x00)
+			{
+				LIS3DSH_ReadACC(&Buffer[0]);
+				accX = (float)Buffer[0];
+				accY = (float)Buffer[1];
+				accZ = (float)Buffer[2];
+			}
+			osSignalSet(Read_Raw_ACC_Id, SIGNAL_WAIT);
 	}
-
 }
 
 /**

@@ -78,18 +78,19 @@ void EXTI0_IRQHandler(void){
 	HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_0);
 }
 
-// void TIM2_IRQHandler(void)
-// {
-//   /* USER CODE BEGIN TIM2_IRQn 0 */
 
-//   /* USER CODE END TIM2_IRQn 0 */
-//   HAL_TIM_IRQHandler(&htim2);
-//    USER CODE BEGIN TIM2_IRQn 1 
-// 	digselect_flag=1;
-// 	displayCounter= (displayCounter+1)%DISPLAY_COUNTER_MAX ;
+void TIM2_IRQHandler(void)
+{
+  /* USER CODE BEGIN TIM2_IRQn 0 */
+
+  /* USER CODE END TIM2_IRQn 0 */
+  HAL_TIM_IRQHandler(&htim2);
+  /* USER CODE BEGIN TIM2_IRQn 1 */
+	digselect_flag=1;
+	displayCounter= (displayCounter+1)%DISPLAY_COUNTER_MAX ;
   
-//   /* USER CODE END TIM2_IRQn 1 */
-// }
+  /* USER CODE END TIM2_IRQn 1 */
+}
 
 /* USER CODE END 1 */
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

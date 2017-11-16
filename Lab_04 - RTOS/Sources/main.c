@@ -34,6 +34,9 @@ void SystemClock_Config(void);
 void initializeACC(void);
 void MX_NVIC_Init(void);
 char key_pressed;
+int digselect_flag;
+int displayCounter;
+const int DISPLAY_COUNTER_MAX = 10000; 
 //extern osThreadId Read_KP_Value_Id;
 
 
@@ -49,8 +52,12 @@ uint32_t HAL_GetTick(void) {
 #endif
 
 void thread_temp(void const *argument){
+	int isSemReady;
 	while(1){
-		osSemaphoreWait(read_kp_flag_sem, osWaitForever);
+		isSemReady = osSemaphoreWait(read_kp_flag_sem, osWaitForever);
+		if(isSemReady == 0){
+			osThreadYield();
+		}
 		//osThreadTerminate(Read_KP_Value_Id);
 		if(key_pressed != '\0'){
 			printf("char type is %c \n", key_pressed);
@@ -71,31 +78,31 @@ void start_temp_thread(void){
 int main (void) {
 
   osKernelInitialize();                     /* initialize CMSIS-RTOS          */
-	MX_TIM4_Init();
-	MX_TIM2_Init();
-	
-	HAL_TIM_Base_Start_IT(&htim2);
-	HAL_TIM_Base_Start(&htim4);
-	
-	HAL_TIM_PWM_Start(&htim4,TIM_CHANNEL_1);
-	HAL_TIM_PWM_Start(&htim4,TIM_CHANNEL_2);
-	HAL_TIM_PWM_Start(&htim4,TIM_CHANNEL_3);
-	HAL_TIM_PWM_Start(&htim4,TIM_CHANNEL_4);
+
 	read_kp_flag_sem = osSemaphoreCreate(osSemaphore(read_kp_flag_sem), 1);
 	MX_GPIO_Init();
   HAL_Init();                               /* Initialize the HAL Library     */
 	initializeACC();
 	MX_NVIC_Init();
   SystemClock_Config();                     /* Configure the System Clock     */
-	//start_acc_thread();
+	MX_TIM4_Init();
+	MX_TIM2_Init();
+	HAL_TIM_Base_Start_IT(&htim2);
+	HAL_TIM_Base_Start(&htim4);
+	HAL_TIM_PWM_Start(&htim4,TIM_CHANNEL_1);
+	HAL_TIM_PWM_Start(&htim4,TIM_CHANNEL_2);
+	HAL_TIM_PWM_Start(&htim4,TIM_CHANNEL_3);
+	HAL_TIM_PWM_Start(&htim4,TIM_CHANNEL_4);
+	start_acc_thread();
 	start_kp_thread();
-	start_temp_thread();
+	//start_temp_thread();
 	/* User codes goes here*/
   //initializeLED_IO();                       /* Initialize LED GPIO Buttons    */
   //start_Thread_LED();                       /* Create LED thread              */
 	/* User codes ends here*/
   
 	osKernelStart();                          /* start thread execution         */
+
 }
 
 /**
