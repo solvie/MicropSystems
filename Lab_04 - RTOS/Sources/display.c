@@ -287,8 +287,8 @@ void Display_Thread(void const *argument){
 		}
 		if (!sleepmode){
 			HAL_TIM_Base_Start_IT(&htim2);
+			digitSelect(&digitArray[0],toggleDigit());
 			if (userInputState){
-				digitSelect(&digitArray[0],toggleDigit());
 				if (entered_char_pointer==4){//nothing has been entered yet
 					initializeDisplayToZero(digitArray);//display zero if nothing has been entered
 				}

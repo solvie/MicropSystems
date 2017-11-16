@@ -27,26 +27,6 @@ Project File Date:  11/16/2017
 <h2>Output:</h2>
 *** Using Compiler 'V5.05 update 2 (build 169)', folder: 'C:\Keil_v5\ARM\ARMCC\Bin'
 Build target 'Lab4'
-compiling main.c...
-.\Headers\accelerometer.h(5): warning:  #1-D: last line of file ends without a newline
-  void start_acc_thread(void);
-.\Headers\display.h(19): warning:  #1-D: last line of file ends without a newline
-  float calculateRollAngleFromAccVals(float ax, float ay, float az);
-Sources\main.c(71): warning:  #550-D: variable "tid_thread1" was set but never used
-        osThreadId tid_thread1;  
-Sources\main.c(183): warning:  #1-D: last line of file ends without a newline
-  }
-Sources\main.c: 4 warnings, 0 errors
-compiling accelerometer.c...
-.\Headers\accelerometer.h(5): warning:  #1-D: last line of file ends without a newline
-  void start_acc_thread(void);
-.\Headers\display.h(19): warning:  #1-D: last line of file ends without a newline
-  float calculateRollAngleFromAccVals(float ax, float ay, float az);
-Sources\accelerometer.c(108): warning:  #177-D: variable "new_value" was declared but never referenced
-                        float new_value[3];
-Sources\accelerometer.c(169): warning:  #1-D: last line of file ends without a newline
-  }
-Sources\accelerometer.c: 4 warnings, 0 errors
 compiling keypad.c...
 .\Headers\display.h(19): warning:  #1-D: last line of file ends without a newline
   float calculateRollAngleFromAccVals(float ax, float ay, float az);
@@ -55,19 +35,9 @@ Sources\keypad.c(123): warning:  #177-D: variable "isSemReady" was declared but 
 Sources\keypad.c(228): warning:  #1-D: last line of file ends without a newline
   }
 Sources\keypad.c: 3 warnings, 0 errors
-compiling display.c...
-.\Headers\display.h(19): warning:  #1-D: last line of file ends without a newline
-  float calculateRollAngleFromAccVals(float ax, float ay, float az);
-Sources\display.c(436): warning:  #1035-D: single-precision operand implicitly converted to double-precision
-                convertedTo180scale= calculated+90.5;//adding .5 to cast to int properly
-Sources\display.c(448): warning:  #1035-D: single-precision operand implicitly converted to double-precision
-                convertedTo180scale= calculated+90.5;//adding .5 to cast to int properly
-Sources\display.c(507): warning:  #1-D: last line of file ends without a newline
-  }
-Sources\display.c: 4 warnings, 0 errors
 linking...
 Program Size: Code=47940 RO-data=916 RW-data=352 ZI-data=19792  
-".\Objects\Blinky.axf" - 0 Error(s), 15 Warning(s).
+".\Objects\Blinky.axf" - 0 Error(s), 3 Warning(s).
 
 <h2>Software Packages used:</h2>
 

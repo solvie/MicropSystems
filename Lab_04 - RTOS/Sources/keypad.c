@@ -219,7 +219,7 @@ void Read_KP_Value(void const *argument){
 
 		set_key_pressed_display(key_pressed);
 		
-		osDelay(1);  
+		osDelay(2);  
 	}
 }
 
