@@ -10,11 +10,12 @@
       <TargetName>STM32F407 RAM</TargetName>
       <ToolsetNumber>0x4</ToolsetNumber>
       <ToolsetName>ARM-ADS</ToolsetName>
+      <uAC6>0</uAC6>
       <TargetOption>
         <TargetCommonOption>
           <Device>STM32F407VGTx</Device>
           <Vendor>STMicroelectronics</Vendor>
-          <PackID>Keil.STM32F4xx_DFP.2.10.0</PackID>
+          <PackID>Keil.STM32F4xx_DFP.2.11.0</PackID>
           <PackURL>http://www.keil.com/pack</PackURL>
           <Cpu>IROM(0x08000000,0x100000) IRAM(0x20000000,0x20000) IRAM2(0x10000000,0x10000) CPUTYPE("Cortex-M4") FPU2 CLOCK(12000000) ELITTLE</Cpu>
           <FlashUtilSpec></FlashUtilSpec>
@@ -124,47 +125,6 @@
             <HexOffset>0</HexOffset>
             <Oh166RecLen>16</Oh166RecLen>
           </OPTHX>
-          <Simulator>
-            <UseSimulator>0</UseSimulator>
-            <LoadApplicationAtStartup>1</LoadApplicationAtStartup>
-            <RunToMain>1</RunToMain>
-            <RestoreBreakpoints>1</RestoreBreakpoints>
-            <RestoreWatchpoints>1</RestoreWatchpoints>
-            <RestoreMemoryDisplay>1</RestoreMemoryDisplay>
-            <RestoreFunctions>1</RestoreFunctions>
-            <RestoreToolbox>1</RestoreToolbox>
-            <LimitSpeedToRealTime>0</LimitSpeedToRealTime>
-            <RestoreSysVw>1</RestoreSysVw>
-          </Simulator>
-          <Target>
-            <UseTarget>1</UseTarget>
-            <LoadApplicationAtStartup>0</LoadApplicationAtStartup>
-            <RunToMain>0</RunToMain>
-            <RestoreBreakpoints>1</RestoreBreakpoints>
-            <RestoreWatchpoints>1</RestoreWatchpoints>
-            <RestoreMemoryDisplay>1</RestoreMemoryDisplay>
-            <RestoreFunctions>0</RestoreFunctions>
-            <RestoreToolbox>1</RestoreToolbox>
-            <RestoreTracepoints>0</RestoreTracepoints>
-            <RestoreSysVw>1</RestoreSysVw>
-          </Target>
-          <RunDebugAfterBuild>0</RunDebugAfterBuild>
-          <TargetSelection>12</TargetSelection>
-          <SimDlls>
-            <CpuDll></CpuDll>
-            <CpuDllArguments></CpuDllArguments>
-            <PeripheralDll></PeripheralDll>
-            <PeripheralDllArguments></PeripheralDllArguments>
-            <InitializationFile></InitializationFile>
-          </SimDlls>
-          <TargetDlls>
-            <CpuDll></CpuDll>
-            <CpuDllArguments></CpuDllArguments>
-            <PeripheralDll></PeripheralDll>
-            <PeripheralDllArguments></PeripheralDllArguments>
-            <InitializationFile>.\Debug_RAM.ini</InitializationFile>
-            <Driver>STLink\ST-LINKIII-KEIL_SWO.dll</Driver>
-          </TargetDlls>
         </DebugOption>
         <Utilities>
           <Flash1>
@@ -368,6 +328,9 @@
             <v6LangP>0</v6LangP>
             <vShortEn>0</vShortEn>
             <vShortWch>0</vShortWch>
+            <v6Lto>0</v6Lto>
+            <v6WtE>0</v6WtE>
+            <v6Rtti>0</v6Rtti>
             <VariousControls>
               <MiscControls></MiscControls>
               <Define>HSE_VALUE=8000000, VECT_TAB_SRAM</Define>
@@ -385,6 +348,7 @@
             <NoWarn>0</NoWarn>
             <uSurpInc>0</uSurpInc>
             <useXO>0</useXO>
+            <uClangAs>0</uClangAs>
             <VariousControls>
               <MiscControls></MiscControls>
               <Define></Define>
@@ -430,6 +394,56 @@
               <FileType>1</FileType>
               <FilePath>.\Sources\supporting_functions.c</FilePath>
             </File>
+            <File>
+              <FileName>gpio.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\Sources\gpio.c</FilePath>
+            </File>
+            <File>
+              <FileName>accelerometer.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\Sources\accelerometer.c</FilePath>
+            </File>
+            <File>
+              <FileName>accelerometer.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>.\Headers\accelerometer.h</FilePath>
+            </File>
+            <File>
+              <FileName>fput_debug.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\fput_debug.c</FilePath>
+            </File>
+            <File>
+              <FileName>stm32f4xx_hal_msp.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\Sources\stm32f4xx_hal_msp.c</FilePath>
+            </File>
+            <File>
+              <FileName>stm32f4xx_it.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\Sources\stm32f4xx_it.c</FilePath>
+            </File>
+            <File>
+              <FileName>keypad.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\Sources\keypad.c</FilePath>
+            </File>
+            <File>
+              <FileName>keypad.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>.\Headers\keypad.h</FilePath>
+            </File>
+            <File>
+              <FileName>tim.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\Sources\tim.c</FilePath>
+            </File>
+            <File>
+              <FileName>tim.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>.\Headers\tim.h</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -454,12 +468,13 @@
       <TargetName>Lab4</TargetName>
       <ToolsetNumber>0x4</ToolsetNumber>
       <ToolsetName>ARM-ADS</ToolsetName>
-      <pCCUsed>5060061::V5.06 update 1 (build 61)::ARMCC</pCCUsed>
+      <pCCUsed>5060528::V5.06 update 5 (build 528)::ARMCC</pCCUsed>
+      <uAC6>0</uAC6>
       <TargetOption>
         <TargetCommonOption>
           <Device>STM32F407VGTx</Device>
           <Vendor>STMicroelectronics</Vendor>
-          <PackID>Keil.STM32F4xx_DFP.2.10.0</PackID>
+          <PackID>Keil.STM32F4xx_DFP.2.7.0</PackID>
           <PackURL>http://www.keil.com/pack</PackURL>
           <Cpu>IROM(0x08000000,0x100000) IRAM(0x20000000,0x20000) IRAM2(0x10000000,0x10000) CPUTYPE("Cortex-M4") FPU2 CLOCK(12000000) ELITTLE</Cpu>
           <FlashUtilSpec></FlashUtilSpec>
@@ -569,47 +584,6 @@
             <HexOffset>0</HexOffset>
             <Oh166RecLen>16</Oh166RecLen>
           </OPTHX>
-          <Simulator>
-            <UseSimulator>0</UseSimulator>
-            <LoadApplicationAtStartup>1</LoadApplicationAtStartup>
-            <RunToMain>1</RunToMain>
-            <RestoreBreakpoints>1</RestoreBreakpoints>
-            <RestoreWatchpoints>1</RestoreWatchpoints>
-            <RestoreMemoryDisplay>1</RestoreMemoryDisplay>
-            <RestoreFunctions>1</RestoreFunctions>
-            <RestoreToolbox>1</RestoreToolbox>
-            <LimitSpeedToRealTime>0</LimitSpeedToRealTime>
-            <RestoreSysVw>1</RestoreSysVw>
-          </Simulator>
-          <Target>
-            <UseTarget>1</UseTarget>
-            <LoadApplicationAtStartup>1</LoadApplicationAtStartup>
-            <RunToMain>1</RunToMain>
-            <RestoreBreakpoints>1</RestoreBreakpoints>
-            <RestoreWatchpoints>1</RestoreWatchpoints>
-            <RestoreMemoryDisplay>1</RestoreMemoryDisplay>
-            <RestoreFunctions>0</RestoreFunctions>
-            <RestoreToolbox>1</RestoreToolbox>
-            <RestoreTracepoints>0</RestoreTracepoints>
-            <RestoreSysVw>1</RestoreSysVw>
-          </Target>
-          <RunDebugAfterBuild>0</RunDebugAfterBuild>
-          <TargetSelection>11</TargetSelection>
-          <SimDlls>
-            <CpuDll></CpuDll>
-            <CpuDllArguments></CpuDllArguments>
-            <PeripheralDll></PeripheralDll>
-            <PeripheralDllArguments></PeripheralDllArguments>
-            <InitializationFile></InitializationFile>
-          </SimDlls>
-          <TargetDlls>
-            <CpuDll></CpuDll>
-            <CpuDllArguments></CpuDllArguments>
-            <PeripheralDll></PeripheralDll>
-            <PeripheralDllArguments></PeripheralDllArguments>
-            <InitializationFile></InitializationFile>
-            <Driver>STLink\ST-LINKIII-KEIL_SWO.dll</Driver>
-          </TargetDlls>
         </DebugOption>
         <Utilities>
           <Flash1>
@@ -813,6 +787,9 @@
             <v6LangP>0</v6LangP>
             <vShortEn>0</vShortEn>
             <vShortWch>0</vShortWch>
+            <v6Lto>0</v6Lto>
+            <v6WtE>0</v6WtE>
+            <v6Rtti>0</v6Rtti>
             <VariousControls>
               <MiscControls></MiscControls>
               <Define>USE_HAL_DRIVER, STM32F407xx ,  __FPU_PRESENT=1 , HSE_VALUE=8000000</Define>
@@ -830,6 +807,7 @@
             <NoWarn>0</NoWarn>
             <uSurpInc>0</uSurpInc>
             <useXO>0</useXO>
+            <uClangAs>0</uClangAs>
             <VariousControls>
               <MiscControls></MiscControls>
               <Define></Define>
@@ -875,6 +853,56 @@
               <FileType>1</FileType>
               <FilePath>.\Sources\supporting_functions.c</FilePath>
             </File>
+            <File>
+              <FileName>gpio.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\Sources\gpio.c</FilePath>
+            </File>
+            <File>
+              <FileName>accelerometer.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\Sources\accelerometer.c</FilePath>
+            </File>
+            <File>
+              <FileName>accelerometer.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>.\Headers\accelerometer.h</FilePath>
+            </File>
+            <File>
+              <FileName>fput_debug.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\fput_debug.c</FilePath>
+            </File>
+            <File>
+              <FileName>stm32f4xx_hal_msp.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\Sources\stm32f4xx_hal_msp.c</FilePath>
+            </File>
+            <File>
+              <FileName>stm32f4xx_it.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\Sources\stm32f4xx_it.c</FilePath>
+            </File>
+            <File>
+              <FileName>keypad.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\Sources\keypad.c</FilePath>
+            </File>
+            <File>
+              <FileName>keypad.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>.\Headers\keypad.h</FilePath>
+            </File>
+            <File>
+              <FileName>tim.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\Sources\tim.c</FilePath>
+            </File>
+            <File>
+              <FileName>tim.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>.\Headers\tim.h</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -899,11 +927,12 @@
       <TargetName>STM32F407 OPT</TargetName>
       <ToolsetNumber>0x4</ToolsetNumber>
       <ToolsetName>ARM-ADS</ToolsetName>
+      <uAC6>0</uAC6>
       <TargetOption>
         <TargetCommonOption>
           <Device>STM32F407VGTx</Device>
           <Vendor>STMicroelectronics</Vendor>
-          <PackID>Keil.STM32F4xx_DFP.2.10.0</PackID>
+          <PackID>Keil.STM32F4xx_DFP.2.11.0</PackID>
           <PackURL>http://www.keil.com/pack</PackURL>
           <Cpu>IROM(0x08000000,0x100000) IRAM(0x20000000,0x20000) IRAM2(0x10000000,0x10000) CPUTYPE("Cortex-M4") FPU2 CLOCK(12000000) ELITTLE</Cpu>
           <FlashUtilSpec></FlashUtilSpec>
@@ -1013,47 +1042,6 @@
             <HexOffset>0</HexOffset>
             <Oh166RecLen>16</Oh166RecLen>
           </OPTHX>
-          <Simulator>
-            <UseSimulator>0</UseSimulator>
-            <LoadApplicationAtStartup>1</LoadApplicationAtStartup>
-            <RunToMain>1</RunToMain>
-            <RestoreBreakpoints>1</RestoreBreakpoints>
-            <RestoreWatchpoints>1</RestoreWatchpoints>
-            <RestoreMemoryDisplay>1</RestoreMemoryDisplay>
-            <RestoreFunctions>1</RestoreFunctions>
-            <RestoreToolbox>1</RestoreToolbox>
-            <LimitSpeedToRealTime>0</LimitSpeedToRealTime>
-            <RestoreSysVw>1</RestoreSysVw>
-          </Simulator>
-          <Target>
-            <UseTarget>1</UseTarget>
-            <LoadApplicationAtStartup>1</LoadApplicationAtStartup>
-            <RunToMain>1</RunToMain>
-            <RestoreBreakpoints>1</RestoreBreakpoints>
-            <RestoreWatchpoints>1</RestoreWatchpoints>
-            <RestoreMemoryDisplay>1</RestoreMemoryDisplay>
-            <RestoreFunctions>0</RestoreFunctions>
-            <RestoreToolbox>1</RestoreToolbox>
-            <RestoreTracepoints>0</RestoreTracepoints>
-            <RestoreSysVw>1</RestoreSysVw>
-          </Target>
-          <RunDebugAfterBuild>0</RunDebugAfterBuild>
-          <TargetSelection>12</TargetSelection>
-          <SimDlls>
-            <CpuDll></CpuDll>
-            <CpuDllArguments></CpuDllArguments>
-            <PeripheralDll></PeripheralDll>
-            <PeripheralDllArguments></PeripheralDllArguments>
-            <InitializationFile></InitializationFile>
-          </SimDlls>
-          <TargetDlls>
-            <CpuDll></CpuDll>
-            <CpuDllArguments></CpuDllArguments>
-            <PeripheralDll></PeripheralDll>
-            <PeripheralDllArguments></PeripheralDllArguments>
-            <InitializationFile></InitializationFile>
-            <Driver>STLink\ST-LINKIII-KEIL_SWO.dll</Driver>
-          </TargetDlls>
         </DebugOption>
         <Utilities>
           <Flash1>
@@ -1257,6 +1245,9 @@
             <v6LangP>0</v6LangP>
             <vShortEn>0</vShortEn>
             <vShortWch>0</vShortWch>
+            <v6Lto>0</v6Lto>
+            <v6WtE>0</v6WtE>
+            <v6Rtti>0</v6Rtti>
             <VariousControls>
               <MiscControls></MiscControls>
               <Define>HSE_VALUE=8000000</Define>
@@ -1274,6 +1265,7 @@
             <NoWarn>0</NoWarn>
             <uSurpInc>0</uSurpInc>
             <useXO>0</useXO>
+            <uClangAs>0</uClangAs>
             <VariousControls>
               <MiscControls></MiscControls>
               <Define></Define>
@@ -1318,6 +1310,56 @@
               <FileName>supporting_functions.c</FileName>
               <FileType>1</FileType>
               <FilePath>.\Sources\supporting_functions.c</FilePath>
+            </File>
+            <File>
+              <FileName>gpio.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\Sources\gpio.c</FilePath>
+            </File>
+            <File>
+              <FileName>accelerometer.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\Sources\accelerometer.c</FilePath>
+            </File>
+            <File>
+              <FileName>accelerometer.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>.\Headers\accelerometer.h</FilePath>
+            </File>
+            <File>
+              <FileName>fput_debug.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\fput_debug.c</FilePath>
+            </File>
+            <File>
+              <FileName>stm32f4xx_hal_msp.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\Sources\stm32f4xx_hal_msp.c</FilePath>
+            </File>
+            <File>
+              <FileName>stm32f4xx_it.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\Sources\stm32f4xx_it.c</FilePath>
+            </File>
+            <File>
+              <FileName>keypad.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\Sources\keypad.c</FilePath>
+            </File>
+            <File>
+              <FileName>keypad.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>.\Headers\keypad.h</FilePath>
+            </File>
+            <File>
+              <FileName>tim.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\Sources\tim.c</FilePath>
+            </File>
+            <File>
+              <FileName>tim.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>.\Headers\tim.h</FilePath>
             </File>
           </Files>
         </Group>
@@ -1573,8 +1615,8 @@
     <files>
       <file attr="config" category="source" name="CMSIS\RTOS\RTX\Templates\RTX_Conf_CM.c" version="4.70.1">
         <instance index="0">RTE\CMSIS\RTX_Conf_CM.c</instance>
-        <component Capiversion="1.0" Cclass="CMSIS" Cgroup="RTOS" Csub="Keil RTX" Cvendor="ARM" Cversion="4.81.0" condition="Cortex-M Device Startup"/>
-        <package name="CMSIS" schemaVersion="1.3" url="http://www.keil.com/pack/" vendor="ARM" version="5.0.0-Beta4"/>
+        <component Capiversion="1.0.0" Cclass="CMSIS" Cgroup="RTOS" Csub="Keil RTX" Cvendor="ARM" Cversion="4.81.0" condition="RTOS RTX"/>
+        <package name="CMSIS" schemaVersion="1.3" url="http://www.keil.com/pack/" vendor="ARM" version="5.0.1"/>
         <targetInfos>
           <targetInfo name="Lab4"/>
           <targetInfo name="STM32F407 OPT"/>
@@ -1583,8 +1625,8 @@
       </file>
       <file attr="config" category="header" name="CMSIS\Driver\Config\RTE_Device.h" version="2.3.0">
         <instance index="0">RTE\Device\STM32F407VGTx\RTE_Device.h</instance>
-        <component Capiversion="1.0.0" Cclass="Device" Cgroup="STM32Cube Framework" Csub="Classic" Cvendor="Keil" Cversion="1.5.0" condition="STM32F4 Framework Classic"/>
-        <package name="STM32F4xx_DFP" schemaVersion="1.3" url="http://www.keil.com/pack" vendor="Keil" version="2.10.0"/>
+        <component Capiversion="1.0.0" Cclass="Device" Cgroup="STM32Cube Framework" Csub="Classic" Cvendor="Keil" Cversion="1.6.0" condition="STM32F4 Framework Classic"/>
+        <package name="STM32F4xx_DFP" schemaVersion="1.3" url="http://www.keil.com/pack" vendor="Keil" version="2.11.0"/>
         <targetInfos>
           <targetInfo name="Lab4"/>
           <targetInfo name="STM32F407 OPT"/>
@@ -1593,8 +1635,8 @@
       </file>
       <file attr="config" category="source" condition="STM32F407xx_ARMCC" name="Drivers\CMSIS\Device\ST\STM32F4xx\Source\Templates\arm\startup_stm32f407xx.s" version="2.4.2">
         <instance index="0">RTE\Device\STM32F407VGTx\startup_stm32f407xx.s</instance>
-        <component Cclass="Device" Cgroup="Startup" Cvendor="Keil" Cversion="2.5.0" condition="STM32F4 CMSIS"/>
-        <package name="STM32F4xx_DFP" schemaVersion="1.3" url="http://www.keil.com/pack" vendor="Keil" version="2.10.0"/>
+        <component Cclass="Device" Cgroup="Startup" Cvendor="Keil" Cversion="2.6.0" condition="STM32F4 CMSIS"/>
+        <package name="STM32F4xx_DFP" schemaVersion="1.3" url="http://www.keil.com/pack" vendor="Keil" version="2.11.0"/>
         <targetInfos>
           <targetInfo name="Lab4"/>
           <targetInfo name="STM32F407 OPT"/>
@@ -1603,8 +1645,8 @@
       </file>
       <file attr="config" category="header" name="MDK\Templates\Inc\stm32f4xx_hal_conf.h" version="1.4.2">
         <instance index="0">RTE\Device\STM32F407VGTx\stm32f4xx_hal_conf.h</instance>
-        <component Capiversion="1.0.0" Cclass="Device" Cgroup="STM32Cube Framework" Csub="Classic" Cvendor="Keil" Cversion="1.5.0" condition="STM32F4 Framework Classic"/>
-        <package name="STM32F4xx_DFP" schemaVersion="1.3" url="http://www.keil.com/pack" vendor="Keil" version="2.10.0"/>
+        <component Capiversion="1.0.0" Cclass="Device" Cgroup="STM32Cube Framework" Csub="Classic" Cvendor="Keil" Cversion="1.6.0" condition="STM32F4 Framework Classic"/>
+        <package name="STM32F4xx_DFP" schemaVersion="1.3" url="http://www.keil.com/pack" vendor="Keil" version="2.11.0"/>
         <targetInfos>
           <targetInfo name="Lab4"/>
           <targetInfo name="STM32F407 OPT"/>
@@ -1613,8 +1655,8 @@
       </file>
       <file attr="config" category="source" name="Drivers\CMSIS\Device\ST\STM32F4xx\Source\Templates\system_stm32f4xx.c" version="2.4.2">
         <instance index="0">RTE\Device\STM32F407VGTx\system_stm32f4xx.c</instance>
-        <component Cclass="Device" Cgroup="Startup" Cvendor="Keil" Cversion="2.5.0" condition="STM32F4 CMSIS"/>
-        <package name="STM32F4xx_DFP" schemaVersion="1.3" url="http://www.keil.com/pack" vendor="Keil" version="2.10.0"/>
+        <component Cclass="Device" Cgroup="Startup" Cvendor="Keil" Cversion="2.6.0" condition="STM32F4 CMSIS"/>
+        <package name="STM32F4xx_DFP" schemaVersion="1.3" url="http://www.keil.com/pack" vendor="Keil" version="2.11.0"/>
         <targetInfos>
           <targetInfo name="Lab4"/>
           <targetInfo name="STM32F407 OPT"/>

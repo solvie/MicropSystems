@@ -74,7 +74,7 @@ int toDisplay=0;
 
 int userInputState; //if not in userInputState, is in operatingMode
 int enterRollState; // if not in enterRollState, is in enterPitchState
-int operatingModeRollMonitoring; // if not operatingModeRollMonitoring, is operatingModePitchMonitoring
+int operatingModeRollMonitoring;// if not operatingModeRollMonitoring, is operatingModePitchMonitoring
 int sleepmode=0;
 int inputRollExpected = 0;
 int inputPitchExpected = 0;
