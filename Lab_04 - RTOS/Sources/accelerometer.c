@@ -3,8 +3,11 @@
 #include "accelerometer.h"
 #include "cmsis_os.h" 
 #include "display.h"
+#include "math.h"
+
 #define SIGNAL_READY 0x0001
 #define SIGNAL_WAIT 0x0002
+#define PI 3.14159265
 
 
 osThreadDef(Read_Raw_ACC, osPriorityNormal, 1, 0);
@@ -107,6 +110,8 @@ void Read_Raw_ACC(void const *argument){
 	while(1){
 			float new_value[3];
 			float acc_value[3];
+			float acc_pitch_and_roll[2];
+
 			osSignalWait(SIGNAL_READY, osWaitForever);
 			LIS3DSH_Read (&status, LIS3DSH_STATUS, 1);
 			if ((status & 0x0F) != 0x00)
@@ -122,8 +127,10 @@ void Read_Raw_ACC(void const *argument){
 				
 				buffer_counter += 1;
 				if(buffer_counter == BUFFER_SIZE){
-					Get_Final_ACC_Value(&acc_value[0]);
-					set_acc_value_display(&acc_value[0]);
+					//Get_Final_ACC_Value(&acc_value[0]);
+					Get_Final_Pitch_And_Roll(&acc_value[0],&acc_pitch_and_roll[0]);
+					//set_acc_value_display(&acc_value[0]);
+					set_acc_pitch_and_roll(&acc_pitch_and_roll[0]);
 				}
 			}
 			osSignalSet(Read_Raw_ACC_Id, SIGNAL_WAIT);
@@ -161,6 +168,32 @@ void Get_Final_ACC_Value(float *value){
 	value[1] = y_filtered[BUFFER_SIZE-1];
 	value[2] = z_filtered[BUFFER_SIZE-1];
 	buffer_counter = 0;
+}
+
+void Get_Final_Pitch_And_Roll(float *value, float *pitchRoll){
+	Get_Final_ACC_Value(value);
+	pitchRoll[0] = calculatePitchAngleFromAccVals(value[0], value[1],value[2]);
+	pitchRoll[1] = calculateRollAngleFromAccVals(value[0], value[1],value[2]);
+}
+
+float calculatePitchAngleFromAccVals(float ax, float ay, float az){
+	float val = 180.0 / PI;
+	float retval;
+	float denom = ay*ay+az*az;
+	denom = sqrt(denom);
+	retval = ax/denom;
+	retval = atan(retval)*val;
+	return retval;
+}
+
+float calculateRollAngleFromAccVals(float ax, float ay, float az){
+	float val = 180.0 / PI;
+	float retval;
+	float denom = ax*ax+az*az;
+	denom = sqrt(denom);
+	retval = (-ay)/denom;
+	retval = atan(retval)*val;
+	return retval;
 }
 
 void start_acc_thread(void){

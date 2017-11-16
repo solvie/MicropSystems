@@ -6,12 +6,13 @@
 
 #define SIGNAL_READY 0x0001
 #define SIGNAL_WAIT 0x0002
-#define PI 3.14159265
 /**
 * Converts an integer @param number (which must be 1~3 digits long) into an array of integers @param array.
 * An array value of -1 indicates that it is empty. 
 */
-float acc_value_global[3];
+//float acc_value_global[3];
+float pitch_roll_value_global[2];
+
 int currentDigit = 0;
 int sleep_flag;
 int operation_flag;
@@ -23,7 +24,6 @@ int inputRollExpected = 0;
 int inputPitchExpected = 0;
 int reinit=0;
 int toDisplay=0;
-//int digitArray[4];
 int userInputState;
 int enterRollState; 
 int operatingModeRollMonitoring; //the first operating mode we enter will be roll monitoring
@@ -227,22 +227,19 @@ int toggleDigit(){
 	return currentDigit;
 }
 
-
-void set_acc_value_display(float *temp_value){
+void set_acc_pitch_and_roll(float *pitchRoll){
 	osSemaphoreWait(acc_ready_sem_id,osWaitForever);
-	acc_value_global[0] = temp_value[0];
-	acc_value_global[1] = temp_value[1];
-	acc_value_global[2] = temp_value[2];
-	
+	pitch_roll_value_global[0] = pitchRoll[0];
+	pitch_roll_value_global[1] = pitchRoll[1];
 	osSemaphoreRelease(acc_ready_sem_id);
 }
 
-void get_acc_value_display(float *temp_value){
+void get_acc_pitch_and_roll(float *pitchRoll){
 	osSemaphoreWait(acc_ready_sem_id,osWaitForever);
-	temp_value[0] = acc_value_global[0];
-	temp_value[1] = acc_value_global[1];
-	temp_value[2] = acc_value_global[2];
-	printf("X: %f, Y: %f, Z: %f", temp_value[0], temp_value[1], temp_value[2]);
+	pitchRoll[0] = pitch_roll_value_global[0];
+	pitchRoll[1] = pitch_roll_value_global[1];
+	//temp_value[2] = acc_value_global[2];
+	//printf("X: %f, Y: %f, Z: %f", temp_value[0], temp_value[1], temp_value[2]);
 	osSemaphoreRelease(acc_ready_sem_id);
 }
 
@@ -269,6 +266,7 @@ void Display_Thread(void const *argument){
 	const int DISPLAY_COUNTER_MAX = 5; 
 	int displayCounter = 0;
 	float acc_value[3];
+	float acc_pitch_roll[2];
 	
 	char key_pressed;
 	userInputState=1;
@@ -328,11 +326,11 @@ void Display_Thread(void const *argument){
 				}
 			}else{ // Is in operatingMode
 			//Update the value to be shown in 7-segment display.
-				get_acc_value_display(&acc_value[0]);
+				get_acc_pitch_and_roll(&acc_pitch_roll[0]);
 				if (operatingModeRollMonitoring){
-					adjustBrightnessBasedOnACC(0, inputRollExpected, &acc_value[0]);
+					adjustBrightnessBasedOnACC(0, inputRollExpected, &acc_pitch_roll[0]);
 				} else{//if not in operatingModeRollMonitoring is operatingModePitchMonitoring
-					adjustBrightnessBasedOnACC(1, inputPitchExpected, &acc_value[0]);
+					adjustBrightnessBasedOnACC(1, inputPitchExpected, &acc_pitch_roll[0]);
 				}
 
 				if(key_pressed == '1'){ //go to roll
@@ -426,55 +424,32 @@ void deleteLastInBuffer(int * digitArray){
 }
 
 void adjustBrightnessBasedOnACC(int isPitch, float expectedPitchOrRoll, float* valsFromAcc){
-	uint16_t diffMagnitudeForBrightness;
-	float calculated, convertedTo180scale, diff;
-	float ax = valsFromAcc[0]; //doing absolute values for now.
-	float ay = valsFromAcc[1];
-	float az = valsFromAcc[2];
+	uint16_t diffMagnitudeForBrightnessPitch,diffMagnitudeForBrightnessRoll;//, diffMagnitudeForBrightnessRoll;
+	float convertedPitchTo180scale,convertedRollTo180scale,  pitchDiff, rollDiff;
+	float calculatedPitch = valsFromAcc[0]; //doing absolute values for now.
+	float calculatedRoll = valsFromAcc[1];
 	if (isPitch){
-		calculated = calculatePitchAngleFromAccVals(ax, ay, az);
-		convertedTo180scale= calculated+90.5;//adding .5 to cast to int properly
+		convertedPitchTo180scale= calculatedPitch+90.5;//adding .5 to cast to int properly
 		// The diffMagnitudeForBrightness will be from 0 to 90 (because of abs). 
-		diff = expectedPitchOrRoll- convertedTo180scale;
-		diffMagnitudeForBrightness= (uint16_t) fabs( expectedPitchOrRoll - convertedTo180scale);
-	
-		if (diff>0)
-			user_pwm_set_led_brightness(0,0,diffMagnitudeForBrightness * 5.555555,0); //5.5555 = 500/90
+		pitchDiff = expectedPitchOrRoll- convertedPitchTo180scale;
+		diffMagnitudeForBrightnessPitch= (uint16_t) fabs( expectedPitchOrRoll - convertedPitchTo180scale);
+		if (pitchDiff>0)
+			user_pwm_set_led_brightness(0,0,diffMagnitudeForBrightnessPitch * 5.555555,0); //5.5555 = 500/90
 		else
-			user_pwm_set_led_brightness(0,diffMagnitudeForBrightness * 5.555555,0,0); //5.5555 = 500/90
+			user_pwm_set_led_brightness(0,diffMagnitudeForBrightnessPitch * 5.555555,0,0); //5.5555 = 500/90
+		toDisplay= (int)convertedPitchTo180scale;
 	}
 	else {
-		calculated = calculateRollAngleFromAccVals(ax, ay, az);
-		convertedTo180scale= calculated+90.5;//adding .5 to cast to int properly
-		diff = expectedPitchOrRoll- convertedTo180scale;
+		convertedRollTo180scale= calculatedRoll+90.5;//adding .5 to cast to int properly
+		rollDiff = expectedPitchOrRoll- convertedRollTo180scale;
 		// The diffMagnitudeForBrightness will be from 0 to 90 (because of abs).
-		diffMagnitudeForBrightness=  (uint16_t)fabs( expectedPitchOrRoll - convertedTo180scale);
-		if (diff>0)
-			user_pwm_set_led_brightness(0,0,0,diffMagnitudeForBrightness * 5.555555); //5.5555 = 500/90
+		diffMagnitudeForBrightnessRoll=  (uint16_t)fabs( expectedPitchOrRoll - convertedRollTo180scale);
+		if (rollDiff>0)
+			user_pwm_set_led_brightness(0,0,0,diffMagnitudeForBrightnessRoll * 5.555555); //5.5555 = 500/90
 		else
-			user_pwm_set_led_brightness(diffMagnitudeForBrightness * 5.555555,0,0,0); //5.5555 = 500/90
+			user_pwm_set_led_brightness(diffMagnitudeForBrightnessRoll * 5.555555,0,0,0); //5.5555 = 500/90
+		toDisplay= (int)convertedRollTo180scale;
 	}
-	toDisplay= (int)convertedTo180scale;
-}
-
-float calculatePitchAngleFromAccVals(float ax, float ay, float az){
-	float val = 180.0 / PI;
-	float retval;
-	float denom = ay*ay+az*az;
-	denom = sqrt(denom);
-	retval = ax/denom;
-	retval = atan(retval)*val;
-	return retval;
-}
-
-float calculateRollAngleFromAccVals(float ax, float ay, float az){
-	float val = 180.0 / PI;
-	float retval;
-	float denom = ax*ax+az*az;
-	denom = sqrt(denom);
-	retval = (-ay)/denom;
-	retval = atan(retval)*val;
-	return retval;
 }
 
 void user_pwm_set_led_brightness(uint16_t ld3, uint16_t ld4,uint16_t ld5,uint16_t ld6){

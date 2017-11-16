@@ -1,6 +1,5 @@
 --cpu Cortex-M4.fp
 ".\objects\main.o"
-".\objects\thread_led.o"
 ".\objects\supporting_functions.o"
 ".\objects\gpio.o"
 ".\objects\accelerometer.o"

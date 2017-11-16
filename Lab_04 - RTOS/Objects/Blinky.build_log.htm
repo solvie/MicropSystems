@@ -27,17 +27,37 @@ Project File Date:  11/16/2017
 <h2>Output:</h2>
 *** Using Compiler 'V5.05 update 2 (build 169)', folder: 'C:\Keil_v5\ARM\ARMCC\Bin'
 Build target 'Lab4'
-compiling keypad.c...
-.\Headers\display.h(19): warning:  #1-D: last line of file ends without a newline
-  float calculateRollAngleFromAccVals(float ax, float ay, float az);
-Sources\keypad.c(123): warning:  #177-D: variable "isSemReady" was declared but never referenced
-        int isSemReady;
-Sources\keypad.c(228): warning:  #1-D: last line of file ends without a newline
+compiling main.c...
+.\Headers\display.h(21): warning:  #1-D: last line of file ends without a newline
+  //float calculateRollAngleFromAccVals(float ax, float ay, float az);
+Sources\main.c(71): warning:  #550-D: variable "tid_thread1" was set but never used
+        osThreadId tid_thread1;  
+Sources\main.c(183): warning:  #1-D: last line of file ends without a newline
   }
-Sources\keypad.c: 3 warnings, 0 errors
+Sources\main.c: 3 warnings, 0 errors
+compiling accelerometer.c...
+.\Headers\display.h(21): warning:  #1-D: last line of file ends without a newline
+  //float calculateRollAngleFromAccVals(float ax, float ay, float az);
+Sources\accelerometer.c(111): warning:  #177-D: variable "new_value" was declared but never referenced
+                        float new_value[3];
+Sources\accelerometer.c(202): warning:  #1-D: last line of file ends without a newline
+  }
+Sources\accelerometer.c: 3 warnings, 0 errors
+compiling display.c...
+.\Headers\display.h(21): warning:  #1-D: last line of file ends without a newline
+  //float calculateRollAngleFromAccVals(float ax, float ay, float az);
+Sources\display.c(268): warning:  #177-D: variable "acc_value" was declared but never referenced
+        float acc_value[3];
+Sources\display.c(432): warning:  #1035-D: single-precision operand implicitly converted to double-precision
+                convertedPitchTo180scale= calculatedPitch+90.5;//adding .5 to cast to int properly
+Sources\display.c(443): warning:  #1035-D: single-precision operand implicitly converted to double-precision
+                convertedRollTo180scale= calculatedRoll+90.5;//adding .5 to cast to int properly
+Sources\display.c(482): warning:  #1-D: last line of file ends without a newline
+  }
+Sources\display.c: 5 warnings, 0 errors
 linking...
-Program Size: Code=47940 RO-data=916 RW-data=352 ZI-data=19792  
-".\Objects\Blinky.axf" - 0 Error(s), 3 Warning(s).
+Program Size: Code=45928 RO-data=920 RW-data=360 ZI-data=19784  
+".\Objects\Blinky.axf" - 0 Error(s), 11 Warning(s).
 
 <h2>Software Packages used:</h2>
 
