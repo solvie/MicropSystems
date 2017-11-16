@@ -103,7 +103,7 @@ int main(void)
 	HAL_TIM_PWM_Start(&htim4,TIM_CHANNEL_4);
 	
 	userInputState=1;
-	enterRollState=1; //On startup, we are in enter Roll state
+	enterRollState=1; 
 	operatingModeRollMonitoring=1; //the first operating mode we enter will be roll monitoring
 	user_pwm_set_led_brightness(500,0,0,500);//On startup, we are in enter Roll state
 

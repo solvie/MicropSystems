@@ -1,6 +1,7 @@
 #include "gpio.h"
 #include "keypad.h"
 #include "cmsis_os.h"  
+#include "display.h"
 /*
 connection: 
 PB12,PB13,PB14,PB15,PD8,PD9,PD10,PD11
@@ -218,6 +219,7 @@ void Read_KP_Value(void const *argument){
 		if(key_pressed != '\0'){
 			printf("Key is %c \n", key_pressed);
 		}
+		set_key_pressed_display(key_pressed);
 		
 		osDelay(10);  
 	}

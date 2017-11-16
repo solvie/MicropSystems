@@ -444,6 +444,16 @@
               <FileType>5</FileType>
               <FilePath>.\Headers\tim.h</FilePath>
             </File>
+            <File>
+              <FileName>display.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\Sources\display.c</FilePath>
+            </File>
+            <File>
+              <FileName>display.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>.\Headers\display.h</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -903,6 +913,16 @@
               <FileType>5</FileType>
               <FilePath>.\Headers\tim.h</FilePath>
             </File>
+            <File>
+              <FileName>display.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\Sources\display.c</FilePath>
+            </File>
+            <File>
+              <FileName>display.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>.\Headers\display.h</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -1360,6 +1380,16 @@
               <FileName>tim.h</FileName>
               <FileType>5</FileType>
               <FilePath>.\Headers\tim.h</FilePath>
+            </File>
+            <File>
+              <FileName>display.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\Sources\display.c</FilePath>
+            </File>
+            <File>
+              <FileName>display.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>.\Headers\display.h</FilePath>
             </File>
           </Files>
         </Group>

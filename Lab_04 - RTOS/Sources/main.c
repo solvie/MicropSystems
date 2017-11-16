@@ -16,6 +16,7 @@
 #include "accelerometer.h"
 #include "keypad.h"
 #include "tim.h"
+#include "display.h"
 
 #define PI 3.14159265
 
@@ -34,7 +35,6 @@ void SystemClock_Config(void);
 void initializeACC(void);
 void MX_NVIC_Init(void);
 char key_pressed;
-int digselect_flag;
 int displayCounter;
 const int DISPLAY_COUNTER_MAX = 10000; 
 //extern osThreadId Read_KP_Value_Id;
@@ -95,6 +95,7 @@ int main (void) {
 	HAL_TIM_PWM_Start(&htim4,TIM_CHANNEL_4);
 	start_acc_thread();
 	start_kp_thread();
+	start_display_thread();
 	//start_temp_thread();
 	/* User codes goes here*/
   //initializeLED_IO();                       /* Initialize LED GPIO Buttons    */

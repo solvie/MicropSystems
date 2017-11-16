@@ -39,3 +39,4 @@
 .\objects\main.o: .\Headers\accelerometer.h
 .\objects\main.o: .\Headers\keypad.h
 .\objects\main.o: .\Headers\tim.h
+.\objects\main.o: .\Headers\display.h
