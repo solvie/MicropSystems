@@ -2,6 +2,7 @@
 #include "lis3dsh.h"
 #include "accelerometer.h"
 #include "cmsis_os.h" 
+#include "display.h"
 #define SIGNAL_READY 0x0001
 #define SIGNAL_WAIT 0x0002
 
@@ -104,14 +105,26 @@ void Read_Raw_ACC(void const *argument){
 	//The first four bits denote if we have new data on all XYZ axes, 
 	//Z axis only, Y axis only or Z axis only. If any or all changed, proceed
 	while(1){
+			float new_value[3];
+			float acc_value[3];
 			osSignalWait(SIGNAL_READY, osWaitForever);
 			LIS3DSH_Read (&status, LIS3DSH_STATUS, 1);
 			if ((status & 0x0F) != 0x00)
 			{
+				//printf("BUFFER IS %d\n", buffer_counter);
 				LIS3DSH_ReadACC(&Buffer[0]);
 				accX = (float)Buffer[0];
 				accY = (float)Buffer[1];
 				accZ = (float)Buffer[2];
+				x_buffer[buffer_counter] = accX * Cal_M[0][0] + accY * Cal_M[1][0] + accZ * Cal_M[2][0] + Cal_M[3][0];
+				y_buffer[buffer_counter] = accX * Cal_M[0][1] + accY * Cal_M[1][1] + accZ * Cal_M[2][1] + Cal_M[3][1];
+				z_buffer[buffer_counter] = accX * Cal_M[0][2] + accY * Cal_M[1][2] + accZ * Cal_M[2][2] + Cal_M[3][2];	
+				
+				buffer_counter += 1;
+				if(buffer_counter == BUFFER_SIZE){
+					Get_Final_ACC_Value(&acc_value[0]);
+					set_acc_value_display(&acc_value[0]);
+				}
 			}
 			osSignalSet(Read_Raw_ACC_Id, SIGNAL_WAIT);
 	}

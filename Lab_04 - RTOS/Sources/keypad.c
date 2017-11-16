@@ -216,9 +216,7 @@ void Read_KP_Value(void const *argument){
 				}
 			}
 		//osSemaphoreRelease(read_kp_flag_sem);
-		if(key_pressed != '\0'){
-			printf("Key is %c \n", key_pressed);
-		}
+
 		set_key_pressed_display(key_pressed);
 		
 		osDelay(10);  

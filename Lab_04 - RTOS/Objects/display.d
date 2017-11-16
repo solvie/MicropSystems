@@ -36,3 +36,4 @@
 .\objects\display.o: D:\Keil_v5\ARM\ARMCC\Bin\..\include\math.h
 .\objects\display.o: D:\Keil_v5\ARM\PACK\ARM\CMSIS\5.0.0-Beta4\CMSIS\RTOS\RTX\INC\cmsis_os.h
 .\objects\display.o: D:\Keil_v5\ARM\ARMCC\Bin\..\include\stddef.h
+.\objects\display.o: .\Headers\tim.h

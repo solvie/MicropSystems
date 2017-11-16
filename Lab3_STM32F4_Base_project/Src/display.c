@@ -2,6 +2,7 @@
 #include "display.h"
 #include "math.h"
 
+
 /**
 * Converts an integer @param number (which must be 1~3 digits long) into an array of integers @param array.
 * An array value of -1 indicates that it is empty. 

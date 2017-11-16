@@ -24,9 +24,6 @@
 //functions are declared externally
 osSemaphoreId read_kp_flag_sem;                         // Semaphore ID
 osSemaphoreDef(read_kp_flag_sem);                       // Semaphore definition
-int reset_flag;
-int sleep_flag;
-int operation_flag;
 extern void initializeLED_IO			(void);
 extern void start_Thread_LED			(void);
 extern void Thread_LED(void const *argument);

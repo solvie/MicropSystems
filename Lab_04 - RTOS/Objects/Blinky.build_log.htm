@@ -27,35 +27,23 @@ Project File Date:  11/16/2017
 <h2>Output:</h2>
 *** Using Compiler 'V5.06 update 5 (build 528)', folder: 'D:\Keil_v5\ARM\ARMCC\Bin'
 Build target 'Lab4'
-compiling keypad.c...
-.\Headers\display.h(8): warning:  #1-D: last line of file ends without a newline
-  char get_key_pressed_display(void);
-Sources\keypad.c(123): warning:  #177-D: variable "isSemReady"  was declared but never referenced
-  	int isSemReady;
-Sources\keypad.c(230): warning:  #1-D: last line of file ends without a newline
-  }
-Sources\keypad.c: 3 warnings, 0 errors
-compiling main.c...
-.\Headers\accelerometer.h(5): warning:  #1-D: last line of file ends without a newline
-  void start_acc_thread(void);
-.\Headers\display.h(8): warning:  #1-D: last line of file ends without a newline
-  char get_key_pressed_display(void);
-Sources\main.c(74): warning:  #550-D: variable "tid_thread1"  was set but never used
-  	osThreadId tid_thread1;  
-Sources\main.c(186): warning:  #1-D: last line of file ends without a newline
-  }
-Sources\main.c: 4 warnings, 0 errors
 compiling display.c...
-.\Headers\display.h(8): warning:  #1-D: last line of file ends without a newline
-  char get_key_pressed_display(void);
-Sources\display.c(233): warning:  #550-D: variable "key_pressed"  was set but never used
-  	char key_pressed;
-Sources\display.c(251): warning:  #1-D: last line of file ends without a newline
+.\Headers\display.h(12): warning:  #1295-D: Deprecated declaration concatenateArray - give arg types
+  int concatenateArray();
+.\Headers\display.h(15): warning:  #1295-D: Deprecated declaration deleteLastInBuffer - give arg types
+  void deleteLastInBuffer();
+.\Headers\display.h(18): warning:  #1-D: last line of file ends without a newline
+  float calculateRollAngleFromAccVals(float ax, float ay, float az);
+Sources\display.c(435): warning:  #1035-D: single-precision operand implicitly converted to double-precision
+  		convertedTo180scale= calculated+90.5;//adding .5 to cast to int properly
+Sources\display.c(447): warning:  #1035-D: single-precision operand implicitly converted to double-precision
+  		convertedTo180scale= calculated+90.5;//adding .5 to cast to int properly
+Sources\display.c(506): warning:  #1-D: last line of file ends without a newline
   }
-Sources\display.c: 3 warnings, 0 errors
+Sources\display.c: 6 warnings, 0 errors
 linking...
-Program Size: Code=42196 RO-data=780 RW-data=304 ZI-data=19784  
-".\Objects\Blinky.axf" - 0 Error(s), 10 Warning(s).
+Program Size: Code=47892 RO-data=916 RW-data=352 ZI-data=19808  
+".\Objects\Blinky.axf" - 0 Error(s), 6 Warning(s).
 
 <h2>Software Packages used:</h2>
 
@@ -176,7 +164,7 @@ Package Vendor: Keil
    * Component: ::Device:STM32Cube Framework (API)
 
    * Component: ::CMSIS:RTOS:1.0 (API)
-Build Time Elapsed:  00:00:02
+Build Time Elapsed:  00:00:01
 </pre>
 </body>
 </html>
