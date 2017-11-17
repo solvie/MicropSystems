@@ -2,6 +2,9 @@
 #include "keypad.h"
 #include "cmsis_os.h"  
 #include "display.h"
+#define reset_flag_const 0
+#define sleep_flag_const 1
+#define operation_flag_const 2
 /*
 connection: 
 PB12,PB13,PB14,PB15,PD8,PD9,PD10,PD11
@@ -20,11 +23,6 @@ Col:
 */
 osThreadId Read_KP_Value_Id;
 osThreadDef(Read_KP_Value, osPriorityNormal, 1, 0);
-extern int reset_flag;
-extern int sleep_flag;
-extern int operation_flag;
-extern osSemaphoreId read_kp_flag_sem;    
-extern char key_pressed;
 const float KEYPAD_MAP [4][3] = {
 	{'1','2','3'},
 	{'4','5','6'},
@@ -126,7 +124,7 @@ void Read_KP_Value(void const *argument){
 	const int reset_threshold = 30000;
 	const int sleep_threshold = 100000;
 	static char temp = 0;
-
+	char key_pressed;
 	while(1){
 		//isSemReady = osSemaphoreWait(read_kp_flag_sem, 0);
 		//if(isSemReady == 0){
@@ -135,6 +133,7 @@ void Read_KP_Value(void const *argument){
 		data_ok = 0;
 		counter = 0;
 		temp = 0;
+		key_pressed = '\0';
 		while(data_ok == 0){
 			Row_Out_Col_In();
 			col_index = Get_Col_Pin_In_Reset_Mode();
@@ -150,7 +149,8 @@ void Read_KP_Value(void const *argument){
 						if(temp == KEYPAD_MAP[row_index][col_index]){
 							counter ++;
 							if(counter > sleep_threshold){
-								sleep_flag = 1;
+								set_flag_display(sleep_flag_const, 1);
+								//sleep_flag = 1;
 								temp = 0;
 								counter = 0;
 								data_ok = 1;
@@ -161,7 +161,8 @@ void Read_KP_Value(void const *argument){
 						if(temp == KEYPAD_MAP[row_index][col_index]){
 							counter ++;
 							if(counter > sleep_threshold){
-								operation_flag = 1;
+								set_flag_display(operation_flag_const, 1);
+								//operation_flag = 1;
 								temp = 0;
 								counter = 0;
 								data_ok = 1;
@@ -186,7 +187,8 @@ void Read_KP_Value(void const *argument){
 			}else{
 				if(temp == '*'){
 						if(counter > reset_threshold){
-								reset_flag = 1;
+								set_flag_display(reset_flag_const, 1);
+								//reset_flag = 1;
 								counter = 0;
 								temp = 0;
 								key_pressed = '\0';

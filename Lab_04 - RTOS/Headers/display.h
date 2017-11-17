@@ -17,5 +17,6 @@ void enterNumberIntoBuffer(int* array, int numberEntered);
 void deleteLastInBuffer(int* array);
 void adjustBrightnessBasedOnACC(int isPitch, float expectedPitch, float expectedRoll, float* valsFromAcc);
 void user_pwm_set_led_brightness(uint16_t ld3, uint16_t ld4,uint16_t ld5,uint16_t ld6);
+void set_flag_display(int flag_index, int status);
 //float calculatePitchAngleFromAccVals(float ax, float ay, float az);
 //float calculateRollAngleFromAccVals(float ax, float ay, float az);

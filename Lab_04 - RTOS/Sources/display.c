@@ -6,6 +6,10 @@
 
 #define SIGNAL_READY 0x0001
 #define SIGNAL_WAIT 0x0002
+
+#define reset_flag_const 0
+#define sleep_flag_const 1
+#define operation_flag_const 2
 /**
 * Converts an integer @param number (which must be 1~3 digits long) into an array of integers @param array.
 * An array value of -1 indicates that it is empty. 
@@ -15,9 +19,9 @@ float pitch_roll_value_global[2];
 const uint16_t EXCEEDS_MAX = 61568; //WARNING MUST BE GREATER THAN PULSE
 
 int currentDigit = 0;
-int sleep_flag;
-int operation_flag;
-int reset_flag;
+int sleep_flag_global;
+int operation_flag_global;
+int reset_flag_global;
 char key_pressed_global = 0;
 int entered_char_pointer = 4;
 int sleepmode=0;
@@ -38,6 +42,9 @@ osSemaphoreDef(key_pressed_sem);                       // Semaphore definition
 
 osSemaphoreId acc_ready_sem_id;                         // Semaphore ID
 osSemaphoreDef(acc_ready_sem);                       // Semaphore definition
+
+osSemaphoreId flag_sem_id;                         // Semaphore ID
+osSemaphoreDef(flag_sem);                       // Semaphore definition
 
 void intToArray(int * array, int number){
 	const int NUM_LED_DIGITS = 4;
@@ -228,6 +235,32 @@ int toggleDigit(){
 	return currentDigit;
 }
 
+void set_flag_display(int flag_index, int status){
+	osSemaphoreWait(flag_sem_id,osWaitForever);
+	if(flag_index == 0){
+		reset_flag_global = status;
+	}else if(flag_index == 1){
+		sleep_flag_global = status;
+	}else if(flag_index == 2){
+		operation_flag_global = status;
+	}
+	osSemaphoreRelease(flag_sem_id);
+}
+
+int get_flag_display(int flag_index){
+	int flag_status;
+	osSemaphoreWait(flag_sem_id,osWaitForever);
+	if(flag_index == 0){
+		flag_status = reset_flag_global;
+	}else if(flag_index == 1){
+		flag_status = sleep_flag_global;
+	}else if(flag_index == 2){
+		flag_status = operation_flag_global;
+	}
+	osSemaphoreRelease(flag_sem_id);
+	return flag_status;
+}
+
 void set_acc_pitch_and_roll(float *pitchRoll){
 	osSemaphoreWait(acc_ready_sem_id,osWaitForever);
 	pitch_roll_value_global[0] = pitchRoll[0];
@@ -275,11 +308,16 @@ void Display_Thread(void const *argument){
 	operatingModeRollMonitoring=1;
 	user_pwm_set_led_brightness(500,0,0,500);//On startup, we are in enter Roll state
 	int digitArray[4];
-	
+	int sleep_flag;
+	int reset_flag;
+	int operation_flag;
 	while(1){
 		
 		osSignalWait(SIGNAL_READY, osWaitForever);
 		key_pressed = get_key_pressed_display();
+		sleep_flag = get_flag_display(sleep_flag_const);
+		reset_flag = get_flag_display(reset_flag_const);
+		operation_flag = get_flag_display(operation_flag_const);
 		set_key_pressed_display('\0');
 		if(key_pressed != '\0'){
 			printf("Key is %c \n", key_pressed);
@@ -343,14 +381,16 @@ void Display_Thread(void const *argument){
 					printf("Key Pressed is %c \n", key_pressed);
 					operatingModeRollMonitoring=0;
 				} if (sleep_flag){//enter sleep mode
-					sleep_flag=0;
+					//sleep_flag=0;
+					set_flag_display(sleep_flag_const, 0);
 					sleepmode=1;
 					resetAll(); 
-					HAL_TIM_Base_Stop_IT(&htim2);
+					//HAL_TIM_Base_Stop_IT(&htim2);
 					for (int i=0; i<4; i++)digitArray[i] = -1;
 					user_pwm_set_led_brightness(0,0,0,0);//Dim the LEDS
 				} else if (reset_flag){ //go to input mode for the relevant roll state
-					reset_flag=0;
+					//reset_flag=0;
+					set_flag_display(reset_flag_const, 0);
 					userInputState=1;
 					reinit = 1;
 					if (operatingModeRollMonitoring){
@@ -375,7 +415,9 @@ void Display_Thread(void const *argument){
 			if(operation_flag){
 				sleepmode=0;
 				userInputState=0;
-				operation_flag=0;
+				//operation_flag=0;
+				set_flag_display(operation_flag_const, 0);
+
 			}
 		}
 		displayCounter = (displayCounter+1)%DISPLAY_COUNTER_MAX;
@@ -494,4 +536,5 @@ void start_display_thread(void){
 	osSignalSet(Display_Thread_ID, SIGNAL_WAIT);
 	key_pressed_sem_id = osSemaphoreCreate(osSemaphore(key_pressed_sem), 1); 
 	acc_ready_sem_id = osSemaphoreCreate(osSemaphore(acc_ready_sem), 1);
+	flag_sem_id = osSemaphoreCreate(osSemaphore(flag_sem), 1);
 }
