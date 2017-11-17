@@ -200,3 +200,7 @@ void start_acc_thread(void){
 	Read_Raw_ACC_Id = osThreadCreate(osThread(Read_Raw_ACC), NULL); 
 	osSignalSet(Read_Raw_ACC_Id, SIGNAL_WAIT);
 }
+
+void stop_acc_thread(void){
+	osThreadTerminate(Read_Raw_ACC_Id); 
+}

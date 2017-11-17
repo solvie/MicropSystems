@@ -220,7 +220,7 @@ void Read_KP_Value(void const *argument){
 		//osSemaphoreRelease(read_kp_flag_sem);
 
 		set_key_pressed_display(key_pressed);
-		osDelay(1);  
+		osDelay(2);  
 	}
 }
 

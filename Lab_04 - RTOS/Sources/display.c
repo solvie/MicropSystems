@@ -3,6 +3,8 @@
 #include "math.h"
 #include "cmsis_os.h"  
 #include "tim.h"
+#include "accelerometer.h"
+
 
 #define SIGNAL_READY 0x0001
 #define SIGNAL_WAIT 0x0002
@@ -34,6 +36,7 @@ int enterRollState;
 int operatingModeRollMonitoring; //the first operating mode we enter will be roll monitoring
 
 extern TIM_HandleTypeDef htim2;
+
 osThreadDef(Display_Thread, osPriorityNormal, 1, 0);
 osThreadId Display_Thread_ID;
 
@@ -155,20 +158,27 @@ void displayInt(int toDisplay){
 /**
 * Resets all of the 7-segment display pins, to shut the display off.
 */
-void resetAll(){
-		HAL_GPIO_WritePin(GPIOD,GPIO_PIN_0,GPIO_PIN_RESET);
-		HAL_GPIO_WritePin(GPIOD,GPIO_PIN_1,GPIO_PIN_RESET);
-		HAL_GPIO_WritePin(GPIOD,GPIO_PIN_2,GPIO_PIN_RESET);
-		HAL_GPIO_WritePin(GPIOD,GPIO_PIN_3,GPIO_PIN_RESET);
-	
-		HAL_GPIO_WritePin(GPIOE,GPIO_PIN_7,GPIO_PIN_RESET);
-		HAL_GPIO_WritePin(GPIOE,GPIO_PIN_8,GPIO_PIN_RESET);
-		HAL_GPIO_WritePin(GPIOE,GPIO_PIN_9,GPIO_PIN_RESET);
-		HAL_GPIO_WritePin(GPIOE,GPIO_PIN_10,GPIO_PIN_RESET);
-		HAL_GPIO_WritePin(GPIOE,GPIO_PIN_11,GPIO_PIN_RESET);
-		HAL_GPIO_WritePin(GPIOE,GPIO_PIN_12,GPIO_PIN_RESET);
-		HAL_GPIO_WritePin(GPIOE,GPIO_PIN_13,GPIO_PIN_RESET);
+void disableAllGPIOClocks(){
+  __GPIOE_CLK_DISABLE();
+  __GPIOC_CLK_DISABLE();
+  __GPIOH_CLK_DISABLE();
+  __GPIOA_CLK_DISABLE();
+  __GPIOB_CLK_DISABLE();
+  __GPIOD_CLK_DISABLE();
 }
+
+/**
+* Resets all of the 7-segment display pins, to shut the display off.
+*/
+void enableAllGPIOClocks(){
+  __GPIOE_CLK_ENABLE();
+  __GPIOC_CLK_ENABLE();
+  __GPIOH_CLK_ENABLE();
+  __GPIOA_CLK_ENABLE();
+  __GPIOB_CLK_ENABLE();
+  __GPIOD_CLK_ENABLE();
+}
+
 
 /**
 * From the @param digitArray, if the array's value at @param currentDigit's index is not -1, we enable the 
@@ -230,6 +240,22 @@ void digitSelect(int* digitArray,int currentDigit){
 		}
 	}
 }
+
+void resetAll(){
+		HAL_GPIO_WritePin(GPIOD,GPIO_PIN_0,GPIO_PIN_RESET);
+		HAL_GPIO_WritePin(GPIOD,GPIO_PIN_1,GPIO_PIN_RESET);
+		HAL_GPIO_WritePin(GPIOD,GPIO_PIN_2,GPIO_PIN_RESET);
+		HAL_GPIO_WritePin(GPIOD,GPIO_PIN_3,GPIO_PIN_RESET);
+	
+		HAL_GPIO_WritePin(GPIOE,GPIO_PIN_7,GPIO_PIN_RESET);
+		HAL_GPIO_WritePin(GPIOE,GPIO_PIN_8,GPIO_PIN_RESET);
+		HAL_GPIO_WritePin(GPIOE,GPIO_PIN_9,GPIO_PIN_RESET);
+		HAL_GPIO_WritePin(GPIOE,GPIO_PIN_10,GPIO_PIN_RESET);
+		HAL_GPIO_WritePin(GPIOE,GPIO_PIN_11,GPIO_PIN_RESET);
+		HAL_GPIO_WritePin(GPIOE,GPIO_PIN_12,GPIO_PIN_RESET);
+		HAL_GPIO_WritePin(GPIOE,GPIO_PIN_13,GPIO_PIN_RESET);
+}
+
 int toggleDigit(){
 	currentDigit=(currentDigit+1)%4;
 	return currentDigit;
@@ -367,12 +393,6 @@ void Display_Thread(void const *argument){
 			//Update the value to be shown in 7-segment display.
 				get_acc_pitch_and_roll(&acc_pitch_roll[0]);
 				adjustBrightnessBasedOnACC(!operatingModeRollMonitoring,inputPitchExpected, inputRollExpected, &acc_pitch_roll[0]);
-				
-				//if (operatingModeRollMonitoring){
-				//	adjustBrightnessBasedOnACC(0, inputRollExpected, &acc_pitch_roll[0]);
-				//} else{//if not in operatingModeRollMonitoring is operatingModePitchMonitoring
-				//	adjustBrightnessBasedOnACC(1, inputPitchExpected, &acc_pitch_roll[0]);
-				//}
 
 				if(key_pressed == '1'){ //go to roll
 					printf("Key Pressed is %c \n", key_pressed);
@@ -384,7 +404,9 @@ void Display_Thread(void const *argument){
 					//sleep_flag=0;
 					set_flag_display(sleep_flag_const, 0);
 					sleepmode=1;
-					resetAll(); 
+					resetAll();
+					disableAllGPIOClocks();
+					stop_acc_thread();
 					//HAL_TIM_Base_Stop_IT(&htim2);
 					for (int i=0; i<4; i++)digitArray[i] = -1;
 					user_pwm_set_led_brightness(0,0,0,0);//Dim the LEDS
@@ -409,15 +431,13 @@ void Display_Thread(void const *argument){
 					intToArray(&digitArray[0],toDisplay);
 				}
 			} 
-		} else{ //Is in sleep mode
-			resetAll(); 
-		  
+		} else{ //Is in sleep mode		  
 			if(operation_flag){
 				sleepmode=0;
 				userInputState=0;
-				//operation_flag=0;
 				set_flag_display(operation_flag_const, 0);
-
+				enableAllGPIOClocks();
+				start_acc_thread();
 			}
 		}
 		displayCounter = (displayCounter+1)%DISPLAY_COUNTER_MAX;
