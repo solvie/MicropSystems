@@ -27,7 +27,6 @@ int sleep_flag_global;
 int operation_flag_global;
 int reset_flag_global;
 char key_pressed_global = 0;
-
 int entered_char_pointer = 4;
 int sleepmode=0;
 int inputRollExpected = 0;
@@ -315,9 +314,12 @@ void set_key_pressed_display(char c){
 
 char get_key_pressed_display(void){
 	char temp;
-	osSemaphoreWait(key_pressed_sem_id,osWaitForever);
-	temp = key_pressed_global;
-	osSemaphoreRelease(key_pressed_sem_id);
+	int val = osSemaphoreWait(key_pressed_sem_id,1);
+	if (val > 0) {
+      temp = key_pressed_global;
+			osSemaphoreRelease(key_pressed_sem_id);
+  }
+	
 	return temp;
 }
 
@@ -350,9 +352,9 @@ void Display_Thread(void const *argument){
 		reset_flag = get_flag_display(reset_flag_const);
 		operation_flag = get_flag_display(operation_flag_const);
 		set_key_pressed_display('\0');
-		if(key_pressed != '\0'){
+		/*if(key_pressed != '\0'){
 			printf("Key is %c \n", key_pressed);
-		}
+		}*/
 		if (!sleepmode){
 			HAL_TIM_Base_Start_IT(&htim2);
 			digitSelect(&digitArray[0],toggleDigit());
@@ -361,11 +363,11 @@ void Display_Thread(void const *argument){
 					initializeDisplayToZero(digitArray);//display zero if nothing has been entered
 				}
 				if(key_pressed != '\0'&&key_pressed != '*'&&key_pressed != '#'){ //a number was entered
-					printf("Key Pressed is %c \n", key_pressed);
+					//printf("Key Pressed is %c \n", key_pressed);
 					enterNumberIntoBuffer(digitArray, key_pressed - '0');
 				} else if(key_pressed == '#') {
 					int concatedint = concatenateArray(digitArray);// concatenate array contents into one integer/.
-					printf("Input is %d \n", concatedint);
+					//printf("Input is %d \n", concatedint);
 					if (enterRollState){ 
 						inputRollExpected = concatedint;
 						if(!reinit){//If not reinitializing, go to enterPitchState
@@ -391,7 +393,7 @@ void Display_Thread(void const *argument){
 						}
 					}
 				} else if (key_pressed=='*'){
-					printf("Key Pressed is %c \n", key_pressed);
+					//printf("Key Pressed is %c \n", key_pressed);
 					deleteLastInBuffer(digitArray);
 				}
 			}else{ // Is in operatingMode
@@ -409,10 +411,10 @@ void Display_Thread(void const *argument){
 				}
 				
 				if(key_pressed == '1'){ //go to roll
-					printf("Key Pressed is %c \n", key_pressed);
+					//printf("Key Pressed is %c \n", key_pressed);
 					operatingModeRollMonitoring=1;
 				} else if(key_pressed == '2'){ //go to pitch
-					printf("Key Pressed is %c \n", key_pressed);
+					//printf("Key Pressed is %c \n", key_pressed);
 					operatingModeRollMonitoring=0;
 				} else if (key_pressed=='#'){
 						//if in view input go to view accel, and vice versa.
@@ -461,6 +463,7 @@ void Display_Thread(void const *argument){
 			}
 		}
 		displayCounter = (displayCounter+1)%DISPLAY_COUNTER_MAX;
+		osSignalSet(Display_Thread_ID, SIGNAL_WAIT);
 }
 }
 void initializeDisplayToZero(int * digitArray){

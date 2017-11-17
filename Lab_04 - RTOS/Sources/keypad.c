@@ -5,6 +5,8 @@
 #define reset_flag_const 0
 #define sleep_flag_const 1
 #define operation_flag_const 2
+#define SIGNAL_READY 0x0001
+#define SIGNAL_WAIT 0x0002
 /*
 connection: 
 PB12,PB13,PB14,PB15,PD8,PD9,PD10,PD11
@@ -22,7 +24,7 @@ Col:
 	RB7 -> PB15 ---Disable
 */
 osThreadId Read_KP_Value_Id;
-osThreadDef(Read_KP_Value, osPriorityNormal, 1, 0);
+osThreadDef(Read_KP_Value, osPriorityHigh, 1, 0);
 const float KEYPAD_MAP [4][3] = {
 	{'1','2','3'},
 	{'4','5','6'},
@@ -35,6 +37,7 @@ const float KEYPAD_MAP [4][3] = {
 * Set rows as output and columns as input; if no button is pressed, column line inputs
 * will all be read as 1 due to pullup resistors; if button is pressed, that column will go 0.
 */
+
 void Row_Out_Col_In(void){
 	GPIO_InitTypeDef GPIO_InitStruct;
 	//row -> Output
@@ -120,108 +123,112 @@ void Read_KP_Value(void const *argument){
 	int data_ok;
 	int isSemReady;
 	static int counter = 0;
-	const int key_pressed_threshold = 10000;
-	const int reset_threshold = 30000;
-	const int sleep_threshold = 100000;
+	const int key_pressed_threshold = 20;
+	const int reset_threshold = 60;
+	const int sleep_threshold = 100;
 	static char temp = 0;
 	char key_pressed;
-	while(1){
 		//isSemReady = osSemaphoreWait(read_kp_flag_sem, 0);
 		//if(isSemReady == 0){
 		//	osThreadYield();
 		//}
-		data_ok = 0;
-		counter = 0;
-		temp = 0;
-		key_pressed = '\0';
-		while(data_ok == 0){
-			Row_Out_Col_In();
-			col_index = Get_Col_Pin_In_Reset_Mode();
-			Row_In_Col_Out();
-			row_index = Get_Row_Pin_In_Reset_Mode();
-			//printf("Counter is %d\n", counter);
-			if(row_index!=-1 && col_index!=-1){
-				if(counter == 0){
-					temp = KEYPAD_MAP[row_index][col_index];
-					counter += 1;
-				}else{
-					if(temp == '*'){
-						if(temp == KEYPAD_MAP[row_index][col_index]){
-							counter ++;
-							if(counter > sleep_threshold){
-								set_flag_display(sleep_flag_const, 1);
-								//sleep_flag = 1;
-								temp = 0;
-								counter = 0;
-								data_ok = 1;
-								key_pressed = '\0';
-							}
-						}
-					}else if(temp=='#'){
-						if(temp == KEYPAD_MAP[row_index][col_index]){
-							counter ++;
-							if(counter > sleep_threshold){
-								set_flag_display(operation_flag_const, 1);
-								//operation_flag = 1;
-								temp = 0;
-								counter = 0;
-								data_ok = 1;
-								key_pressed = '\0';
-							}
-						}
-					}else{
-						if(counter > key_pressed_threshold){
-							counter = 0;
-							temp = 0;
-							data_ok = 1;
-							key_pressed = KEYPAD_MAP[row_index][col_index];
-						}
-						if(temp == KEYPAD_MAP[row_index][col_index]){
-							counter ++;
-						}else{
-							counter = 0;
-							temp = 0;
-						}
-					}
-				}
+	data_ok = 0;
+	counter = 0;
+	temp = 0;
+	while(1){
+		//printf("Counter %d", counter);
+		Row_Out_Col_In();
+		col_index = Get_Col_Pin_In_Reset_Mode();
+		Row_In_Col_Out();
+		row_index = Get_Row_Pin_In_Reset_Mode();
+		//printf("Counter is %d\n", counter);
+		if(row_index!=-1 && col_index!=-1){
+			if(counter == 0){
+				temp = KEYPAD_MAP[row_index][col_index];
+				counter += 1;
 			}else{
 				if(temp == '*'){
-						if(counter > reset_threshold){
-								set_flag_display(reset_flag_const, 1);
-								//reset_flag = 1;
-								counter = 0;
-								temp = 0;
-								key_pressed = '\0';
-								data_ok = 1;
-						}else if(counter > key_pressed_threshold && counter < reset_threshold){
-								counter = 0;
-								temp = 0;
-								key_pressed = '*';
-								data_ok = 1;
-						}
-							
-				}else if(temp == '#'){
-					if(counter > key_pressed_threshold){
-							counter = 0;
+					if(temp == KEYPAD_MAP[row_index][col_index]){
+						counter ++;
+						if(counter > sleep_threshold){
+							set_flag_display(sleep_flag_const, 1);
+							//sleep_flag = 1;
 							temp = 0;
-							key_pressed = '#';
+							counter = 0;
 							data_ok = 1;
+							key_pressed = '\0';
+						}
 					}
-							
+				}else if(temp=='#'){
+					if(temp == KEYPAD_MAP[row_index][col_index]){
+						counter ++;
+						if(counter > sleep_threshold){
+							set_flag_display(operation_flag_const, 1);
+							//operation_flag = 1;
+							temp = 0;
+							counter = 0;
+							data_ok = 1;
+							key_pressed = '\0';
+						}
+					}
 				}else{
-					temp = 0;
-					counter = 0;
-					key_pressed = '\0';
-					data_ok = 1;
-				}
-
+					if(counter > key_pressed_threshold){
+						counter = 0;
+						temp = 0;
+						data_ok = 1;
+						key_pressed = KEYPAD_MAP[row_index][col_index];
+					}
+					if(temp == KEYPAD_MAP[row_index][col_index]){
+						counter ++;
+					}else{
+						counter = 0;
+						temp = 0;
+					}
 				}
 			}
+		}else{
+			if(temp == '*'){
+					if(counter > reset_threshold){
+							set_flag_display(reset_flag_const, 1);
+							//reset_flag = 1;
+							counter = 0;
+							temp = 0;
+							key_pressed = '\0';
+							data_ok = 1;
+					}else if(counter > key_pressed_threshold && counter < reset_threshold){
+							counter = 0;
+							temp = 0;
+							key_pressed = '*';
+							data_ok = 1;
+					}
+						
+			}else if(temp == '#'){
+				if(counter > key_pressed_threshold){
+						counter = 0;
+						temp = 0;
+						key_pressed = '#';
+						data_ok = 1;
+				}
+						
+			}else{
+				temp = 0;
+				counter = 0;
+				key_pressed = '\0';
+				data_ok = 1;
+			}
+
+		}
+		if(key_pressed != '\0'){
+		set_key_pressed_display(key_pressed);
+		}
+		
+		key_pressed='\0';
+		osDelay(10);  
+		}
 		//osSemaphoreRelease(read_kp_flag_sem);
 
-		set_key_pressed_display(key_pressed);
-		osDelay(2);  
-	}
+		
+	
 }
 
 void start_kp_thread(void){
