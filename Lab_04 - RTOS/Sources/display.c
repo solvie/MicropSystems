@@ -20,11 +20,14 @@
 float pitch_roll_value_global[2];
 const uint16_t EXCEEDS_MAX = 61568; //WARNING MUST BE GREATER THAN PULSE
 
+int digitArray[4];
+
 int currentDigit = 0;
 int sleep_flag_global;
 int operation_flag_global;
 int reset_flag_global;
 char key_pressed_global = 0;
+
 int entered_char_pointer = 4;
 int sleepmode=0;
 int inputRollExpected = 0;
@@ -34,6 +37,7 @@ int toDisplay=0;
 int userInputState;
 int enterRollState; 
 int operatingModeRollMonitoring; //the first operating mode we enter will be roll monitoring
+int viewAccelVals;
 
 extern TIM_HandleTypeDef htim2;
 
@@ -332,8 +336,9 @@ void Display_Thread(void const *argument){
 	userInputState=1;
 	enterRollState=1; 
 	operatingModeRollMonitoring=1;
+	viewAccelVals=1;
+
 	user_pwm_set_led_brightness(500,0,0,500);//On startup, we are in enter Roll state
-	int digitArray[4];
 	int sleep_flag;
 	int reset_flag;
 	int operation_flag;
@@ -392,15 +397,30 @@ void Display_Thread(void const *argument){
 			}else{ // Is in operatingMode
 			//Update the value to be shown in 7-segment display.
 				get_acc_pitch_and_roll(&acc_pitch_roll[0]);
-				adjustBrightnessBasedOnACC(!operatingModeRollMonitoring,inputPitchExpected, inputRollExpected, &acc_pitch_roll[0]);
-
+				int retval = adjustBrightnessBasedOnACC(!operatingModeRollMonitoring,inputPitchExpected, inputRollExpected, &acc_pitch_roll[0]);
+			
+				if (viewAccelVals){
+					toDisplay= retval;
+				}else {
+					if (operatingModeRollMonitoring)
+						toDisplay= inputRollExpected;
+					else 
+						toDisplay= inputPitchExpected;
+				}
+				
 				if(key_pressed == '1'){ //go to roll
 					printf("Key Pressed is %c \n", key_pressed);
 					operatingModeRollMonitoring=1;
 				} else if(key_pressed == '2'){ //go to pitch
 					printf("Key Pressed is %c \n", key_pressed);
 					operatingModeRollMonitoring=0;
-				} if (sleep_flag){//enter sleep mode
+				} else if (key_pressed=='#'){
+						//if in view input go to view accel, and vice versa.
+						if (viewAccelVals)viewAccelVals=0;
+						else viewAccelVals=1;
+				}
+				
+				if (sleep_flag){//enter sleep mode
 					//sleep_flag=0;
 					set_flag_display(sleep_flag_const, 0);
 					sleepmode=1;
@@ -488,7 +508,7 @@ void deleteLastInBuffer(int * digitArray){
 		}
 }
 
-void adjustBrightnessBasedOnACC(int isPitch, float inputPitchExpected, float inputRollExpected, float* valsFromAcc){
+int adjustBrightnessBasedOnACC(int isPitch, float inputPitchExpected, float inputRollExpected, float* valsFromAcc){
 	uint16_t diffMagnitudeForBrightnessPitch,diffMagnitudeForBrightnessRoll;//, diffMagnitudeForBrightnessRoll;
 	float convertedPitchTo180scale,convertedRollTo180scale,  pitchDiff, rollDiff;
 	float calculatedPitch = valsFromAcc[0]; //doing absolute values for now.
@@ -513,11 +533,10 @@ void adjustBrightnessBasedOnACC(int isPitch, float inputPitchExpected, float inp
 		user_pwm_set_led_brightness(diffMagnitudeForBrightnessRoll * 5.555555,EXCEEDS_MAX,EXCEEDS_MAX,0); //5.5555 = 500/90
 
 	if (isPitch){
-			toDisplay= (int)convertedPitchTo180scale;
+			return (int)convertedPitchTo180scale;
 	}else{
-			toDisplay= (int)convertedRollTo180scale;
+			return (int)convertedRollTo180scale;
 	}
-		
 }
 
 void user_pwm_set_led_brightness(uint16_t ld3, uint16_t ld4,uint16_t ld5,uint16_t ld6){
