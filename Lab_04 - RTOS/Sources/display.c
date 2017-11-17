@@ -12,6 +12,7 @@
 */
 //float acc_value_global[3];
 float pitch_roll_value_global[2];
+const uint16_t EXCEEDS_MAX = 61568; //WARNING MUST BE GREATER THAN PULSE
 
 int currentDigit = 0;
 int sleep_flag;
@@ -327,11 +328,13 @@ void Display_Thread(void const *argument){
 			}else{ // Is in operatingMode
 			//Update the value to be shown in 7-segment display.
 				get_acc_pitch_and_roll(&acc_pitch_roll[0]);
-				if (operatingModeRollMonitoring){
-					adjustBrightnessBasedOnACC(0, inputRollExpected, &acc_pitch_roll[0]);
-				} else{//if not in operatingModeRollMonitoring is operatingModePitchMonitoring
-					adjustBrightnessBasedOnACC(1, inputPitchExpected, &acc_pitch_roll[0]);
-				}
+				adjustBrightnessBasedOnACC(!operatingModeRollMonitoring,inputPitchExpected, inputRollExpected, &acc_pitch_roll[0]);
+				
+				//if (operatingModeRollMonitoring){
+				//	adjustBrightnessBasedOnACC(0, inputRollExpected, &acc_pitch_roll[0]);
+				//} else{//if not in operatingModeRollMonitoring is operatingModePitchMonitoring
+				//	adjustBrightnessBasedOnACC(1, inputPitchExpected, &acc_pitch_roll[0]);
+				//}
 
 				if(key_pressed == '1'){ //go to roll
 					printf("Key Pressed is %c \n", key_pressed);
@@ -423,55 +426,67 @@ void deleteLastInBuffer(int * digitArray){
 		}
 }
 
-void adjustBrightnessBasedOnACC(int isPitch, float expectedPitchOrRoll, float* valsFromAcc){
+void adjustBrightnessBasedOnACC(int isPitch, float inputPitchExpected, float inputRollExpected, float* valsFromAcc){
 	uint16_t diffMagnitudeForBrightnessPitch,diffMagnitudeForBrightnessRoll;//, diffMagnitudeForBrightnessRoll;
 	float convertedPitchTo180scale,convertedRollTo180scale,  pitchDiff, rollDiff;
 	float calculatedPitch = valsFromAcc[0]; //doing absolute values for now.
 	float calculatedRoll = valsFromAcc[1];
+		
+	convertedPitchTo180scale= calculatedPitch+90.5;//adding .5 to cast to int properly
+	convertedRollTo180scale= calculatedRoll+90.5;//adding .5 to cast to int properly
+	// The diffMagnitudeForBrightness will be from 0 to 90 (because of abs). 
+	pitchDiff = inputPitchExpected- convertedPitchTo180scale;
+	diffMagnitudeForBrightnessPitch= (uint16_t) fabs( inputPitchExpected - convertedPitchTo180scale);
+	// The diffMagnitudeForBrightness will be from 0 to 90 (because of abs).
+	rollDiff = inputRollExpected- convertedRollTo180scale;
+	diffMagnitudeForBrightnessRoll=  (uint16_t)fabs( inputRollExpected - convertedRollTo180scale);
+		
+	if (pitchDiff>0)
+		user_pwm_set_led_brightness(EXCEEDS_MAX,0,diffMagnitudeForBrightnessPitch * 5.555555,EXCEEDS_MAX); //5.5555 = 500/90
+	else
+		user_pwm_set_led_brightness(EXCEEDS_MAX,diffMagnitudeForBrightnessPitch * 5.555555,0,EXCEEDS_MAX); //5.5555 = 500/90
+	if (rollDiff>0)
+		user_pwm_set_led_brightness(0,EXCEEDS_MAX,EXCEEDS_MAX,diffMagnitudeForBrightnessRoll * 5.555555); //5.5555 = 500/90
+	else
+		user_pwm_set_led_brightness(diffMagnitudeForBrightnessRoll * 5.555555,EXCEEDS_MAX,EXCEEDS_MAX,0); //5.5555 = 500/90
+
 	if (isPitch){
-		convertedPitchTo180scale= calculatedPitch+90.5;//adding .5 to cast to int properly
-		// The diffMagnitudeForBrightness will be from 0 to 90 (because of abs). 
-		pitchDiff = expectedPitchOrRoll- convertedPitchTo180scale;
-		diffMagnitudeForBrightnessPitch= (uint16_t) fabs( expectedPitchOrRoll - convertedPitchTo180scale);
-		if (pitchDiff>0)
-			user_pwm_set_led_brightness(0,0,diffMagnitudeForBrightnessPitch * 5.555555,0); //5.5555 = 500/90
-		else
-			user_pwm_set_led_brightness(0,diffMagnitudeForBrightnessPitch * 5.555555,0,0); //5.5555 = 500/90
-		toDisplay= (int)convertedPitchTo180scale;
+			toDisplay= (int)convertedPitchTo180scale;
+	}else{
+			toDisplay= (int)convertedRollTo180scale;
 	}
-	else {
-		convertedRollTo180scale= calculatedRoll+90.5;//adding .5 to cast to int properly
-		rollDiff = expectedPitchOrRoll- convertedRollTo180scale;
-		// The diffMagnitudeForBrightness will be from 0 to 90 (because of abs).
-		diffMagnitudeForBrightnessRoll=  (uint16_t)fabs( expectedPitchOrRoll - convertedRollTo180scale);
-		if (rollDiff>0)
-			user_pwm_set_led_brightness(0,0,0,diffMagnitudeForBrightnessRoll * 5.555555); //5.5555 = 500/90
-		else
-			user_pwm_set_led_brightness(diffMagnitudeForBrightnessRoll * 5.555555,0,0,0); //5.5555 = 500/90
-		toDisplay= (int)convertedRollTo180scale;
-	}
+		
 }
 
 void user_pwm_set_led_brightness(uint16_t ld3, uint16_t ld4,uint16_t ld5,uint16_t ld6){
 	TIM_OC_InitTypeDef sConfigOC;
   
-    sConfigOC.OCMode = TIM_OCMODE_PWM1;
-    sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
-    sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
-	  
-	sConfigOC.Pulse = ld4;
-    HAL_TIM_PWM_ConfigChannel(&htim4, &sConfigOC, TIM_CHANNEL_1);
-	sConfigOC.Pulse = ld3;
-	HAL_TIM_PWM_ConfigChannel(&htim4, &sConfigOC, TIM_CHANNEL_2);
-	sConfigOC.Pulse = ld5;
-	HAL_TIM_PWM_ConfigChannel(&htim4, &sConfigOC, TIM_CHANNEL_3);
-	sConfigOC.Pulse = ld6;
-    HAL_TIM_PWM_ConfigChannel(&htim4, &sConfigOC, TIM_CHANNEL_4);
+  sConfigOC.OCMode = TIM_OCMODE_PWM1;
+  sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
+  sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
+	 
+	if(ld4!=EXCEEDS_MAX){
+		sConfigOC.Pulse = ld4;
+		HAL_TIM_PWM_ConfigChannel(&htim4, &sConfigOC, TIM_CHANNEL_1);
+	} 
+	
+	if(ld3!=EXCEEDS_MAX){
+		sConfigOC.Pulse = ld3;
+		HAL_TIM_PWM_ConfigChannel(&htim4, &sConfigOC, TIM_CHANNEL_2);
+	}
+	if(ld5!=EXCEEDS_MAX){
+		sConfigOC.Pulse = ld5;
+		HAL_TIM_PWM_ConfigChannel(&htim4, &sConfigOC, TIM_CHANNEL_3);
+	}
+	if(ld6!=EXCEEDS_MAX){
+		sConfigOC.Pulse = ld6;
+		HAL_TIM_PWM_ConfigChannel(&htim4, &sConfigOC, TIM_CHANNEL_4);
+	}
 
-    HAL_TIM_PWM_Start(&htim4, TIM_CHANNEL_1);  
+	HAL_TIM_PWM_Start(&htim4, TIM_CHANNEL_1);  
 	HAL_TIM_PWM_Start(&htim4, TIM_CHANNEL_2);  
-    HAL_TIM_PWM_Start(&htim4, TIM_CHANNEL_3);  
-    HAL_TIM_PWM_Start(&htim4, TIM_CHANNEL_4);  
+	HAL_TIM_PWM_Start(&htim4, TIM_CHANNEL_3);  
+	HAL_TIM_PWM_Start(&htim4, TIM_CHANNEL_4);  
 }
 
 void start_display_thread(void){

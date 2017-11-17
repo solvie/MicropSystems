@@ -27,37 +27,21 @@ Project File Date:  11/16/2017
 <h2>Output:</h2>
 *** Using Compiler 'V5.05 update 2 (build 169)', folder: 'C:\Keil_v5\ARM\ARMCC\Bin'
 Build target 'Lab4'
-compiling main.c...
-.\Headers\display.h(21): warning:  #1-D: last line of file ends without a newline
-  //float calculateRollAngleFromAccVals(float ax, float ay, float az);
-Sources\main.c(71): warning:  #550-D: variable "tid_thread1" was set but never used
-        osThreadId tid_thread1;  
-Sources\main.c(183): warning:  #1-D: last line of file ends without a newline
-  }
-Sources\main.c: 3 warnings, 0 errors
-compiling accelerometer.c...
-.\Headers\display.h(21): warning:  #1-D: last line of file ends without a newline
-  //float calculateRollAngleFromAccVals(float ax, float ay, float az);
-Sources\accelerometer.c(111): warning:  #177-D: variable "new_value" was declared but never referenced
-                        float new_value[3];
-Sources\accelerometer.c(202): warning:  #1-D: last line of file ends without a newline
-  }
-Sources\accelerometer.c: 3 warnings, 0 errors
 compiling display.c...
 .\Headers\display.h(21): warning:  #1-D: last line of file ends without a newline
   //float calculateRollAngleFromAccVals(float ax, float ay, float az);
-Sources\display.c(268): warning:  #177-D: variable "acc_value" was declared but never referenced
+Sources\display.c(269): warning:  #177-D: variable "acc_value" was declared but never referenced
         float acc_value[3];
-Sources\display.c(432): warning:  #1035-D: single-precision operand implicitly converted to double-precision
-                convertedPitchTo180scale= calculatedPitch+90.5;//adding .5 to cast to int properly
-Sources\display.c(443): warning:  #1035-D: single-precision operand implicitly converted to double-precision
-                convertedRollTo180scale= calculatedRoll+90.5;//adding .5 to cast to int properly
-Sources\display.c(482): warning:  #1-D: last line of file ends without a newline
+Sources\display.c(435): warning:  #1035-D: single-precision operand implicitly converted to double-precision
+        convertedPitchTo180scale= calculatedPitch+90.5;//adding .5 to cast to int properly
+Sources\display.c(436): warning:  #1035-D: single-precision operand implicitly converted to double-precision
+        convertedRollTo180scale= calculatedRoll+90.5;//adding .5 to cast to int properly
+Sources\display.c(497): warning:  #1-D: last line of file ends without a newline
   }
 Sources\display.c: 5 warnings, 0 errors
 linking...
-Program Size: Code=45928 RO-data=920 RW-data=360 ZI-data=19784  
-".\Objects\Blinky.axf" - 0 Error(s), 11 Warning(s).
+Program Size: Code=45968 RO-data=920 RW-data=360 ZI-data=19784  
+".\Objects\Blinky.axf" - 0 Error(s), 5 Warning(s).
 
 <h2>Software Packages used:</h2>
 
@@ -78,15 +62,15 @@ Package Vendor: Keil
    * Component: Startup Version: 2.4.2
    * Component: Classic Version: 1.4.2
    * Component: Common Version: 1.4.2
-   * Component: GPIO Version: 1.4.2
-   * Component: DMA Version: 1.4.2
    * Component: ADC Version: 1.4.2
-   * Component: Cortex Version: 1.4.2
-   * Component: RCC Version: 1.4.2
-   * Component: PWR Version: 1.4.2
-   * Component: USART Version: 1.4.2
    * Component: TIM Version: 1.4.2
    * Component: UART Version: 1.4.2
+   * Component: USART Version: 1.4.2
+   * Component: GPIO Version: 1.4.2
+   * Component: PWR Version: 1.4.2
+   * Component: RCC Version: 1.4.2
+   * Component: Cortex Version: 1.4.2
+   * Component: DMA Version: 1.4.2
    * Component: SPI Version: 1.4.2
 
 <h2>Collection of Component include folders:</h2>
@@ -104,18 +88,18 @@ Package Vendor: Keil
    * Component: ::CMSIS:RTOS:1.0 (API)
 
    * Component: ARM::CMSIS:RTOS:Keil RTX:4.81.0
-      Source file:   CMSIS\RTOS\RTX\UserCodeTemplates\Timer.c
-      Source file:   CMSIS\RTOS\RTX\UserCodeTemplates\Semaphore.c
-      Source file:   CMSIS\RTOS\RTX\SRC\ARM\SVC_Table.s
       Source file:   CMSIS\RTOS\RTX\UserCodeTemplates\MailQueue.c
-      Source file:   CMSIS\RTOS\RTX\UserCodeTemplates\main.c
-      Source file:   CMSIS\RTOS\RTX\UserCodeTemplates\MemPool.c
-      Source file:   CMSIS\RTOS\RTX\UserCodeTemplates\MsgQueue.c
       Source file:   CMSIS\RTOS\RTX\UserCodeTemplates\Mutex.c
-      Source file:   CMSIS\RTOS\RTX\UserCodeTemplates\Thread.c
       Include file:  CMSIS\RTOS\RTX\INC\cmsis_os.h
+      Source file:   CMSIS\RTOS\RTX\UserCodeTemplates\Timer.c
+      Source file:   CMSIS\RTOS\RTX\SRC\ARM\SVC_Table.s
       Source file:   CMSIS\RTOS\RTX\Templates\RTX_Conf_CM.c
+      Source file:   CMSIS\RTOS\RTX\UserCodeTemplates\main.c
+      Source file:   CMSIS\RTOS\RTX\UserCodeTemplates\MsgQueue.c
       Include file:  CMSIS\RTOS\RTX\UserCodeTemplates\osObjects.h
+      Source file:   CMSIS\RTOS\RTX\UserCodeTemplates\Thread.c
+      Source file:   CMSIS\RTOS\RTX\UserCodeTemplates\MemPool.c
+      Source file:   CMSIS\RTOS\RTX\UserCodeTemplates\Semaphore.c
       Library file:  CMSIS\RTOS\RTX\LIB\ARM\RTX_CM4.lib
 
    * Component: ARM::CMSIS:DSP:1.4.6
@@ -125,49 +109,28 @@ Package Vendor: Keil
    * Component: ::Device:STM32Cube Framework (API)
 
    * Component: Keil::Device:Startup:2.4.2
-      Source file:   Drivers\CMSIS\Device\ST\STM32F4xx\Source\Templates\arm\startup_stm32f407xx.s
       Source file:   MDK\Device\Source\ARM\STM32F4xx_OTP.s
-      Include file:  Drivers\CMSIS\Device\ST\STM32F4xx\Include\stm32f4xx.h
       Source file:   MDK\Device\Source\ARM\STM32F40xxx_41xxx_OPT.s
+      Include file:  Drivers\CMSIS\Device\ST\STM32F4xx\Include\stm32f4xx.h
+      Source file:   Drivers\CMSIS\Device\ST\STM32F4xx\Source\Templates\arm\startup_stm32f407xx.s
       Source file:   Drivers\CMSIS\Device\ST\STM32F4xx\Source\Templates\system_stm32f4xx.c
 
    * Component: Keil::Device:STM32Cube Framework:Classic:1.4.2
-      Include file:  CMSIS\Driver\Config\RTE_Device.h
-      Source file:   MDK\Templates\Src\stm32f4xx_hal_msp.c
       Include file:  MDK\Templates\Inc\stm32f4xx_hal_conf.h
-      Source file:   MDK\Templates\Src\stm32f4xx_it.c
+      Source file:   MDK\Templates\Src\stm32f4xx_hal_msp.c
       Include file:  MDK\Templates\Inc\main.h
-      Source file:   MDK\Templates\Src\main.c
+      Include file:  CMSIS\Driver\Config\RTE_Device.h
       Include file:  MDK\Templates\Inc\stm32f4xx_it.h
+      Source file:   MDK\Templates\Src\stm32f4xx_it.c
+      Source file:   MDK\Templates\Src\main.c
 
    * Component: Keil::Device:STM32Cube HAL:Common:1.4.2
-      Source file:   Drivers\STM32F4xx_HAL_Driver\Src\stm32f4xx_hal.c
       Include file:  Drivers\STM32F4xx_HAL_Driver\Inc\stm32f4xx_hal.h
-
-   * Component: Keil::Device:STM32Cube HAL:GPIO:1.4.2
-      Source file:   Drivers\STM32F4xx_HAL_Driver\Src\stm32f4xx_hal_gpio.c
-
-   * Component: Keil::Device:STM32Cube HAL:DMA:1.4.2
-      Source file:   Drivers\STM32F4xx_HAL_Driver\Src\stm32f4xx_hal_dma.c
-      Source file:   Drivers\STM32F4xx_HAL_Driver\Src\stm32f4xx_hal_dma_ex.c
+      Source file:   Drivers\STM32F4xx_HAL_Driver\Src\stm32f4xx_hal.c
 
    * Component: Keil::Device:STM32Cube HAL:ADC:1.4.2
       Source file:   Drivers\STM32F4xx_HAL_Driver\Src\stm32f4xx_hal_adc.c
       Source file:   Drivers\STM32F4xx_HAL_Driver\Src\stm32f4xx_hal_adc_ex.c
-
-   * Component: Keil::Device:STM32Cube HAL:Cortex:1.4.2
-      Source file:   Drivers\STM32F4xx_HAL_Driver\Src\stm32f4xx_hal_cortex.c
-
-   * Component: Keil::Device:STM32Cube HAL:RCC:1.4.2
-      Source file:   Drivers\STM32F4xx_HAL_Driver\Src\stm32f4xx_hal_rcc_ex.c
-      Source file:   Drivers\STM32F4xx_HAL_Driver\Src\stm32f4xx_hal_rcc.c
-
-   * Component: Keil::Device:STM32Cube HAL:PWR:1.4.2
-      Source file:   Drivers\STM32F4xx_HAL_Driver\Src\stm32f4xx_hal_pwr.c
-      Source file:   Drivers\STM32F4xx_HAL_Driver\Src\stm32f4xx_hal_pwr_ex.c
-
-   * Component: Keil::Device:STM32Cube HAL:USART:1.4.2
-      Source file:   Drivers\STM32F4xx_HAL_Driver\Src\stm32f4xx_hal_usart.c
 
    * Component: Keil::Device:STM32Cube HAL:TIM:1.4.2
       Source file:   Drivers\STM32F4xx_HAL_Driver\Src\stm32f4xx_hal_tim_ex.c
@@ -175,6 +138,27 @@ Package Vendor: Keil
 
    * Component: Keil::Device:STM32Cube HAL:UART:1.4.2
       Source file:   Drivers\STM32F4xx_HAL_Driver\Src\stm32f4xx_hal_uart.c
+
+   * Component: Keil::Device:STM32Cube HAL:USART:1.4.2
+      Source file:   Drivers\STM32F4xx_HAL_Driver\Src\stm32f4xx_hal_usart.c
+
+   * Component: Keil::Device:STM32Cube HAL:GPIO:1.4.2
+      Source file:   Drivers\STM32F4xx_HAL_Driver\Src\stm32f4xx_hal_gpio.c
+
+   * Component: Keil::Device:STM32Cube HAL:PWR:1.4.2
+      Source file:   Drivers\STM32F4xx_HAL_Driver\Src\stm32f4xx_hal_pwr_ex.c
+      Source file:   Drivers\STM32F4xx_HAL_Driver\Src\stm32f4xx_hal_pwr.c
+
+   * Component: Keil::Device:STM32Cube HAL:RCC:1.4.2
+      Source file:   Drivers\STM32F4xx_HAL_Driver\Src\stm32f4xx_hal_rcc.c
+      Source file:   Drivers\STM32F4xx_HAL_Driver\Src\stm32f4xx_hal_rcc_ex.c
+
+   * Component: Keil::Device:STM32Cube HAL:Cortex:1.4.2
+      Source file:   Drivers\STM32F4xx_HAL_Driver\Src\stm32f4xx_hal_cortex.c
+
+   * Component: Keil::Device:STM32Cube HAL:DMA:1.4.2
+      Source file:   Drivers\STM32F4xx_HAL_Driver\Src\stm32f4xx_hal_dma.c
+      Source file:   Drivers\STM32F4xx_HAL_Driver\Src\stm32f4xx_hal_dma_ex.c
 
    * Component: Keil::Device:STM32Cube HAL:SPI:1.4.2
       Source file:   Drivers\STM32F4xx_HAL_Driver\Src\stm32f4xx_hal_spi.c
