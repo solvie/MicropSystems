@@ -111,7 +111,6 @@ void Read_Raw_ACC(void const *argument){
 			float new_value[3];
 			float acc_value[3];
 			float acc_pitch_and_roll[2];
-
 			osSignalWait(SIGNAL_READY, osWaitForever);
 			LIS3DSH_Read (&status, LIS3DSH_STATUS, 1);
 			if ((status & 0x0F) != 0x00)

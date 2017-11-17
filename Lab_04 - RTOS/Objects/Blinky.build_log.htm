@@ -27,43 +27,7 @@ Project File Date:  11/16/2017
 <h2>Output:</h2>
 *** Using Compiler 'V5.06 update 5 (build 528)', folder: 'D:\Keil_v5\ARM\ARMCC\Bin'
 Build target 'Lab4'
-compiling keypad.c...
-.\Headers\display.h(3): warning:  #1295-D: Deprecated declaration resetAll - give arg types
-  void resetAll();
-.\Headers\display.h(4): warning:  #1295-D: Deprecated declaration disableAllGPIOClocks - give arg types
-  void disableAllGPIOClocks();
-.\Headers\display.h(5): warning:  #1295-D: Deprecated declaration enableAllGPIOClocks - give arg types
-  void enableAllGPIOClocks();
-.\Headers\display.h(24): warning:  #1-D: last line of file ends without a newline
-  //float calculateRollAngleFromAccVals(float ax, float ay, float az);
-Sources\keypad.c(123): warning:  #550-D: variable "data_ok"  was set but never used
-  	int data_ok;
-Sources\keypad.c(124): warning:  #177-D: variable "isSemReady"  was declared but never referenced
-  	int isSemReady;
-Sources\keypad.c(236): warning:  #1-D: last line of file ends without a newline
-  }
-Sources\keypad.c: 7 warnings, 0 errors
-compiling display.c...
-.\Headers\display.h(3): warning:  #1295-D: Deprecated declaration resetAll - give arg types
-  void resetAll();
-.\Headers\display.h(4): warning:  #1295-D: Deprecated declaration disableAllGPIOClocks - give arg types
-  void disableAllGPIOClocks();
-.\Headers\display.h(5): warning:  #1295-D: Deprecated declaration enableAllGPIOClocks - give arg types
-  void enableAllGPIOClocks();
-.\Headers\display.h(24): warning:  #1-D: last line of file ends without a newline
-  //float calculateRollAngleFromAccVals(float ax, float ay, float az);
-Sources\display.c(334): warning:  #177-D: variable "acc_value"  was declared but never referenced
-  	float acc_value[3];
-Sources\display.c(520): warning:  #1035-D: single-precision operand implicitly converted to double-precision
-  	convertedPitchTo180scale= calculatedPitch+90.5;//adding .5 to cast to int properly
-Sources\display.c(521): warning:  #1035-D: single-precision operand implicitly converted to double-precision
-  	convertedRollTo180scale= calculatedRoll+90.5;//adding .5 to cast to int properly
-Sources\display.c(582): warning:  #1-D: last line of file ends without a newline
-  }
-Sources\display.c: 8 warnings, 0 errors
-linking...
-Program Size: Code=46116 RO-data=924 RW-data=376 ZI-data=19800  
-".\Objects\Blinky.axf" - 0 Error(s), 15 Warning(s).
+".\Objects\Blinky.axf" - 0 Error(s), 0 Warning(s).
 
 <h2>Software Packages used:</h2>
 
@@ -106,10 +70,10 @@ Package Vendor: Keil
 <h2>Collection of Component Files used:</h2>
 
    * Component: Keil::Device:Startup:2.4.2
+      Source file:   Drivers\CMSIS\Device\ST\STM32F4xx\Source\Templates\arm\startup_stm32f407xx.s
+      Include file:  Drivers\CMSIS\Device\ST\STM32F4xx\Include\stm32f4xx.h
       Source file:   MDK\Device\Source\ARM\STM32F4xx_OTP.s
       Source file:   MDK\Device\Source\ARM\STM32F40xxx_41xxx_OPT.s
-      Include file:  Drivers\CMSIS\Device\ST\STM32F4xx\Include\stm32f4xx.h
-      Source file:   Drivers\CMSIS\Device\ST\STM32F4xx\Source\Templates\arm\startup_stm32f407xx.s
       Source file:   Drivers\CMSIS\Device\ST\STM32F4xx\Source\Templates\system_stm32f4xx.c
 
    * Component: Keil::Device:STM32Cube HAL:USART:1.4.2
@@ -126,8 +90,8 @@ Package Vendor: Keil
       Source file:   Drivers\STM32F4xx_HAL_Driver\Src\stm32f4xx_hal_spi.c
 
    * Component: Keil::Device:STM32Cube HAL:RCC:1.4.2
-      Source file:   Drivers\STM32F4xx_HAL_Driver\Src\stm32f4xx_hal_rcc_ex.c
       Source file:   Drivers\STM32F4xx_HAL_Driver\Src\stm32f4xx_hal_rcc.c
+      Source file:   Drivers\STM32F4xx_HAL_Driver\Src\stm32f4xx_hal_rcc_ex.c
 
    * Component: Keil::Device:STM32Cube HAL:PWR:1.4.2
       Source file:   Drivers\STM32F4xx_HAL_Driver\Src\stm32f4xx_hal_pwr.c
@@ -137,8 +101,8 @@ Package Vendor: Keil
       Source file:   Drivers\STM32F4xx_HAL_Driver\Src\stm32f4xx_hal_gpio.c
 
    * Component: Keil::Device:STM32Cube HAL:DMA:1.4.2
-      Source file:   Drivers\STM32F4xx_HAL_Driver\Src\stm32f4xx_hal_dma.c
       Source file:   Drivers\STM32F4xx_HAL_Driver\Src\stm32f4xx_hal_dma_ex.c
+      Source file:   Drivers\STM32F4xx_HAL_Driver\Src\stm32f4xx_hal_dma.c
 
    * Component: Keil::Device:STM32Cube HAL:Cortex:1.4.2
       Source file:   Drivers\STM32F4xx_HAL_Driver\Src\stm32f4xx_hal_cortex.c
@@ -152,32 +116,32 @@ Package Vendor: Keil
       Source file:   Drivers\STM32F4xx_HAL_Driver\Src\stm32f4xx_hal_adc_ex.c
 
    * Component: Keil::Device:STM32Cube Framework:Classic:1.4.2
-      Include file:  CMSIS\Driver\Config\RTE_Device.h
-      Source file:   MDK\Templates\Src\stm32f4xx_it.c
-      Include file:  MDK\Templates\Inc\stm32f4xx_hal_conf.h
-      Source file:   MDK\Templates\Src\stm32f4xx_hal_msp.c
-      Source file:   MDK\Templates\Src\main.c
       Include file:  MDK\Templates\Inc\stm32f4xx_it.h
+      Include file:  CMSIS\Driver\Config\RTE_Device.h
+      Include file:  MDK\Templates\Inc\stm32f4xx_hal_conf.h
+      Source file:   MDK\Templates\Src\main.c
+      Source file:   MDK\Templates\Src\stm32f4xx_it.c
       Include file:  MDK\Templates\Inc\main.h
+      Source file:   MDK\Templates\Src\stm32f4xx_hal_msp.c
 
    * Component: ARM::CMSIS:RTOS:Keil RTX:4.81.0
-      Source file:   CMSIS\RTOS\RTX\SRC\ARM\SVC_Table.s
-      Source file:   CMSIS\RTOS\RTX\UserCodeTemplates\Mutex.c
+      Include file:  CMSIS\RTOS\RTX\INC\cmsis_os.h
       Source file:   CMSIS\RTOS\RTX\Templates\RTX_Conf_CM.c
-      Source file:   CMSIS\RTOS\RTX\UserCodeTemplates\Timer.c
-      Library file:  CMSIS\RTOS\RTX\LIB\ARM\RTX_CM4.lib
       Source file:   CMSIS\RTOS\RTX\UserCodeTemplates\MailQueue.c
       Source file:   CMSIS\RTOS\RTX\UserCodeTemplates\main.c
-      Source file:   CMSIS\RTOS\RTX\UserCodeTemplates\Semaphore.c
-      Include file:  CMSIS\RTOS\RTX\UserCodeTemplates\osObjects.h
       Source file:   CMSIS\RTOS\RTX\UserCodeTemplates\MsgQueue.c
-      Include file:  CMSIS\RTOS\RTX\INC\cmsis_os.h
-      Source file:   CMSIS\RTOS\RTX\UserCodeTemplates\MemPool.c
+      Include file:  CMSIS\RTOS\RTX\UserCodeTemplates\osObjects.h
+      Source file:   CMSIS\RTOS\RTX\UserCodeTemplates\Mutex.c
+      Source file:   CMSIS\RTOS\RTX\UserCodeTemplates\Semaphore.c
+      Source file:   CMSIS\RTOS\RTX\SRC\ARM\SVC_Table.s
       Source file:   CMSIS\RTOS\RTX\UserCodeTemplates\Thread.c
+      Source file:   CMSIS\RTOS\RTX\UserCodeTemplates\Timer.c
+      Source file:   CMSIS\RTOS\RTX\UserCodeTemplates\MemPool.c
+      Library file:  CMSIS\RTOS\RTX\LIB\ARM\RTX_CM4.lib
 
    * Component: ARM::CMSIS:DSP:1.4.6
-      Include file:  CMSIS\Include\arm_math.h
       Library file:  CMSIS\Lib\ARM\arm_cortexM4lf_math.lib
+      Include file:  CMSIS\Include\arm_math.h
 
    * Component: ARM::CMSIS:CORE:5.0.0
 

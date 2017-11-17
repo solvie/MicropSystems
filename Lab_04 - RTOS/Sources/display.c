@@ -166,8 +166,8 @@ void disableAllGPIOClocks(){
   __GPIOC_CLK_DISABLE();
   __GPIOH_CLK_DISABLE();
   __GPIOA_CLK_DISABLE();
-  __GPIOB_CLK_DISABLE();
-  __GPIOD_CLK_DISABLE();
+  //__GPIOB_CLK_DISABLE();
+  //__GPIOD_CLK_DISABLE();
 }
 
 /**
@@ -178,8 +178,8 @@ void enableAllGPIOClocks(){
   __GPIOC_CLK_ENABLE();
   __GPIOH_CLK_ENABLE();
   __GPIOA_CLK_ENABLE();
-  __GPIOB_CLK_ENABLE();
-  __GPIOD_CLK_ENABLE();
+  //__GPIOB_CLK_ENABLE();
+  //__GPIOD_CLK_ENABLE();
 }
 
 

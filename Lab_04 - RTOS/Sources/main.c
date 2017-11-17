@@ -72,6 +72,7 @@ void start_temp_thread(void){
 	osThreadDef(thread_temp, osPriorityNormal, 1, 0);
 	tid_thread1 = osThreadCreate(osThread(thread_temp), NULL);
 }
+ 
 int main (void) {
 
   osKernelInitialize();                     /* initialize CMSIS-RTOS          */
@@ -153,7 +154,7 @@ void initializeACC(void){
 	SPI_HandleTypeDef SPI_Handle;
 	
 	Acc_instance.Axes_Enable				= LIS3DSH_XYZ_ENABLE;
-	Acc_instance.AA_Filter_BW				= LIS3DSH_AA_BW_50;
+	Acc_instance.AA_Filter_BW				= LIS3DSH_AA_BW_200;
 	Acc_instance.Full_Scale					= LIS3DSH_FULLSCALE_2;
 	Acc_instance.Power_Mode_Output_DataRate		= LIS3DSH_DATARATE_50;
 	Acc_instance.Self_Test					= LIS3DSH_SELFTEST_NORMAL;
